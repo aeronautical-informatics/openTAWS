@@ -1,0 +1,18 @@
+@startuml
+
+skinparam componentStyle uml2
+
+package "Terrain Server" {
+    [SRTMServer]
+    database "TerrainDB" {
+      folder "SRTM" {
+        [SRTMFiles]
+      }
+    }
+    DataAccess -- [SRTMFiles]
+    [SRTMServer]--DataAccess
+}
+
+AltituteQuery -- [SRTMServer] 
+
+@enduml
