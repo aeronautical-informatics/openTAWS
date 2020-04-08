@@ -9,7 +9,7 @@ edition = "2018"
 [dependencies]
 
 [[test]]
-name="cucumber"
+name="altitudequery_test"
 harness = false
 
 [dev-dependencies]

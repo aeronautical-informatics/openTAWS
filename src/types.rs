@@ -1,9 +1,7 @@
-mod types{
 
-    struct GeograpraphicPosition{
-        latitude: f64,
-        longitude:f64,
-    }
-
-
+pub struct GeograpraphicPosition{
+    latitude: f64,
+    longitude:f64,
 }
+
+

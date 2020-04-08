@@ -1,6 +1,6 @@
+extern crate otaws;
+
 use cucumber::{cucumber, steps, before, after};
-use crate::types;
-use crate::terrain_server;
 
 pub struct MyWorld {
     // Struct for mutable context in scenarios.
@@ -24,22 +24,22 @@ mod test_steps {
     steps!(crate::MyWorld => {
         
         given "terrain server up and running" |world, step| {
-            world.test_status = "Creating an instance of a terrain server".to_string()
+            world.test_status = "Creating an instance of a terrain server".to_string();
             // Set up your context in given steps
-            assert_eq!(terrain_server.status(), "OK");
+            assert_eq!(terrain_server.status(), crate::terrain_server::TerrainServerStatus::OK);
             
         };
 
         when "user makes an altitude query with the position in geographic coordinates" |world, step| {
             // An sample test point
             let test_position = GeograpraphicPosition{
-                latitude=39.0,
-                longitude=42.0.
+                latitude:39.0,
+                longitude:42.0,
             };
 
         };
 
-        then "I am interested in ATDD" |world, step| {
+        then "the altitute of the terrain at that point above the mean sea level is given in meters" |world, step| {
             // Check that the outcomes to be observed have occurred
             let altitude = terrain_server.altitude_query(test_position);
             assert_eq!(altitude, 0);
