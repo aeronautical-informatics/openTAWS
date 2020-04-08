@@ -1,7 +1,7 @@
 #[derive(Debug, PartialEq)]
 pub struct GeograpraphicPosition {
-    latitude: f64,
-    longitude: f64,
+    pub latitude: f64,
+    pub longitude: f64,
 }
 
 #[derive(Debug, PartialEq)]

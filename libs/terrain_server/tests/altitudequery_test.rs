@@ -18,8 +18,8 @@ impl std::default::Default for MyWorld {
 }
 
 mod test_steps {
+    use super::*;
     use cucumber::steps;
-    use cucumber::World;
     use terrain_server::{GeograpraphicPosition, TerrainServerStatus};
 
     // Any type that implements cucumber::World + Default can be the world
