@@ -1,5 +1,4 @@
-pub mod terrain_server;
-pub mod types;
+use terrain_server::*;
 
 fn main() {
     println!("Hello, world!");

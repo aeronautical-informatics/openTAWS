@@ -1,3 +1,10 @@
+#[derive(Debug, PartialEq)]
+pub struct GeograpraphicPosition {
+    latitude: f64,
+    longitude: f64,
+}
+
+#[derive(Debug, PartialEq)]
 pub enum TerrainServerStatus {
     OK,
     NoDatabase,

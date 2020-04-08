@@ -1,6 +1,6 @@
 [workspace]
 
 members = [
-    "otaws",
-    "terrain_server",
+    "app",
+    "libs/terrain_server",
 ]

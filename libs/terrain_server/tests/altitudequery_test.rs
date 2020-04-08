@@ -1,4 +1,4 @@
-extern crate otaws;
+use terrain_server;
 
 use cucumber::{after, before, cucumber, steps};
 
@@ -19,14 +19,16 @@ impl std::default::Default for MyWorld {
 
 mod test_steps {
     use cucumber::steps;
+    use cucumber::World;
+    use terrain_server::{GeograpraphicPosition, TerrainServerStatus};
 
     // Any type that implements cucumber::World + Default can be the world
-    steps!(crate::MyWorld => {
+    steps!(MyWorld => {
         
         given "terrain server up and running" |world, step| {
             world.test_status = "Creating an instance of a terrain server".to_string();
             // Set up your context in given steps
-            assert_eq!(terrain_server.status(), crate::terrain_server::TerrainServerStatus::OK);
+            assert_eq!(terrain_server::status(), TerrainServerStatus::OK);
             
         };
 
@@ -41,7 +43,7 @@ mod test_steps {
 
         then "the altitute of the terrain at that point above the mean sea level is given in meters" |world, step| {
             // Check that the outcomes to be observed have occurred
-            let altitude = terrain_server.altitude_query(test_position);
+            let altitude = terrain_server::altitude_query();
             assert_eq!(altitude, 0);
         };
 
@@ -63,7 +65,7 @@ fn setup() {}
 
 cucumber! {
     features: "./features", // Path to our feature files
-    world: crate::MyWorld, // The world needs to be the same for steps and the main cucumber call
+    world: MyWorld, // The world needs to be the same for steps and the main cucumber call
     steps: &[
         test_steps::steps // the `steps!` macro creates a `steps` function in a module
     ],
