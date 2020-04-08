@@ -20,24 +20,25 @@ impl std::default::Default for MyWorld {
 mod test_steps {
     use super::*;
     use cucumber::steps;
-    use terrain_server::{GeograpraphicPosition, TerrainServerStatus};
+    use terrain_server::{Point, TerrainServer, TerrainServerStatus};
 
     // Any type that implements cucumber::World + Default can be the world
     steps!(MyWorld => {
         
         given "terrain server up and running" |world, step| {
             world.test_status = "Creating an instance of a terrain server".to_string();
+            let ts = TerrainServer::default();
             // Set up your context in given steps
-            assert_eq!(terrain_server::status(), TerrainServerStatus::OK);
+            assert_eq!(ts.status(), TerrainServerStatus::OK);
             
         };
 
         when "user makes an altitude query with the position in geographic coordinates" |world, step| {
             // An sample test point
-            let test_position = GeograpraphicPosition{
-                latitude:39.0,
-                longitude:42.0,
-            };
+            let test_position = Point::new(
+                39.0,
+                42.0,
+            );
 
         };
 
