@@ -1,17 +1,6 @@
-[package]
-name = "otaws"
-version = "0.1.0"
-authors = ["Umut Durak <umut.durak@tu-clausthal.de>"]
-edition = "2018"
+[workspace]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-
-[[test]]
-name="altitudequery_test"
-harness = false
-
-[dev-dependencies]
-cucumber = {package = "cucumber_rust", version = "^0.6.0"}
-
+members = [
+    "otaws",
+    "terrain_server",
+]

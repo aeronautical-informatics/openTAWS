@@ -1,10 +1,10 @@
 extern crate otaws;
 
-use cucumber::{cucumber, steps, before, after};
+use cucumber::{after, before, cucumber, steps};
 
 pub struct MyWorld {
     // Struct for mutable context in scenarios.
-    test_status: String
+    test_status: String,
 }
 
 impl cucumber::World for MyWorld {}
@@ -12,7 +12,7 @@ impl std::default::Default for MyWorld {
     fn default() -> MyWorld {
         // This function is called every time a new scenario is started
         MyWorld {
-           test_status: "World is created".to_string()
+            test_status: "World is created".to_string(),
         }
     }
 }
@@ -59,9 +59,7 @@ after!(an_after_fn => |scenario| {
 });
 
 // A setup function to be called before everything else
-fn setup() {
-
-}
+fn setup() {}
 
 cucumber! {
     features: "./features", // Path to our feature files
