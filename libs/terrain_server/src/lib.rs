@@ -40,4 +40,8 @@ impl TerrainServer {
     pub fn status(&self) -> TerrainServerStatus {
         self::TerrainServerStatus::OK
     }
+
+    pub fn altitude (&self, point: geo::Point)->i64 {
+        self::altitude_query()
+    }
 }
