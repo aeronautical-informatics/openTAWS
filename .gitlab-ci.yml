@@ -1,0 +1,48 @@
+image: 'rust:latest'
+
+stages:
+  - build
+  - test
+
+variables:
+  CARGO_HOME: $CI_PROJECT_DIR/cargo
+  APT_CACHE_DIR: $CI_PROJECT_DIR/apt
+
+before_script:
+  - apt-get update -yq
+  - apt-get install -o dir::cache::archives="$APT_CACHE_DIR" -y mingw-w64 musl-dev
+  - rustup target add x86_64-pc-windows-gnu
+  - rustup target add x86_64-unknown-linux-musl
+
+build-windows:
+  stage: build
+  script:
+    - rustc --version
+    - cargo --version
+    - cargo build --release --target=x86_64-pc-windows-gnu
+  artifacts:
+    paths:
+      - target/x86_64-pc-windows-gnu/release/
+
+build-linux:
+  stage: build
+  script:
+    - rustc --version
+    - cargo --version
+    - cargo build --release --target=x86_64-unknown-linux-musl
+  artifacts:
+    paths:
+      - target/x86_64-unknown-linux-musl/release/
+
+test:
+  stage: test
+  script:
+    - rustc --version
+    - cargo --version
+    - cargo test
+
+cache:
+  paths:
+    - apt/
+    - cargo/
+    - target/
