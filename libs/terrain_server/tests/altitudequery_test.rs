@@ -45,7 +45,7 @@ mod test_steps {
         then "the altitute of the terrain at that point above the mean sea level is given in meters" |world, step| {
             // Check that the outcomes to be observed have occurred
             let altitude = terrain_server::altitude_query();
-            assert_eq!(altitude, 0);
+            assert_eq!(altitude, 0.);
         };
 
     });

@@ -21,19 +21,15 @@ pub enum TerrainServerStatus {
 }
 
 /// Queries the current altitude of the vehicle. Yields meters above sealevel.
-pub fn altitude_query() -> f64 {
-    0.
+pub fn altitude_query() -> i64 {
+    0
 }
 
 /// Struct which holds the whole state of a TerrainServer instance
 ///
 /// To create a new one, enter this code:
 ///
-/// This is actually a test as well. It treats our lib like an external library, hence we need to
-/// import with `libname::`.
-///
 /// ```
-/// # use terrain_server::TerrainServer;
 /// let ts = TerrainServer::default();
 /// ```
 #[derive(Default)]
@@ -45,7 +41,7 @@ impl TerrainServer {
         self::TerrainServerStatus::OK
     }
 
-    pub fn altitude(&self, point: geo::Point<f64>) -> f64 {
+    pub fn altitude (&self, point: geo::Point)->i64 {
         self::altitude_query()
     }
 }
