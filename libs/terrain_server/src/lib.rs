@@ -11,7 +11,7 @@ pub use geo::Point;
 /// Some documentation
 ///
 /// This is indeed a very nice Enum
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum TerrainServerStatus {
     /// The server feels great!
     OK,
@@ -36,7 +36,8 @@ pub fn altitude_query() -> f64 {
 /// # use terrain_server::TerrainServer;
 /// let ts = TerrainServer::default();
 /// ```
-#[derive(Default)]
+
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct TerrainServer;
 
 impl TerrainServer {

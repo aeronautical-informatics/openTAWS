@@ -24,13 +24,13 @@ mod test_steps {
 
     // Any type that implements cucumber::World + Default can be the world
     steps!(MyWorld => {
-        
+
         given "terrain server up and running" |world, step| {
             world.test_status = "Creating an instance of a terrain server".to_string();
             let ts = TerrainServer::default();
             // Set up your context in given steps
             assert_eq!(ts.status(), TerrainServerStatus::OK);
-            
+
         };
 
         when "user makes an altitude query with the position in geographic coordinates" |world, step| {

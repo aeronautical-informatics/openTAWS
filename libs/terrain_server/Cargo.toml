@@ -11,6 +11,7 @@ geo = "0.13"
 
 [dev-dependencies]
 cucumber = { package = "cucumber_rust", version = "^0.6.0" }
+rspec = "1.0.0-beta.4"
 
 [[test]]
 name="altitudequery_test"
