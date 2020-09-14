@@ -46,7 +46,8 @@ impl TerrainServer {
         self::TerrainServerStatus::OK
     }
 
-    pub fn altitude(&self, point: geo::Point<f64>) -> f64 {
+    /// Returns the current aircrafts altitude
+    pub fn altitude(&self, _point: geo::Point<f64>) -> f64 {
         self::altitude_query()
     }
 }

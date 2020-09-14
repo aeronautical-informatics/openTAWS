@@ -13,12 +13,15 @@ before_script:
   - apt-get install -o dir::cache::archives="$APT_CACHE_DIR" -y mingw-w64 musl-dev
   - rustup target add x86_64-pc-windows-gnu
   - rustup target add x86_64-unknown-linux-musl
+  - rustup component add clippy
+  - rustc --version
+  - cargo --version
+  - cargo test
+
 
 build-windows:
   stage: build
   script:
-    - rustc --version
-    - cargo --version
     - cargo build --release --target=x86_64-pc-windows-gnu
   artifacts:
     paths:
@@ -27,8 +30,6 @@ build-windows:
 build-linux:
   stage: build
   script:
-    - rustc --version
-    - cargo --version
     - cargo build --release --target=x86_64-unknown-linux-musl
   artifacts:
     paths:
@@ -37,9 +38,13 @@ build-linux:
 test:
   stage: test
   script:
-    - rustc --version
-    - cargo --version
     - cargo test
+
+clippy:
+  stage: test
+  script:
+    - cargo clippy
+
 
 cache:
   paths:

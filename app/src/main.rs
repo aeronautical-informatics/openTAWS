@@ -1,5 +1,6 @@
 use terrain_server::*;
 
 fn main() {
-    println!("Hello, world!");
+    let attitude = altitude_query();
+    println!("Hello, world! {}", attitude);
 }
