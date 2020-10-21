@@ -10,7 +10,6 @@ variables:
 
 before_script:
   - apt-get update -yq
-  - rustup component add clippy
   - rustc --version
   - cargo --version
 
@@ -30,6 +29,7 @@ test:
 clippy:
   stage: test
   script:
+    - rustup component add clippy
     - cargo clippy
 
 cache:
