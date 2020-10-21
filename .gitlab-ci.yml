@@ -19,7 +19,7 @@ build-linux:
     - cargo build
   artifacts:
     paths:
-      - target/x86_64-unknown-linux-musl/release/
+      - target
 
 test:
   stage: test
