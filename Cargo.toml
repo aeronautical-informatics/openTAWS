@@ -2,5 +2,6 @@
 
 members = [
     "app",
-    "libs/terrain_server",
+    "libs/otaws_core",
+    #"libs/terrain_server",
 ]
