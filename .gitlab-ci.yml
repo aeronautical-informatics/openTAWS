@@ -10,27 +10,14 @@ variables:
 
 before_script:
   - apt-get update -yq
-  - apt-get install -o dir::cache::archives="$APT_CACHE_DIR" -y mingw-w64 musl-dev
-  - rustup target add x86_64-pc-windows-gnu
-  - rustup target add x86_64-unknown-linux-musl
   - rustup component add clippy
   - rustc --version
   - cargo --version
-  - cargo test
-
-
-build-windows:
-  stage: build
-  script:
-    - cargo build --release --target=x86_64-pc-windows-gnu
-  artifacts:
-    paths:
-      - target/x86_64-pc-windows-gnu/release/
 
 build-linux:
   stage: build
   script:
-    - cargo build --release --target=x86_64-unknown-linux-musl
+    - cargo build
   artifacts:
     paths:
       - target/x86_64-unknown-linux-musl/release/
@@ -44,7 +31,6 @@ clippy:
   stage: test
   script:
     - cargo clippy
-
 
 cache:
   paths:
