@@ -91,7 +91,6 @@ Feature: Mode 1: Excessive Rate of Descent
 
     @MOPS_272
     Scenario Outline: Must Not Alert
-      And Mode 1 is not inhibited
       Given steep approach is selected
       When the rate of descent is at least <rate of descent> feet per minute
       But the height above terrain is not in between 10 feet and <height> feet
