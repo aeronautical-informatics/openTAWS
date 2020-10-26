@@ -11,3 +11,5 @@ Cargo.lock
 # vim temporary files
 *.swp
 *.swo
+
+report/
