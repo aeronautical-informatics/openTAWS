@@ -1,4 +1,4 @@
-Feature: Mode 1: excessive Rate of Descent
+Feature: Mode 1: Excessive Rate of Descent
   The Mode 1 alert is intended to generate caution alerts and time-critical
   warning alerts when the aircraft has a high rate of descent relative to its
   height above terrain. Mode 1 is active during all segments of flight. In
@@ -9,8 +9,9 @@ Feature: Mode 1: excessive Rate of Descent
   switch) or it can be based on internal logic (such as comparison of aircraft
   position to approach profiles in a database).
 
-  Scenario: Arming/Disarming (MOPS_268).
-    When the plane is flying
+  @MOPS_268
+  Scenario: Mode Arming/Disarming
+    Given the plane is flying
     Then Mode 1 shall be armed
 
   Rule: Standard Caution Envelope (MOPS_269, MOPS_270)
@@ -20,17 +21,17 @@ Feature: Mode 1: excessive Rate of Descent
       Given Mode 1 is armed
       And Mode 1 is not inhibited
       And steep approach is not selected
-      When the rate of descent is at least <sinkrate> feet per minute
+      When the rate of descent is at least <rate of descent> feet per minute
       And the height above terrain is 
       * at least 100 feet
       * at most <height> feet
       Then a caution alert is emitted within 2 seconds
 
       Examples:
-        | sinkrate | height |
-        | 1560     | 100    |
-        | 2200     | 630    |
-        | 5700     | 100    |
+        | rate of descent | height |
+        | 1560            | 100    |
+        | 2200            | 630    |
+        | 5700            | 100    |
 
     @MOPS_270
     Scenario: Must Not Alert when not Armed
@@ -44,21 +45,19 @@ Feature: Mode 1: excessive Rate of Descent
 
     @MOPS_270
     Scenario Outline: Must Not Alert
-      Given Mode 1 is armed
-      And Mode 1 is not inhibited
-      And steep approach is not selected
-      When the rate of descent is at least <sinkrate> feet per minute
+      Given steep approach is not selected
+      When the rate of descent is at least <rate of descent> feet per minute
       But the height above terrain is not in between 10 feet and <height> feet
       Then a caution alert is not emitted at all
 
       Examples:
-        | sinkrate | height |
-        | 964      | 10     |
-        | 2300     | 1550   |
-        | 4400     | 2900   |
-        | 5000     | 3200   |
-        | 8000     | 4600   |
-        | 12000    | 6467   |
+        | rate of descent | height |
+        | 964             | 10     |
+        | 2300            | 1550   |
+        | 4400            | 2900   |
+        | 5000            | 3200   |
+        | 8000            | 4600   |
+        | 12000           | 6467   |
 
   Rule: Steep Approach Caution Envelope (MOPS_271, MOPS_272)
 
@@ -67,18 +66,18 @@ Feature: Mode 1: excessive Rate of Descent
       Given Mode 1 is armed
       And Mode 1 is not inhibited
       And steep approach is selected
-      When the rate of descent is at least <sinkrate> feet per minute
+      When the rate of descent is at least <rate of descent> feet per minute
       And the height above terrain is 
       * at least 150 feet
       * at most <height> feet
       Then a caution alert is emitted within 2 seconds
 
       Examples:
-        | sinkrate | height |
-        | 1798     | 150    |
-        | 1944     | 300    |
-        | 3233     | 1078   |
-        | 6225     | 2075   |
+        | rate of descent | height |
+        | 1798            | 150    |
+        | 1944            | 300    |
+        | 3233            | 1078   |
+        | 6225            | 2075   |
 
     @MOPS_272
     Scenario:  Must Not Alert when not Armed
@@ -92,21 +91,20 @@ Feature: Mode 1: excessive Rate of Descent
 
     @MOPS_272
     Scenario Outline: Must Not Alert
-      Given Mode 1 is armed
       And Mode 1 is not inhibited
-      And steep approach is selected
-      When the rate of descent is at least <sinkrate> feet per minute
+      Given steep approach is selected
+      When the rate of descent is at least <rate of descent> feet per minute
       But the height above terrain is not in between 10 feet and <height> feet
       Then a caution alert is not emitted at all
 
       Examples:
-        | sinkrate | height |
-        | 964      | 10     |
-        | 2300     | 1550   |
-        | 4400     | 2900   |
-        | 5000     | 3200   |
-        | 8000     | 4600   |
-        | 12000    | 6467   |
+        | rate of descent | height |
+        | 964             | 10     |
+        | 2300            | 1550   |
+        | 4400            | 2900   |
+        | 5000            | 3200   |
+        | 8000            | 4600   |
+        | 12000           | 6467   |
 
   Rule: Warning Envelope (MOPS_273, MOPS_274)
 
@@ -115,17 +113,17 @@ Feature: Mode 1: excessive Rate of Descent
       Given Mode 1 is armed
       And Mode 1 is not inhibited
       And steep approach is not selected
-      When the rate of descent is at least <sinkrate> feet per minute
+      When the rate of descent is at least <rate of descent> feet per minute
       And the height above terrain is 
       * at least 100 feet
       * at most <height> feet
       Then a caution alert is emitted within 2 seconds
 
       Examples:
-        | sinkrate | height |
-        | 1600     | 100    |
-        | 1850     | 300    |
-        | 10100    | 1958   |
+        | rate of descent | height |
+        | 1600            | 100    |
+        | 1850            | 300    |
+        | 10100           | 1958   |
 
     @MOPS_274
     Scenario: Must Not Alert when not Armed
@@ -139,20 +137,18 @@ Feature: Mode 1: excessive Rate of Descent
 
     @MOPS_274
     Scenario Outline: Must Not Alert
-      Given Mode 1 is armed
-      And Mode 1 is not inhibited
-      And steep approach is not selected
-      When the rate of descent is at least <sinkrate> feet per minute
+      Given steep approach is not selected
+      When the rate of descent is at least <rate of descent> feet per minute
       But the height above terrain is not in between 10 feet and <height> feet
       Then a caution alert is not emitted at all
 
       Examples:
-        | sinkrate | height |
-        | 1217     | 10     |
-        | 2300     | 1300   |
-        | 4400     | 2500   |
-        | 8000     | 3500   |
-        | 12000    | 4611   |
+        | rate of descent | height |
+        | 1217            | 10     |
+        | 2300            | 1300   |
+        | 4400            | 2500   |
+        | 8000            | 3500   |
+        | 12000           | 4611   |
 
   Rule: Steep Approach Warning Envelope (MOPS_275, MOPS_276)
 
@@ -161,17 +157,17 @@ Feature: Mode 1: excessive Rate of Descent
       Given Mode 1 is armed
       And Mode 1 is not inhibited
       And steep approach is selected
-      When the rate of descent is at least <sinkrate> feet per minute
+      When the rate of descent is at least <rate of descent> feet per minute
       And the height above terrain is 
       * at least 150 feet
       * at most <height> feet
       Then a caution alert is emitted within 2 seconds
 
       Examples:
-        | sinkrate | height |
-        | 1908     | 150    |
-        | 2050     | 300    |
-        | 10300    | 1958   |
+        | rate of descent | height |
+        | 1908            | 150    |
+        | 2050            | 300    |
+        | 10300           | 1958   |
 
     @MOPS_276
     Scenario: Must Not Alert when not Armed
@@ -185,20 +181,18 @@ Feature: Mode 1: excessive Rate of Descent
 
     @MOPS_276
     Scenario Outline: Must Not Alert
-      Given Mode 1 is armed
-      And Mode 1 is not inhibited
-      And steep approach is selected
-      When the rate of descent is at least <sinkrate> feet per minute
+      Given steep approach is selected
+      When the rate of descent is at least <rate of descent> feet per minute
       But the height above terrain is not in between 10 feet and <height> feet
       Then a caution alert is not emitted at all
 
       Examples:
-        | sinkrate | height |
-        | 1217     | 10     |
-        | 2300     | 1300   |
-        | 4400     | 2500   |
-        | 8000     | 3500   |
-        | 12000    | 4611   |
+        | rate of descent | height |
+        | 1217            | 10     |
+        | 2300            | 1300   |
+        | 4400            | 2500   |
+        | 8000            | 3500   |
+        | 12000           | 4611   |
 
   Rule: Aural Alert (MOPS_277, MOPS_278, MOPS_279, MOPS_280)
 
