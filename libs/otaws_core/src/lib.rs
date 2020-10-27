@@ -1,8 +1,16 @@
 #![deny(unsafe_code)]
 
-pub mod types;
 pub mod alarms;
+pub mod types;
 
+pub mod capi;
+
+// How many alarms at max?
+// How do we prioritize?
+// Alarms Type, which contains all alarms but
+//
+// An array of all alams
+// An array of the important alarms
 pub trait AircraftStateReceiver {
     /// Push new attitude data
     fn push(&mut self, position: &types::LonLatAlt) -> Vec<alarms::Report>;
@@ -16,7 +24,7 @@ pub trait TAWS: AircraftStateReceiver {
 pub trait Alarm: AircraftStateReceiver {
     /// Returns whether this alarm is armed.
     ///
-    /// Arming refers to the automatic switching on of a function by 
+    /// Arming refers to the automatic switching on of a function by
     /// the Equipment (DO-367 Chapter 1.9).
     fn is_armed(&self) -> bool;
 
@@ -32,7 +40,8 @@ pub trait Alarm: AircraftStateReceiver {
 
 use std::collections::HashMap;
 
-struct TawsState {
+#[derive(Default)]
+pub struct TawsState {
     alarms: HashMap<alarms::Report, Box<dyn Alarm>>,
 }
 

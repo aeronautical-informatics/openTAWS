@@ -3,8 +3,6 @@ Feature: Self-Test (MOPS_001)
   provides indications of equipment condition during operation. This self-test
   function consists of continuous and initiated tests.
 
-  # TODO Does the continuos self-test run all the time? When yes, why does the
-  # standard say "during"
   @MOPS_002 @MOPS_003 @MOPS_004
   Scenario: Continuos Self-Test
     When a failure is detected by the continuos monitoring
