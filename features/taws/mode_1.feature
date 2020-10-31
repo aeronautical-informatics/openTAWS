@@ -208,16 +208,20 @@ Feature: Mode 1: Excessive Rate of Descent
     @MOPS_279
     Scenario: Repeating Warning Alert
       Given the warning level Mode 1 alert condition persists
+      And the pilot didn't silence the alert
+      And no higher priority alert is triggered
       Then the aural message shall be repeated periodically
-
+ 
   # Whoop-Whoop (MOPS_280) ain't gonna be testable
 
   Rule: Visual Alert (MOPS_281, MOPS_282)
 
+    @MOPS_281
     Scenario: Caution
       Given a caution level Mode 1 alert is active
       Then the TAWS shall trigger a yellow or amber indicator
 
+    @MOPS_282
     Scenario: Warning
       Given a warning level Mode 1 alert is active
       Then the TAWS shall trigger a red indicator
