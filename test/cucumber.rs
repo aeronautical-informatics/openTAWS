@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use std::convert::Infallible;
 
-use otaws_core::types;
+use otaws::types;
 
 pub struct Nothing();
 
@@ -25,7 +25,7 @@ mod example_steps {
 
 fn main() {
     let runner = cucumber::Cucumber::<Nothing>::new()
-        .features(&["../../features/taws"])
+        .features(&["features"])
         .steps(example_steps::steps());
 
     futures::executor::block_on(runner.run());

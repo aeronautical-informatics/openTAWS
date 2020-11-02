@@ -1,5 +1,7 @@
 #![deny(unsafe_code)]
 
+use wasm_bindgen::prelude::*;
+
 pub mod alarms;
 pub mod types;
 
@@ -40,15 +42,20 @@ pub trait Alarm: AircraftStateReceiver {
 
 use std::collections::HashMap;
 
+//#[wasm_bindgen]
 #[derive(Default)]
 pub struct TawsState {
     alarms: HashMap<alarms::Report, Box<dyn Alarm>>,
 }
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
+//#[wasm_bindgen]
+pub enum Alarms {
+    Mode1,
+    Mode2,
+    FLTA,
+}
+
+#[wasm_bindgen]
+pub fn hello() -> String {
+    String::from("Hello World!")
 }
