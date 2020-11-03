@@ -1,11 +1,15 @@
 #![deny(unsafe_code)]
 
-use wasm_bindgen::prelude::*;
+use std::panic::UnwindSafe;
 
-pub mod alarms;
+pub mod alerts;
 pub mod types;
 
+#[cfg(feature = "capi")]
 pub mod capi;
+
+#[cfg(feature = "wasi")]
+pub mod wasi;
 
 // How many alarms at max?
 // How do we prioritize?
@@ -15,15 +19,10 @@ pub mod capi;
 // An array of the important alarms
 pub trait AircraftStateReceiver {
     /// Push new attitude data
-    fn push(&mut self, position: &types::LonLatAlt) -> Vec<alarms::Report>;
+    fn push(&mut self, position: &types::LonLatAlt) -> alerts::AlertState;
 }
 
-pub trait TAWS: AircraftStateReceiver {
-    fn new() -> Self;
-    fn is_armed(&self) -> bool;
-}
-
-pub trait Alarm: AircraftStateReceiver {
+pub trait TAWSFunctionality: AircraftStateReceiver {
     /// Returns whether this alarm is armed.
     ///
     /// Arming refers to the automatic switching on of a function by
@@ -40,22 +39,39 @@ pub trait Alarm: AircraftStateReceiver {
     fn is_inhibited(&self) -> bool;
 }
 
-use std::collections::HashMap;
-
-//#[wasm_bindgen]
-#[derive(Default)]
-pub struct TawsState {
-    alarms: HashMap<alarms::Report, Box<dyn Alarm>>,
+pub struct TAWS {
+    armed: bool,
+    functions: Vec<Box<dyn TAWSFunctionality + UnwindSafe>>,
 }
 
-//#[wasm_bindgen]
-pub enum Alarms {
-    Mode1,
-    Mode2,
-    FLTA,
+impl TAWS {
+    pub fn new() -> Self {
+        let functions = Vec::new();
+
+        Self {
+            armed: true,
+            functions,
+        }
+    }
+    pub fn is_armed(&self) -> bool {
+        self.armed
+    }
 }
 
-#[wasm_bindgen]
-pub fn hello() -> String {
-    String::from("Hello World!")
+impl AircraftStateReceiver for TAWS {
+    fn push(&mut self, position: &types::LonLatAlt) -> alerts::AlertState {
+        let mut alert_state = alerts::AlertState::default();
+
+        for f in &mut self.functions {
+            let mut new_alert_state = f.push(position);
+            new_alert_state.alerts.drain().for_each(|a| {
+                alert_state.alerts.insert(a);
+            });
+            new_alert_state.nuisance_alerts.drain().for_each(|a| {
+                alert_state.nuisance_alerts.insert(a);
+            });
+        }
+
+        alert_state
+    }
 }

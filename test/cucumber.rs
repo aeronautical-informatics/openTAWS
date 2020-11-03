@@ -1,30 +1,40 @@
 use async_trait::async_trait;
 use std::convert::Infallible;
 
-use otaws::types;
+use otaws::TAWS;
 
-pub struct Nothing();
+pub struct MyWorld {
+    taws: TAWS,
+}
 
 #[async_trait(?Send)]
-impl cucumber::World for Nothing {
+impl cucumber::World for MyWorld {
     type Error = Infallible;
 
     async fn new() -> Result<Self, Infallible> {
-        Ok(Self())
+        Ok(Self { taws: TAWS::new() })
     }
 }
 
 mod example_steps {
     use cucumber::{t, Steps};
 
-    pub fn steps() -> Steps<crate::Nothing> {
-        let mut builder: Steps<crate::Nothing> = Steps::new();
+    pub fn steps() -> Steps<crate::MyWorld> {
+        let mut builder: Steps<crate::MyWorld> = Steps::new();
+
+        builder
+            .given("the plane is flying", |world, _step| world)
+            .then("Mode 1 shall be armed", |world, _step| {
+                assert!(world.taws.is_armed());
+                world
+            });
+
         builder
     }
 }
 
 fn main() {
-    let runner = cucumber::Cucumber::<Nothing>::new()
+    let runner = cucumber::Cucumber::<MyWorld>::new()
         .features(&["features"])
         .steps(example_steps::steps());
 
