@@ -15,9 +15,7 @@ capi = [ ]
 wasi = [ "serde", "serde_json", "wasm-bindgen" ]
 
 [dependencies]
-#uom = "0"
-lonlat = "1"
-myelin-geometry = "2"
+uom = "0"
 
 ### WASI deps
 serde = { version = "1.0", features = [ "derive" ], optional = true }

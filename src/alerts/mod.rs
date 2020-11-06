@@ -5,7 +5,7 @@ pub mod mode_1;
 /// Available alerts from the TAWS
 #[derive(Debug, PartialEq, Hash)]
 #[cfg_attr(feature = "wasi", derive(serde::Serialize))]
-pub enum Alert {
+pub enum Functionality {
     /// Forward Lookig Terrain Avoidance
     FLTA,
 
@@ -13,22 +13,22 @@ pub enum Alert {
     PDA,
 
     /// Excessive Rate of Descent
-    Mode1(AlertLevel),
+    Mode1,
 
     /// Excessive ClosureRate to Terrain
-    Mode2(AlertLevel),
+    Mode2,
 
     /// Negative Climb Rate or Altitude Loss after Take-off or Go Around
-    Mode3(AlertLevel),
+    Mode3,
 
     /// Flight Near Terrain when Not in Landing Configuration
-    Mode4(AlertLevel),
+    Mode4,
 
     /// Excessive Downward Deviation from an ILS Glideslope or LPV/GLS Glidepath
-    Mode5(AlertLevel),
+    Mode5,
     // TODO add more
 }
-impl Eq for Alert {}
+impl Eq for Functionality {}
 
 /// Severity level of an alert
 #[derive(Debug, PartialEq, Hash)]
@@ -49,10 +49,56 @@ impl Eq for AlertLevel {}
 #[cfg_attr(feature = "wasi", derive(serde::Serialize))]
 pub struct AlertState {
     /// Alerts which are to be displayed to the crew
-    pub alerts: HashSet<Alert>,
+    pub alerts: HashSet<(Functionality, AlertLevel)>,
 
     /// Alerts which are not to be disclosed to the crew to avoid nuisance
-    pub nuisance_alerts: HashSet<Alert>,
+    pub nuisance_alerts: HashSet<(Functionality, AlertLevel)>,
 }
 
-impl AlertState {}
+impl AlertState {
+    pub fn count(&self, level: AlertLevel) -> usize {
+        self.alerts.iter().filter(|e| e.1 == level).count()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    pub fn alert_state_usage() {
+        let alts = AlertState::default();
+
+        // using hashset contains
+        if alts
+            .alerts
+            .contains(&(Functionality::Mode1, AlertLevel::Caution))
+        {
+            // do important stuff
+        }
+
+        // using hashset any
+        if alts.alerts.iter().any(|e| e.1 == AlertLevel::Caution) {
+            // do important stuff
+        }
+
+        // using match
+        for x in &alts.alerts {
+            match x {
+                (Functionality::Mode1, AlertLevel::Caution) if 1 > 0 => {}
+
+                (Functionality::Mode1, AlertLevel::Caution) => {}
+                (Functionality::Mode1, AlertLevel::Warning) => {}
+                _ => {}
+            }
+        }
+
+        // using match lazily
+        for x in &alts.alerts {
+            match x {
+                (_, AlertLevel::Caution) if 1 > 0 => {}
+                _ => {}
+            }
+        }
+    }
+}

@@ -1,9 +1,13 @@
 #![deny(unsafe_code)]
 
+use std::collections::HashMap;
 use std::panic::UnwindSafe;
 
 pub mod alerts;
+mod envelope;
 pub mod types;
+use alerts::*;
+use types::*;
 
 #[cfg(feature = "capi")]
 pub mod capi;
@@ -19,7 +23,7 @@ pub mod wasi;
 // An array of the important alarms
 pub trait AircraftStateReceiver {
     /// Push new attitude data
-    fn push(&mut self, position: &types::LonLatAlt) -> alerts::AlertState;
+    fn push(&mut self, position: &AircraftState) -> AlertState;
 }
 
 pub trait TAWSFunctionality: AircraftStateReceiver {
@@ -41,28 +45,34 @@ pub trait TAWSFunctionality: AircraftStateReceiver {
 
 pub struct TAWS {
     armed: bool,
-    functions: Vec<Box<dyn TAWSFunctionality + UnwindSafe>>,
+    functions: HashMap<String, Box<dyn TAWSFunctionality + UnwindSafe>>,
 }
 
 impl TAWS {
-    pub fn new() -> Self {
-        let functions = Vec::new();
+    pub fn new(config: TAWSConfig) -> Self {
+        let mut functions = HashMap::new();
 
         Self {
             armed: true,
             functions,
         }
     }
+
     pub fn is_armed(&self) -> bool {
         self.armed
+    }
+
+    pub fn function_is_armed(&self, function: &str) -> bool {
+        // function identified by string?
+        todo!();
     }
 }
 
 impl AircraftStateReceiver for TAWS {
-    fn push(&mut self, position: &types::LonLatAlt) -> alerts::AlertState {
+    fn push(&mut self, position: &AircraftState) -> alerts::AlertState {
         let mut alert_state = alerts::AlertState::default();
 
-        for f in &mut self.functions {
+        for f in &mut self.functions.values_mut() {
             let mut new_alert_state = f.push(position);
             new_alert_state.alerts.drain().for_each(|a| {
                 alert_state.alerts.insert(a);
