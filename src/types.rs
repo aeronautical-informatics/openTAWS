@@ -7,6 +7,7 @@ pub use uom::si::{
 
 use uom::si::f64::*;
 
+#[derive(Clone, Default)]
 pub struct Attitude {
     ///
     pitch: Angle,
@@ -14,7 +15,11 @@ pub struct Attitude {
 }
 
 /// Structure describing the current state of an Aicraft
+#[derive(Clone, Default)]
 pub struct AircraftState {
+    /// Time when this aircraft state was emitted
+    pub timestamp: Time,
+
     /// Height above sealevel in foot
     pub altitude_sealevel: Length,
 
@@ -43,12 +48,17 @@ pub struct AircraftState {
 
     /// Attitude of the aircraft including pitch & roll
     pub attitude: Attitude,
+
+    /// Whether steep approach is selected
+    pub steep_approach: bool,
 }
+
+impl std::panic::UnwindSafe for AircraftState {}
 
 #[derive(Clone)]
 pub struct TAWSConfig {
-    max_climbrate: Velocity,
-    max_climbrate_change: Acceleration,
+    pub max_climbrate: Velocity,
+    pub max_climbrate_change: Acceleration,
 }
 
 impl Default for TAWSConfig {

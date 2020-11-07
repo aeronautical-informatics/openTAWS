@@ -22,9 +22,7 @@ Feature: Mode 1: Excessive Rate of Descent
       And Mode 1 is not inhibited
       And steep approach is not selected
       When the rate of descent is at least <rate of descent> feet per minute
-      And the height above terrain is 
-      * at least 100 feet
-      * at most <height> feet
+      And the height above terrain is between 100 and <height> feet
       Then a caution alert is emitted within 2 seconds
 
       Examples:
@@ -47,7 +45,7 @@ Feature: Mode 1: Excessive Rate of Descent
     Scenario Outline: Must Not Alert
       Given steep approach is not selected
       When the rate of descent is at least <rate of descent> feet per minute
-      But the height above terrain is not in between 10 feet and <height> feet
+      But the height above terrain is not between 10 feet and <height> feet
       Then a caution alert is not emitted at all
 
       Examples:
@@ -67,9 +65,7 @@ Feature: Mode 1: Excessive Rate of Descent
       And Mode 1 is not inhibited
       And steep approach is selected
       When the rate of descent is at least <rate of descent> feet per minute
-      And the height above terrain is 
-      * at least 150 feet
-      * at most <height> feet
+      And the height above terrain is between 150 and <height> feet
       Then a caution alert is emitted within 2 seconds
 
       Examples:
@@ -93,7 +89,7 @@ Feature: Mode 1: Excessive Rate of Descent
     Scenario Outline: Must Not Alert
       Given steep approach is selected
       When the rate of descent is at least <rate of descent> feet per minute
-      But the height above terrain is not in between 10 feet and <height> feet
+      But the height above terrain is not between 10 feet and <height> feet
       Then a caution alert is not emitted at all
 
       Examples:
@@ -113,9 +109,7 @@ Feature: Mode 1: Excessive Rate of Descent
       And Mode 1 is not inhibited
       And steep approach is not selected
       When the rate of descent is at least <rate of descent> feet per minute
-      And the height above terrain is 
-      * at least 100 feet
-      * at most <height> feet
+      And the height above terrain is between 100 and <height> feet
       Then a caution alert is emitted within 2 seconds
 
       Examples:
@@ -138,7 +132,7 @@ Feature: Mode 1: Excessive Rate of Descent
     Scenario Outline: Must Not Alert
       Given steep approach is not selected
       When the rate of descent is at least <rate of descent> feet per minute
-      But the height above terrain is not in between 10 feet and <height> feet
+      But the height above terrain is not between 10 feet and <height> feet
       Then a caution alert is not emitted at all
 
       Examples:
@@ -157,9 +151,7 @@ Feature: Mode 1: Excessive Rate of Descent
       And Mode 1 is not inhibited
       And steep approach is selected
       When the rate of descent is at least <rate of descent> feet per minute
-      And the height above terrain is 
-      * at least 150 feet
-      * at most <height> feet
+      And the height above terrain is between 150 and <height> feet
       Then a caution alert is emitted within 2 seconds
 
       Examples:
@@ -182,7 +174,7 @@ Feature: Mode 1: Excessive Rate of Descent
     Scenario Outline: Must Not Alert
       Given steep approach is selected
       When the rate of descent is at least <rate of descent> feet per minute
-      But the height above terrain is not in between 10 feet and <height> feet
+      But the height above terrain is not between 10 feet and <height> feet
       Then a caution alert is not emitted at all
 
       Examples:

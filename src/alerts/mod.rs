@@ -5,6 +5,7 @@ pub mod mode_1;
 /// Available alerts from the TAWS
 #[derive(Debug, PartialEq, Hash)]
 #[cfg_attr(feature = "wasi", derive(serde::Serialize))]
+#[derive(strum::EnumString)]
 pub enum Functionality {
     /// Forward Lookig Terrain Avoidance
     FLTA,
@@ -33,6 +34,7 @@ impl Eq for Functionality {}
 /// Severity level of an alert
 #[derive(Debug, PartialEq, Hash)]
 #[cfg_attr(feature = "wasi", derive(serde::Serialize))]
+#[derive(strum::EnumString)]
 pub enum AlertLevel {
     /// The level or category of alert for conditions that require immediate flight crew awareness
     /// and immediate flight crew response.
@@ -64,6 +66,16 @@ impl AlertState {
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    pub fn strum_test() {
+        let mut key = String::from("Mode 1");
+        key.retain(|c| !c.is_whitespace());
+
+        let f: Functionality = key
+            .parse()
+            .expect(&format!("Unable to parse {} as Functionality ", key));
+    }
 
     #[test]
     pub fn alert_state_usage() {

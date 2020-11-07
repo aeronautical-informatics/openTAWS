@@ -1,13 +1,14 @@
 use crate::envelope::Envelope;
 use crate::types::*;
-use crate::{alerts::AlertState, AircraftStateReceiver};
+use crate::{alerts::AlertState, AircraftStateReceiver, TAWSFunctionality};
 
-struct Mode1 {
+pub struct Mode1 {
     caution_envelope: Envelope,
     caution_envelope_steep_approach: Envelope,
 
     warning_envelope: Envelope,
     warning_envelope_steep_approach: Envelope,
+    inhibited: bool,
 }
 
 impl Default for Mode1 {
@@ -50,6 +51,7 @@ impl Default for Mode1 {
             caution_envelope_steep_approach,
             warning_envelope,
             warning_envelope_steep_approach,
+            inhibited: false,
         }
     }
 }
@@ -57,5 +59,20 @@ impl Default for Mode1 {
 impl AircraftStateReceiver for Mode1 {
     fn push(&mut self, state: &AircraftState) -> AlertState {
         todo!();
+    }
+}
+
+impl TAWSFunctionality for Mode1 {
+    fn is_armed(&self) -> bool {
+        true
+    }
+    fn is_inhibited(&self) -> bool {
+        self.inhibited
+    }
+    fn inhibit(&mut self) {
+        self.inhibited = true;
+    }
+    fn uninhibit(&mut self) {
+        self.inhibited = false;
     }
 }

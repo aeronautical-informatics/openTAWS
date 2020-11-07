@@ -3,11 +3,11 @@
 use std::collections::HashMap;
 use std::panic::UnwindSafe;
 
-pub mod alerts;
+mod alerts;
 mod envelope;
-pub mod types;
-use alerts::*;
-use types::*;
+mod types;
+pub use alerts::*;
+pub use types::*;
 
 #[cfg(feature = "capi")]
 pub mod capi;
@@ -45,12 +45,15 @@ pub trait TAWSFunctionality: AircraftStateReceiver {
 
 pub struct TAWS {
     armed: bool,
-    functions: HashMap<String, Box<dyn TAWSFunctionality + UnwindSafe>>,
+    functions: HashMap<Functionality, Box<dyn TAWSFunctionality + UnwindSafe>>,
 }
 
 impl TAWS {
     pub fn new(config: TAWSConfig) -> Self {
+        use alerts::*;
         let mut functions = HashMap::new();
+        let b: Box<dyn TAWSFunctionality + UnwindSafe> = Box::new(mode_1::Mode1::default());
+        functions.insert(Functionality::Mode1, b);
 
         Self {
             armed: true,
@@ -62,9 +65,20 @@ impl TAWS {
         self.armed
     }
 
-    pub fn function_is_armed(&self, function: &str) -> bool {
-        // function identified by string?
-        todo!();
+    pub fn function_is_armed(&self, function: &Functionality) -> bool {
+        self.functions.get(function).unwrap().is_armed()
+    }
+
+    pub fn function_is_inhibited(&self, function: &Functionality) -> bool {
+        self.functions.get(function).unwrap().is_inhibited()
+    }
+
+    pub fn function_inhibit(&mut self, function: &Functionality) {
+        self.functions.get_mut(function).unwrap().inhibit()
+    }
+
+    pub fn function_uninhibit(&mut self, function: &Functionality) {
+        self.functions.get_mut(function).unwrap().uninhibit()
     }
 }
 
