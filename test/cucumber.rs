@@ -6,7 +6,7 @@ use async_trait::async_trait;
 use uom::si::{f64::*, length::foot, velocity::foot_per_minute};
 
 use cucumber::{t, Steps};
-use otaws::{AircraftState, Functionality, TAWSConfig, TAWS};
+use otaws::{AircraftState, AircraftStateReceiver, AlertLevel, Functionality, TAWSConfig, TAWS};
 
 struct ScenarioContext {}
 
@@ -45,14 +45,14 @@ pub fn steps() -> Steps<crate::MyWorld> {
 
     builder
         .given("the plane is flying", |world, _step| world)
-        .given_regex("(.+) is (.*)armed", |world, mut matches, _step| {
+        .given_regex("(.+) is armed", |world, mut matches, _step| {
             matches[1].retain(|c| !c.is_whitespace());
             let functionality = matches[1].parse().unwrap();
-            if matches[2].starts_with("not") {
-                assert!(!world.taws.function_is_armed(&functionality));
-            } else {
-                assert!(world.taws.function_is_armed(&functionality));
-            }
+            //if matches[2].starts_with("not") {
+            //    assert!(!world.taws.function_is_armed(&functionality));
+            //} else {
+            assert!(world.taws.function_is_armed(&functionality));
+            //}
             world
         })
         .given_regex("(.+) is (.*)inhibited", |mut world, mut matches, _step| {
@@ -94,26 +94,48 @@ pub fn steps() -> Steps<crate::MyWorld> {
         .when_regex(
             r"the height above terrain is (.*)between (\d+) and (\d+) feet",
             |mut world, matches, _step| {
-                let height = Length::new::<foot>(matches[1].parse().unwrap());
                 world.props.height_outside = Some(matches[1].starts_with("not"));
                 world.props.height_min = Some(Length::new::<foot>(matches[2].parse().unwrap()));
                 world.props.height_max = Some(Length::new::<foot>(matches[3].parse().unwrap()));
                 world
             },
         )
-        //.then_regex(
-        //    "a (.*) alert is not emitted at all",
-        //    |world, matches, _step| {
-        //        let alert = matches[1].parse().unwrap();
-        //    },
-        //)
-        .given_regex(
-            r"the rate of rage is at least (.+) feet per minute",
-            |world, matches, _step| {
-                panic!("{}", matches[1]);
+        .then_regex(
+            "a (.*) alert is not emitted at all",
+            |mut world, matches, _step| {
+                let alert: AlertLevel = matches[1].parse().unwrap();
+
+                let new_frame = world.template_frame.clone();
+
+                let alert_state = world.taws.push(&new_frame);
+
+                assert!(alert_state.alerts.is_empty());
+                assert!(alert_state.nuisance_alerts.is_empty());
+
+                world
+            },
+        )
+        .then_regex(
+            r"a (.*) alert is emitted within (\d+) seconds",
+            |mut world, matches, _step| {
+                let alert: AlertLevel = matches[1].parse().unwrap();
+
+                let new_frame = world.template_frame.clone();
+
+                let alert_state = world.taws.push(&new_frame);
+
+                assert!(alert_state.count(alert) > 0);
+
                 world
             },
         );
+    //.given_regex(
+    //    r"the rate of rage is at least (.+) feet per minute",
+    //    |world, matches, _step| {
+    //        panic!("{}", matches[1]);
+    //        world
+    //    },
+    //);
 
     builder
 }

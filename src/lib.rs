@@ -23,36 +23,19 @@ pub mod wasi;
 // An array of the important alarms
 pub trait AircraftStateReceiver {
     /// Push new attitude data
-    fn push(&mut self, position: &AircraftState) -> AlertState;
-}
-
-pub trait TAWSFunctionality: AircraftStateReceiver {
-    /// Returns whether this alarm is armed.
-    ///
-    /// Arming refers to the automatic switching on of a function by
-    /// the Equipment (DO-367 Chapter 1.9).
-    fn is_armed(&self) -> bool;
-
-    /// Dismiss this alert
-    fn inhibit(&mut self);
-
-    /// Enable this alert
-    fn uninhibit(&mut self);
-
-    /// Returns whether this alarm is inhibited
-    fn is_inhibited(&self) -> bool;
+    fn push(&mut self, state: &AircraftState) -> AlertState;
 }
 
 pub struct TAWS {
     armed: bool,
-    functions: HashMap<Functionality, Box<dyn TAWSFunctionality + UnwindSafe>>,
+    functions: HashMap<Functionality, Box<dyn FunctionalityProcessor + UnwindSafe>>,
 }
 
 impl TAWS {
     pub fn new(config: TAWSConfig) -> Self {
         use alerts::*;
         let mut functions = HashMap::new();
-        let b: Box<dyn TAWSFunctionality + UnwindSafe> = Box::new(mode_1::Mode1::default());
+        let b: Box<dyn FunctionalityProcessor + UnwindSafe> = Box::new(mode_1::Mode1::default());
         functions.insert(Functionality::Mode1, b);
 
         Self {
@@ -83,19 +66,15 @@ impl TAWS {
 }
 
 impl AircraftStateReceiver for TAWS {
-    fn push(&mut self, position: &AircraftState) -> alerts::AlertState {
+    fn push(&mut self, state: &AircraftState) -> alerts::AlertState {
         let mut alert_state = alerts::AlertState::default();
 
-        for f in &mut self.functions.values_mut() {
-            let mut new_alert_state = f.push(position);
-            new_alert_state.alerts.drain().for_each(|a| {
-                alert_state.alerts.insert(a);
-            });
-            new_alert_state.nuisance_alerts.drain().for_each(|a| {
-                alert_state.nuisance_alerts.insert(a);
-            });
-        }
+        let alerts = self
+            .functions
+            .iter_mut()
+            .filter_map(|(_k, v)| v.process(state));
 
+        alert_state.update(alerts);
         alert_state
     }
 }

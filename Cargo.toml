@@ -15,6 +15,7 @@ capi = [ ]
 wasi = [ "serde", "serde_json", "wasm-bindgen" ]
 
 [dependencies]
+lazy_static = "1"
 uom = "0"
 
 ### WASI deps
@@ -28,7 +29,7 @@ strum = { version = "^0.19", features = ["derive"]}
 [dev-dependencies]
 futures = "0"
 async-trait = "^0.1.41"
-cucumber = { package = "cucumber_rust", version = "^0.7.0" }
+cucumber = { package = "cucumber_rust", git = "https://github.com/bbqsrc/cucumber-rust", branch = "main" }
 
 [[test]]
 name = "cucumber"

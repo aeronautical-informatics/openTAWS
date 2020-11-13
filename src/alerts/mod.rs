@@ -1,9 +1,13 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
+
+use crate::types::AircraftState;
 
 pub mod mode_1;
 
+pub type Alert = (Functionality, AlertLevel);
+
 /// Available alerts from the TAWS
-#[derive(Debug, PartialEq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Hash)]
 #[cfg_attr(feature = "wasi", derive(serde::Serialize))]
 #[derive(strum::EnumString)]
 pub enum Functionality {
@@ -32,9 +36,12 @@ pub enum Functionality {
 impl Eq for Functionality {}
 
 /// Severity level of an alert
-#[derive(Debug, PartialEq, Hash)]
+///
+/// Orderd by high priority to low priority
+#[derive(Clone, Copy, Debug, PartialEq, Hash)]
 #[cfg_attr(feature = "wasi", derive(serde::Serialize))]
 #[derive(strum::EnumString)]
+#[strum(serialize_all = "kebab_case")]
 pub enum AlertLevel {
     /// The level or category of alert for conditions that require immediate flight crew awareness
     /// and immediate flight crew response.
@@ -61,6 +68,45 @@ impl AlertState {
     pub fn count(&self, level: AlertLevel) -> usize {
         self.alerts.iter().filter(|e| e.1 == level).count()
     }
+
+    /// udpates internal alerts with new alerts, removing all old alerts. Prioritizes as well.
+    pub fn update<'a, I>(&mut self, new_alerts: I)
+    where
+        I: Iterator<Item = Alert>,
+    {
+        let mut map = HashMap::new();
+
+        for (function, new_alert_level) in new_alerts {
+            let entry = map.entry(function).and_modify(|old_alert_level| {
+                if (new_alert_level as isize) < (*old_alert_level as isize) {
+                    self.nuisance_alerts.insert((function, *old_alert_level));
+                    *old_alert_level = new_alert_level;
+                }
+            });
+        }
+
+        self.alerts = map.drain().collect();
+    }
+}
+
+/// Trait which is to be fulfilled by all functionalities
+pub trait FunctionalityProcessor {
+    /// Returns whether this alarm is armed.
+    ///
+    /// Arming refers to the automatic switching on of a function by
+    /// the Equipment (DO-367 Chapter 1.9).
+    fn is_armed(&self) -> bool;
+
+    /// Dismiss this alert
+    fn inhibit(&mut self);
+
+    /// Enable this alert
+    fn uninhibit(&mut self);
+
+    /// Returns whether this alarm is inhibited
+    fn is_inhibited(&self) -> bool;
+
+    fn process(&mut self, state: &AircraftState) -> Option<Alert>;
 }
 
 #[cfg(test)]
