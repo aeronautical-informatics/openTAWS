@@ -26,9 +26,16 @@ pub trait AircraftStateReceiver {
     fn push(&mut self, state: &AircraftState) -> AlertState;
 }
 
+#[derive(Debug)]
 pub struct TAWS {
     armed: bool,
     functions: HashMap<Functionality, Box<dyn FunctionalityProcessor + UnwindSafe>>,
+}
+
+impl Clone for TAWS {
+    fn clone(&self) -> Self {
+        todo!();
+    }
 }
 
 impl TAWS {

@@ -8,6 +8,7 @@ use crate::{alerts::AlertState, AircraftStateReceiver};
 
 use super::*;
 
+#[derive(Clone, Debug)]
 pub struct Mode1 {
     armed: bool,
     inhibited: bool,

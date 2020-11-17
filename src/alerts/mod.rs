@@ -65,7 +65,11 @@ pub struct AlertState {
 }
 
 impl AlertState {
-    pub fn count(&self, level: AlertLevel) -> usize {
+    pub fn alerts_total_count(&self) -> usize {
+        self.alerts.union(&self.nuisance_alerts).count()
+    }
+
+    pub fn alerts_count(&self, level: AlertLevel) -> usize {
         self.alerts.iter().filter(|e| e.1 == level).count()
     }
 
@@ -90,7 +94,7 @@ impl AlertState {
 }
 
 /// Trait which is to be fulfilled by all functionalities
-pub trait FunctionalityProcessor {
+pub trait FunctionalityProcessor: std::fmt::Debug + Send {
     /// Returns whether this alarm is armed.
     ///
     /// Arming refers to the automatic switching on of a function by

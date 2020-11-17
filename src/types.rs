@@ -7,7 +7,7 @@ pub use uom::si::{
 
 use uom::si::f64::*;
 
-#[derive(Clone, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Attitude {
     ///
     pitch: Angle,
@@ -15,7 +15,7 @@ pub struct Attitude {
 }
 
 /// Structure describing the current state of an Aicraft
-#[derive(Clone, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct AircraftState {
     /// Time when this aircraft state was emitted
     pub timestamp: Time,

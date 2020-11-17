@@ -3,26 +3,35 @@ use std::str::FromStr;
 
 use async_trait::async_trait;
 
-use uom::si::{f64::*, length::foot, velocity::foot_per_minute};
+use uom::si::{f64::*, length::foot, ratio::ratio, time::second, velocity::foot_per_minute};
 
 use cucumber::{t, Steps};
 use otaws::{AircraftState, AircraftStateReceiver, AlertLevel, Functionality, TAWSConfig, TAWS};
 
 struct ScenarioContext {}
 
+#[derive(Clone, Debug)]
 pub struct MyWorld {
     taws: TAWS,
     template_frame: AircraftState,
-
     props: ScenarioProperties,
 }
 
-#[derive(Default)]
+#[derive(Clone, Debug, Default)]
 struct ScenarioProperties {
     height_min: Option<Length>,
     height_max: Option<Length>,
-    height_outside: Option<bool>,
+    height_inside: Option<bool>,
     rate_of_descent_min: Option<Velocity>,
+}
+
+impl quickcheck::Arbitrary for MyWorld {
+    fn arbitrary<G>(_: &mut G) -> Self
+    where
+        G: quickcheck::Gen,
+    {
+        todo!()
+    }
 }
 
 impl std::panic::UnwindSafe for MyWorld {}
@@ -94,7 +103,7 @@ pub fn steps() -> Steps<crate::MyWorld> {
         .when_regex(
             r"the height above terrain is (.*)between (\d+) and (\d+) feet",
             |mut world, matches, _step| {
-                world.props.height_outside = Some(matches[1].starts_with("not"));
+                world.props.height_inside = Some(!matches[1].starts_with("not"));
                 world.props.height_min = Some(Length::new::<foot>(matches[2].parse().unwrap()));
                 world.props.height_max = Some(Length::new::<foot>(matches[3].parse().unwrap()));
                 world
@@ -105,13 +114,31 @@ pub fn steps() -> Steps<crate::MyWorld> {
             |mut world, matches, _step| {
                 let alert: AlertLevel = matches[1].parse().unwrap();
 
+                let mut frame = world.template_frame.clone();
+
+                assert_eq!(world.taws.push(&frame).alerts_total_count(), 0);
+
+                /*
+                use quickcheck::QuickCheck;
+                let mut qc = QuickCheck::new();
+
+                fn test(mut world: MyWorld )->bool {
+                let alert_state = world.taws.push(&world.template_frame);
+
+                alert_state.alerts.is_empty() &&
+                alert_state.nuisance_alerts.is_empty()
+                };
+
+                qc.quickcheck(test as fn(_)->_);
+
+
                 let new_frame = world.template_frame.clone();
 
                 let alert_state = world.taws.push(&new_frame);
 
                 assert!(alert_state.alerts.is_empty());
                 assert!(alert_state.nuisance_alerts.is_empty());
-
+                */
                 world
             },
         )
@@ -119,12 +146,32 @@ pub fn steps() -> Steps<crate::MyWorld> {
             r"a (.*) alert is emitted within (\d+) seconds",
             |mut world, matches, _step| {
                 let alert: AlertLevel = matches[1].parse().unwrap();
+                let _max_latency = Time::new::<second>(matches[2].parse().unwrap());
+                let props = &world.props;
 
-                let new_frame = world.template_frame.clone();
+                let mut frame = world.template_frame.clone();
+                frame.timestamp += Time::new::<second>(0.1);
 
-                let alert_state = world.taws.push(&new_frame);
+                match (props.height_inside, props.height_min, props.height_max) {
+                    (Some(inside), Some(min), Some(max)) if inside => {
+                        frame.altitude_ground = min;
+                        assert!(world.taws.push(&frame).alerts_count(alert) > 0);
 
-                assert!(alert_state.count(alert) > 0);
+                        frame.altitude_ground = max;
+                        assert!(world.taws.push(&frame).alerts_count(alert) > 0);
+
+                        frame.altitude_ground = (max + min) / Ratio::new::<ratio>(2.0);
+                        assert!(world.taws.push(&frame).alerts_count(alert) > 0);
+                    }
+                    (Some(inside), Some(min), Some(max)) if !inside => {
+                        frame.altitude_ground = min - Length::new::<foot>(1.0);
+                        assert!(world.taws.push(&frame).alerts_count(alert) > 0);
+
+                        frame.altitude_ground = max + Length::new::<foot>(1.0);
+                        assert!(world.taws.push(&frame).alerts_count(alert) > 0);
+                    }
+                    _ => unimplemented!(),
+                }
 
                 world
             },
