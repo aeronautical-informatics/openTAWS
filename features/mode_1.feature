@@ -23,7 +23,7 @@ Feature: Mode 1: Excessive Rate of Descent
       And steep approach is not selected
       When the rate of descent is at least <rate of descent> feet per minute
       And the height above terrain is between 100 and <height> feet
-      Then a caution alert is emitted within 2 seconds
+      Then a Mode 1 caution alert is emitted within 2 seconds
 
       Examples:
         | rate of descent | height |
@@ -46,7 +46,7 @@ Feature: Mode 1: Excessive Rate of Descent
       Given steep approach is not selected
       When the rate of descent is at least <rate of descent> feet per minute
       But the height above terrain is not between 10 and <height> feet
-      Then a caution alert is not emitted at all
+      Then a Mode 1 caution alert is not emitted at all
 
       Examples:
         | rate of descent | height |
@@ -66,7 +66,7 @@ Feature: Mode 1: Excessive Rate of Descent
       And steep approach is selected
       When the rate of descent is at least <rate of descent> feet per minute
       And the height above terrain is between 150 and <height> feet
-      Then a caution alert is emitted within 2 seconds
+      Then a Mode 1 caution alert is emitted within 2 seconds
 
       Examples:
         | rate of descent | height |
@@ -78,19 +78,19 @@ Feature: Mode 1: Excessive Rate of Descent
     @MOPS_272
     Scenario:  Must Not Alert when not Armed
       Given Mode 1 is not armed
-      Then a caution alert is not emitted at all
+      Then a Mode 1 caution alert is not emitted at all
 
     @MOPS_272
     Scenario: Must Not Alert when Inhibited
       Given Mode 1 is inhibited
-      Then a caution alert is not emitted at all
+      Then a Mode 1 caution alert is not emitted at all
 
     @MOPS_272
     Scenario Outline: Must Not Alert
       Given steep approach is selected
       When the rate of descent is at least <rate of descent> feet per minute
       But the height above terrain is not between 10 and <height> feet
-      Then a caution alert is not emitted at all
+      Then a Mode 1 caution alert is not emitted at all
 
       Examples:
         | rate of descent | height |
@@ -110,7 +110,7 @@ Feature: Mode 1: Excessive Rate of Descent
       And steep approach is not selected
       When the rate of descent is at least <rate of descent> feet per minute
       And the height above terrain is between 100 and <height> feet
-      Then a caution alert is emitted within 2 seconds
+      Then a Mode 1 caution alert is emitted within 2 seconds
 
       Examples:
         | rate of descent | height |
@@ -121,19 +121,19 @@ Feature: Mode 1: Excessive Rate of Descent
     @MOPS_274
     Scenario: Must Not Alert when not Armed
       Given Mode 1 is not armed
-      Then a caution alert is not emitted at all
+      Then a Mode 1 caution alert is not emitted at all
 
     @MOPS_274
     Scenario: Must Not Alert when Inhibited
       Given Mode 1 is inhibited
-      Then a caution alert is not emitted at all
+      Then a Mode 1 caution alert is not emitted at all
 
     @MOPS_274
     Scenario Outline: Must Not Alert
       Given steep approach is not selected
       When the rate of descent is at least <rate of descent> feet per minute
       But the height above terrain is not between 10 and <height> feet
-      Then a caution alert is not emitted at all
+      Then a Mode 1 caution alert is not emitted at all
 
       Examples:
         | rate of descent | height |
@@ -152,7 +152,7 @@ Feature: Mode 1: Excessive Rate of Descent
       And steep approach is selected
       When the rate of descent is at least <rate of descent> feet per minute
       And the height above terrain is between 150 and <height> feet
-      Then a caution alert is emitted within 2 seconds
+      Then a Mode 1 caution alert is emitted within 2 seconds
 
       Examples:
         | rate of descent | height |
@@ -163,19 +163,19 @@ Feature: Mode 1: Excessive Rate of Descent
     @MOPS_276
     Scenario: Must Not Alert when not Armed
       Given Mode 1 is not armed
-      Then a caution alert is not emitted at all
+      Then a Mode 1 caution alert is not emitted at all
 
     @MOPS_276
     Scenario: Must Not Alert when Inhibited
       Given Mode 1 is inhibited
-      Then a caution alert is not emitted at all
+      Then a Mode 1 caution alert is not emitted at all
 
     @MOPS_276
     Scenario Outline: Must Not Alert
       Given steep approach is selected
       When the rate of descent is at least <rate of descent> feet per minute
       But the height above terrain is not between 10 and <height> feet
-      Then a caution alert is not emitted at all
+      Then a Mode 1 caution alert is not emitted at all
 
       Examples:
         | rate of descent | height |

@@ -58,10 +58,10 @@ impl Eq for AlertLevel {}
 #[cfg_attr(feature = "wasi", derive(serde::Serialize))]
 pub struct AlertState {
     /// Alerts which are to be displayed to the crew
-    pub alerts: HashSet<(Functionality, AlertLevel)>,
+    pub alerts: HashSet<Alert>,
 
     /// Alerts which are not to be disclosed to the crew to avoid nuisance
-    pub nuisance_alerts: HashSet<(Functionality, AlertLevel)>,
+    pub nuisance_alerts: HashSet<Alert>,
 }
 
 impl AlertState {
@@ -71,6 +71,13 @@ impl AlertState {
 
     pub fn alerts_count(&self, level: AlertLevel) -> usize {
         self.alerts.iter().filter(|e| e.1 == level).count()
+    }
+
+    pub fn mode_alert_level(&self, mode: Functionality) -> Option<AlertLevel> {
+        self.alerts
+            .union(&self.nuisance_alerts)
+            .find(|e| e.0 == mode)
+            .map(|alert| alert.1)
     }
 
     /// udpates internal alerts with new alerts, removing all old alerts. Prioritizes as well.
