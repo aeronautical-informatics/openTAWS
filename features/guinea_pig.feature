@@ -1,19 +1,24 @@
 Feature: Guinea Pig
-This feature was made to be abused!
+  This feature serves as a sleek demonstration of common Gherkin usage
 
-#Rule: To them all
+	@db @backend @sanity
+  Scenario: Name already in use
+    Given a user by the name annika exists
+    When a new user sings up using the username annika
+    Then the sing up shall not suceed
 
-	@SomeTag
-	Scenario Outline: Parse a Number
-	Given the rate of rage is at least <rate of rage> feet per minute
-	When the pressure of caviar is most <pressure> miles
-	Then tea might help
+  @backend @security
+  Scenario Outline: Failed login delay
+    Given a user bert exists with the password heinz
+    When user bert tries to log in with the password hans <count> times
+    Then login for user bert shall be blocked for <interval> seconds
 
 	Examples:
-	| rate of rage | pressure |
-	| 1200         | 42       |
-	| 2200         | 48       |
-	| 3200         | 3        |
+    | count | interval |
+    | 1     | 5        |
+    | 4     | 5        |
+    | 5     | 30       |
+    | 10    | 120      |
 
 
 # vim: set ts=2 sw=2 expandtab: retab: expandtab #

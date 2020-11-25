@@ -88,7 +88,7 @@ impl AlertState {
         let mut map = HashMap::new();
 
         for (function, new_alert_level) in new_alerts {
-            let entry = map.entry(function).and_modify(|old_alert_level| {
+            map.entry(function).and_modify(|old_alert_level| {
                 if (new_alert_level as isize) < (*old_alert_level as isize) {
                     self.nuisance_alerts.insert((function, *old_alert_level));
                     *old_alert_level = new_alert_level;
@@ -117,6 +117,7 @@ pub trait FunctionalityProcessor: std::fmt::Debug + Send {
     /// Returns whether this alarm is inhibited
     fn is_inhibited(&self) -> bool;
 
+    /// Process a new AircraftState, emit alerts if appropiate
     fn process(&mut self, state: &AircraftState) -> Option<Alert>;
 }
 

@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::panic::UnwindSafe;
 
 mod alerts;
-mod envelope;
+pub mod envelope;
 mod types;
 pub use alerts::*;
 pub use types::*;

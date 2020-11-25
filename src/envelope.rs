@@ -4,17 +4,47 @@ pub struct Envelope {
 }
 
 impl Envelope {
-    /// points is orderd by x values
-    /// points does not contain two values with the same x
-    pub fn new(points: Vec<(f64, f64)>) -> Option<Self> {
+    /// Creates an envelope from point pairs
+    ///
+    /// The point pairs must be orderd by x values in ascending order. There must be no two points
+    /// with the same x value. The lower left bound is is the first point.
+    ///
+    /// Each section between two successive x points is interpolated by a linear function. The
+    /// interpolation function of the last section is extendend to +∞. Use an additional point with
+    /// the same y value as the prior point to cause an extrapolation parallel to the x axis for
+    /// the slope after the last point.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use otaws::envelope::Envelope;
+    /// // The last point ensure that the slope is extended with a function parallel to the x axis
+    /// let points = vec![(1908, 150), (2050, 300), (10300, 1958), (10301, 1958)];
+    /// let envelope = Envelope::new(&points).expect("invalid points given to envelope");
+    /// ```
+    pub fn new<'a, I, T: 'a>(points: I) -> Option<Self>
+    where
+        I: IntoIterator<Item = &'a (T, T)>,
+        T: Into<f64> + Copy,
+    {
+        let points: Vec<(f64, f64)> = points
+            .into_iter()
+            .map(|e| (e.0.into(), e.1.into()))
+            .collect();
+
         if points.len() < 2 {
+            // List is too small!
             return None;
         }
 
-        //points.sort_by(|p1, p2| p1.0.partial_cmp(&p2.0).unwrap());
+        for i in 1..points.len() {
+            if points[i - 1].0 >= points[i].0 {
+                // This means either the list is not sorted or two values are identical
+                return None;
+            }
+        }
 
-        let minimum = points[0];
-        let mut derivatives = (0..(points.len() - 1))
+        let derivatives = (0..(points.len() - 1))
             .map(|i| {
                 let (x, y) = points[i];
                 let (x_, y_) = points[i + 1];
@@ -28,7 +58,13 @@ impl Envelope {
         })
     }
 
-    pub fn contains(&self, x: f64, y: f64) -> bool {
+    /// Checks wether a point is in the envelope
+    pub fn contains<T, U>(&self, x: T, y: U) -> bool
+    where
+        T: Into<f64> + Copy,
+        U: Into<f64> + Copy,
+    {
+        let (x, y) = (x.into(), y.into());
         let minium = self.points[0];
         if x < minium.0 || y < minium.1 {
             return false;
@@ -73,36 +109,31 @@ mod test {
     use super::*;
 
     fn init_envelope() -> Envelope {
-        let vec_points = vec![
-            (1600.0f64, 100.0),
-            (1850.0, 300.0),
-            (10100.0, 1958.0),
-            (10101.0, 1958.0),
-        ];
-        Envelope::new(vec_points).unwrap()
+        let vec_points = vec![(1600, 100), (1850, 300), (10100, 1958), (10101, 1958)];
+        Envelope::new(&vec_points).unwrap()
     }
 
     #[test]
     fn left_lower_bound() {
         let evp = init_envelope();
-        assert!(evp.contains(1600.0, 100.0));
+        assert!(evp.contains(1600, 100));
     }
 
     #[test]
     fn y_below_envelope() {
         let evp = init_envelope();
-        assert!(!evp.contains(1600.0, 99.9));
+        assert!(!evp.contains(1600, 99.9));
     }
 
     #[test]
     fn high_x_in_envelope() {
         let evp = init_envelope();
-        assert!(evp.contains(1e100, 100.0));
+        assert!(evp.contains(1e100, 100));
     }
 
     #[test]
     fn y_above_envelope() {
         let evp = init_envelope();
-        assert!(!evp.contains(10100.0, 1959.0));
+        assert!(!evp.contains(10100, 1959));
     }
 }
