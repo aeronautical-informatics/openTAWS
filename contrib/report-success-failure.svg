@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="terminal" baseProfile="full" viewBox="0 0 640 410" width="640" version="1.1">
+    <defs>
+        <termtosvg:template_settings xmlns:termtosvg="https://github.com/nbedos/termtosvg">
+            <termtosvg:screen_geometry columns="80" rows="24"/>
+            <termtosvg:animation type="css"/>
+        </termtosvg:template_settings>
+        <style type="text/css" id="generated-style"><![CDATA[#screen {
+                font-family: 'DejaVu Sans Mono', monospace;
+                font-style: normal;
+                font-size: 14px;
+            }
+
+        text {
+            dominant-baseline: text-before-edge;
+            white-space: pre;
+        }
+    ]]></style>
+        <style type="text/css" id="user-style">
+            /* The colors defined below are the default 16 colors used for rendering text of the terminal. Adjust
+               them as needed.
+               dracula color theme */
+            .foreground {fill: #383a42;}
+            .background {fill: #fafafa;}
+            .color0  {fill: #383a42;}
+            .color1  {fill: #e45649;}
+            .color2  {fill: #50a14f;}
+            .color3  {fill: #c18401;}
+            .color4  {fill: #0184bc;}
+            .color5  {fill: #a626a4;}
+            .color6  {fill: #0997b3;}
+            .color7  {fill: #383a42;}
+            .color8  {fill: #4f525e;}
+            .color9  {fill: #e06c75;}
+            .color10 {fill: #98c379;}
+            .color11 {fill: #e5c07b;}
+            .color12 {fill: #61afef;}
+            .color13 {fill: #c678dd;}
+            .color14 {fill: #56b6c2;}
+            .color15 {fill: #383a42;}
+        </style>
+    </defs>
+    <svg id="screen" width="640" height="408" viewBox="0 0 640 408" preserveAspectRatio="xMidYMin slice"><rect class="background" height="100%" width="100%" x="0" y="0"/><defs><g id="g1"><text x="0" textLength="168" font-weight="bold" class="color15"> Scenario: Must Alert</text></g><g id="g2"><text x="0" textLength="448" font-weight="bold" class="color15"> Using example: &lt;rate of descent&gt; = 1560, &lt;height&gt; = 100</text></g><g id="g3"><text x="0" textLength="400" font-weight="bold" class="color15">                                                  </text><text x="400" textLength="240" class="color7"> features/mode_1.feature:22:5&#160;</text></g><g id="g4"><text x="0" textLength="400" class="color2">  &#10004; Given Mode 1 is armed                         </text><text x="400" textLength="240" class="color7"> features/mode_1.feature:23:7&#160;</text></g><g id="g5"><text x="0" textLength="400" class="color2">  &#10004; And Mode 1 is not inhibited                   </text><text x="400" textLength="240" class="color7"> features/mode_1.feature:24:7&#160;</text></g><g id="g6"><text x="0" textLength="400" class="color2">  &#10004; And steep approach is not selected            </text><text x="400" textLength="240" class="color7"> features/mode_1.feature:25:7&#160;</text></g><g id="g7"><text x="0" textLength="472" class="color7">  When the rate of descent is at least 1560 feet per minute</text></g><g id="g8"><text x="0" textLength="488" class="color2">  &#10004; When the rate of descent is at least 1560 feet per minute</text><text x="488" textLength="152" class="foreground">                   </text></g><g id="g9"><text x="0" textLength="400" class="color2">                                                  </text><text x="400" textLength="240" class="color7"> features/mode_1.feature:26:7&#160;</text></g><g id="g10"><text x="0" textLength="464" class="color7">  And the height above terrain is between 100 and 100 feet</text></g><g id="g11"><text x="0" textLength="480" class="color2">  &#10004; And the height above terrain is between 100 and 100 feet</text><text x="480" textLength="160" class="foreground">                    </text></g><g id="g12"><text x="0" textLength="400" class="color2">                                                  </text><text x="400" textLength="240" class="color7"> features/mode_1.feature:27:7&#160;</text></g><g id="g13"><text x="0" textLength="456" class="color7">  Then a Mode 1 caution alert is emitted within 2 seconds</text></g><g id="g14"><text x="0" textLength="472" class="color1">  &#10008; Then a Mode 1 caution alert is emitted within 2 seconds</text><text x="472" textLength="168" class="foreground">                     </text></g><g id="g15"><text x="0" textLength="400" class="color1">                                                  </text><text x="400" textLength="240" class="color7"> features/mode_1.feature:28:7&#160;</text></g><g id="g16"><text x="0" textLength="432" font-weight="bold" class="color9">&#8212;&#8212;&#8212;&#8212; [!] Step failed: &#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</text><text x="432" textLength="208" class="color7"> &#160;test/cucumber.rs:191:21&#160;</text></g><g id="g17"><text x="0" textLength="536" class="color1">  assertion failed: world.taws.push(&amp;frame).alerts_count(alert) &gt; 0</text></g><g id="g18"><text x="0" textLength="632" font-weight="bold" class="color9">&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</text></g><g id="g19"><text x="0" textLength="448" font-weight="bold" class="color15"> Using example: &lt;rate of descent&gt; = 2200, &lt;height&gt; = 630</text></g><g id="g20"><text x="0" textLength="400" class="color2">  &#10004; And Mode 1 is not inhibited                   </text><text x="400" textLength="8" class="background"> </text><text x="408" textLength="232" class="foreground">                             </text></g></defs><g><use xlink:href="#g1" y="0"/><use xlink:href="#g2" y="17"/><use xlink:href="#g3" y="34"/><use xlink:href="#g4" y="51"/><use xlink:href="#g5" y="68"/><use xlink:href="#g6" y="85"/><use xlink:href="#g7" y="102"/><use xlink:href="#g8" y="119"/><use xlink:href="#g9" y="136"/><use xlink:href="#g10" y="153"/><use xlink:href="#g11" y="170"/><use xlink:href="#g12" y="187"/><use xlink:href="#g13" y="204"/><use xlink:href="#g14" y="221"/><use xlink:href="#g15" y="238"/><use xlink:href="#g16" y="255"/><use xlink:href="#g17" y="272"/><use xlink:href="#g18" y="289"/><use xlink:href="#g1" y="306"/><use xlink:href="#g19" y="323"/><use xlink:href="#g3" y="340"/><use xlink:href="#g4" y="357"/><rect x="400" y="374" width="8" height="17" class="foreground"/><use xlink:href="#g20" y="374"/></g></svg>
+</svg>

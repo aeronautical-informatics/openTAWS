@@ -55,7 +55,7 @@ pub fn steps() -> Steps<crate::MyWorld> {
 
     builder
         .given("the plane is flying", |world, _step| world)
-        .given_regex("(.+) is armed", |world, mut matches, _step| {
+        .given_regex("^(.+) is armed$", |world, mut matches, _step| {
             matches[1].retain(|c| !c.is_whitespace());
             let functionality = matches[1].parse().unwrap();
             //if matches[2].starts_with("not") {
@@ -65,18 +65,21 @@ pub fn steps() -> Steps<crate::MyWorld> {
             //}
             world
         })
-        .given_regex("(.+) is (.*)inhibited", |mut world, mut matches, _step| {
-            matches[1].retain(|c| !c.is_whitespace());
-            let functionality = matches[1].parse().unwrap();
-            if matches[2].starts_with("not") {
-                world.taws.function_uninhibit(&functionality);
-            } else {
-                world.taws.function_inhibit(&functionality);
-            }
-            world
-        })
         .given_regex(
-            r"steep approach is (.*)selected",
+            "^(.+) is (.*)inhibited$",
+            |mut world, mut matches, _step| {
+                matches[1].retain(|c| !c.is_whitespace());
+                let functionality = matches[1].parse().unwrap();
+                if matches[2].starts_with("not") {
+                    world.taws.function_uninhibit(&functionality);
+                } else {
+                    world.taws.function_inhibit(&functionality);
+                }
+                world
+            },
+        )
+        .given_regex(
+            r"^steep approach is (.*)selected$",
             |mut world, matches, _step| {
                 if matches[1].starts_with("not") {
                     world.template_frame.steep_approach = false;
@@ -86,14 +89,14 @@ pub fn steps() -> Steps<crate::MyWorld> {
                 world
             },
         )
-        .then_regex(r"(.+) shall be armed", |world, mut matches, _step| {
+        .then_regex(r"^(.+) shall be armed$", |world, mut matches, _step| {
             matches[1].retain(|c| !c.is_whitespace());
             let functionalitiy = matches[1].parse().unwrap();
             assert!(world.taws.function_is_armed(&functionalitiy));
             world
         })
         .when_regex(
-            r"the rate of descent is at least (\d+) feet per minute",
+            r"^the rate of descent is at least (\d+) feet per minute$",
             |mut world, matches, _step| {
                 world.props.rate_of_descent_min = Some(Velocity::new::<foot_per_minute>(
                     matches[1].parse().unwrap(),
@@ -102,7 +105,7 @@ pub fn steps() -> Steps<crate::MyWorld> {
             },
         )
         .when_regex(
-            r"the height above terrain is (.*)between (\d+) and (\d+) feet",
+            r"^the height above terrain is (.*)between (\d+) and (\d+) feet$",
             |mut world, matches, _step| {
                 world.props.height_inside = Some(!matches[1].starts_with("not"));
                 world.props.height_min = Some(Length::new::<foot>(matches[2].parse().unwrap()));
@@ -111,7 +114,7 @@ pub fn steps() -> Steps<crate::MyWorld> {
             },
         )
         .then_regex(
-            "a Mode 1 (.*) alert is not emitted at all",
+            "^a Mode 1 (.*) alert is not emitted at all$",
             |mut world, matches, _step| {
                 let alert: AlertLevel = matches[1].parse().unwrap();
 
@@ -176,7 +179,7 @@ pub fn steps() -> Steps<crate::MyWorld> {
             },
         )
         .then_regex(
-            r"a Mode 1 (.*) alert is emitted within (\d+) seconds",
+            r"^a Mode 1 (.*) alert is emitted within (\d+) seconds$",
             |mut world, matches, _step| {
                 let alert: AlertLevel = matches[1].parse().unwrap();
                 let _max_latency = Time::new::<second>(matches[2].parse().unwrap());

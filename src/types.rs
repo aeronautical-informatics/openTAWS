@@ -69,3 +69,14 @@ impl Default for TAWSConfig {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    pub fn negative_altitude() {
+        let mut state = AircraftState::default();
+        state.altitude_ground = Length::new::<foot>(-12.0);
+    }
+}

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="terminal" baseProfile="full" viewBox="0 0 640 410" width="640" version="1.1">
+    <defs>
+        <termtosvg:template_settings xmlns:termtosvg="https://github.com/nbedos/termtosvg">
+            <termtosvg:screen_geometry columns="80" rows="24"/>
+            <termtosvg:animation type="css"/>
+        </termtosvg:template_settings>
+        <style type="text/css" id="generated-style"><![CDATA[#screen {
+                font-family: 'DejaVu Sans Mono', monospace;
+                font-style: normal;
+                font-size: 14px;
+            }
+
+        text {
+            dominant-baseline: text-before-edge;
+            white-space: pre;
+        }
+    ]]></style>
+        <style type="text/css" id="user-style">
+            /* The colors defined below are the default 16 colors used for rendering text of the terminal. Adjust
+               them as needed.
+               dracula color theme */
+            .foreground {fill: #383a42;}
+            .background {fill: #fafafa;}
+            .color0  {fill: #383a42;}
+            .color1  {fill: #e45649;}
+            .color2  {fill: #50a14f;}
+            .color3  {fill: #c18401;}
+            .color4  {fill: #0184bc;}
+            .color5  {fill: #a626a4;}
+            .color6  {fill: #0997b3;}
+            .color7  {fill: #383a42;}
+            .color8  {fill: #4f525e;}
+            .color9  {fill: #e06c75;}
+            .color10 {fill: #98c379;}
+            .color11 {fill: #e5c07b;}
+            .color12 {fill: #61afef;}
+            .color13 {fill: #c678dd;}
+            .color14 {fill: #56b6c2;}
+            .color15 {fill: #383a42;}
+        </style>
+    </defs>
+    <svg id="screen" width="640" height="408" viewBox="0 0 640 408" preserveAspectRatio="xMidYMin slice"><rect class="background" height="100%" width="100%" x="0" y="0"/><defs><g id="g1"><text x="0" textLength="432" font-weight="bold" class="color15"> Using example: &lt;capability&gt; = terrain display outputs</text></g><g id="g2"><text x="0" textLength="376" font-weight="bold" class="color15">                                               </text><text x="376" textLength="264" class="color7"> features/self_test.feature:16:3&#160;</text></g><g id="g3"><text x="0" textLength="376" class="color6">  - When the self-test is initiated            </text><text x="376" textLength="264" class="color7"> features/self_test.feature:17:5&#160;</text></g><g id="g4"><text x="0" textLength="56" class="color3">    &#9889; </text><text x="56" textLength="232" class="foreground">Not yet implemented (skipped)</text></g><g id="g5"><text x="0" textLength="240" font-weight="bold" class="color15"> Scenario: Initiated Self-Test</text></g><g id="g6"><text x="0" textLength="376" font-weight="bold" class="color15"> Using example: &lt;capability&gt; = fault reporting </text><text x="376" textLength="264" class="color7"> features/self_test.feature:16:3&#160;</text></g><g id="g7"><text x="0" textLength="376" font-weight="bold" class="color15"> Scenario: Initiated Self-Test                 </text><text x="376" textLength="264" class="color7"> features/self_test.feature:29:3&#160;</text></g><g id="g8"><text x="0" textLength="376" class="color6">  - Given the self-test is initiated           </text><text x="376" textLength="264" class="color7"> features/self_test.feature:30:5&#160;</text></g><g id="g9"><text x="0" textLength="376" font-weight="bold" class="color15"> Scenario: Input Data Smoothing                </text><text x="376" textLength="264" class="color7"> features/self_test.feature:36:3&#160;</text></g><g id="g10"><text x="0" textLength="400" class="color7">  When the rate of input data reduces or stagnates</text></g><g id="g11"><text x="0" textLength="416" class="color6">  - When the rate of input data reduces or stagnates</text><text x="416" textLength="224" class="foreground">                            </text></g><g id="g12"><text x="0" textLength="376" class="color6">                                               </text><text x="376" textLength="264" class="color7"> features/self_test.feature:37:5&#160;</text></g><g id="g13"><text x="0" textLength="72" font-weight="bold" class="color12">[Summary]</text></g><g id="g14"><text x="0" textLength="80" font-weight="bold" class="color15">4 features</text></g><g id="g15"><text x="0" textLength="112" font-weight="bold" class="color15">64 scenarios (</text><text x="112" textLength="72" font-weight="bold" class="color9">13 failed</text><text x="184" textLength="16" font-weight="bold" class="color15">, </text><text x="200" textLength="80" font-weight="bold" class="color14">25 skipped</text><text x="280" textLength="16" font-weight="bold" class="color15">, </text><text x="296" textLength="72" font-weight="bold" class="color10">26 passed</text><text x="368" textLength="8" font-weight="bold" class="color15">)</text></g><g id="g16"><text x="0" textLength="88" font-weight="bold" class="color15">400 steps (</text><text x="88" textLength="72" font-weight="bold" class="color9">13 failed</text><text x="160" textLength="16" font-weight="bold" class="color15">, </text><text x="176" textLength="80" font-weight="bold" class="color14">25 skipped</text><text x="256" textLength="16" font-weight="bold" class="color15">, </text><text x="272" textLength="80" font-weight="bold" class="color10">162 passed</text><text x="352" textLength="8" font-weight="bold" class="color15">)</text></g><g id="g17"><text x="0" textLength="208" class="foreground">Finished in 0.958 seconds.</text></g><g id="g18"><text x="0" textLength="8" class="background"> </text></g></defs><g><use xlink:href="#g1" y="0"/><use xlink:href="#g2" y="17"/><use xlink:href="#g3" y="34"/><use xlink:href="#g4" y="51"/><use xlink:href="#g5" y="68"/><use xlink:href="#g6" y="85"/><use xlink:href="#g3" y="102"/><use xlink:href="#g4" y="119"/><use xlink:href="#g7" y="136"/><use xlink:href="#g8" y="153"/><use xlink:href="#g4" y="170"/><use xlink:href="#g9" y="187"/><use xlink:href="#g10" y="204"/><use xlink:href="#g11" y="221"/><use xlink:href="#g12" y="238"/><use xlink:href="#g4" y="255"/><use xlink:href="#g13" y="289"/><use xlink:href="#g14" y="306"/><use xlink:href="#g15" y="323"/><use xlink:href="#g16" y="340"/><use xlink:href="#g17" y="374"/><rect x="0" y="391" width="8" height="17" class="foreground"/><use xlink:href="#g18" y="391"/></g></svg>
+</svg>
