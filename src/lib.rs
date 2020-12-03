@@ -27,7 +27,6 @@ mod types;
 pub use alerts::*;
 pub use types::*;
 
-
 // How many alarms at max?
 // How do we prioritize?
 // Alarms Type, which contains all alarms but

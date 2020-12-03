@@ -7,8 +7,7 @@ pub mod mode_1;
 pub type Alert = (Functionality, AlertLevel);
 
 /// Available alerts from the TAWS
-#[derive(Clone, Copy, Debug, PartialEq, Hash)]
-#[derive(strum::EnumString)]
+#[derive(Clone, Copy, Debug, PartialEq, Hash, strum::EnumString)]
 pub enum Functionality {
     /// Forward Lookig Terrain Avoidance
     FLTA,
@@ -37,8 +36,7 @@ impl Eq for Functionality {}
 /// Severity level of an alert
 ///
 /// Orderd by high priority to low priority
-#[derive(Clone, Copy, Debug, PartialEq, Hash)]
-#[derive(strum::EnumString)]
+#[derive(Clone, Copy, Debug, PartialEq, Hash, strum::EnumString)]
 #[strum(serialize_all = "kebab_case")]
 pub enum AlertLevel {
     /// The level or category of alert for conditions that require immediate flight crew awareness
