@@ -7,7 +7,7 @@ use rand::random;
 use uom::si::{f64::*, length::foot, ratio::ratio, time::second, velocity::foot_per_minute};
 
 use cucumber::{t, Steps};
-use otaws::{AircraftState, AircraftStateReceiver, AlertLevel, Functionality, TAWSConfig, TAWS};
+use opentaws::{AircraftState, AircraftStateReceiver, AlertLevel, Functionality, TAWSConfig, TAWS};
 
 struct ScenarioContext {}
 

@@ -17,7 +17,7 @@ impl Envelope {
     /// # Example
     ///
     /// ```
-    /// use otaws::envelope::Envelope;
+    /// use opentaws::envelope::Envelope;
     /// // The last point ensure that the slope is extended with a function parallel to the x axis
     /// let points = vec![(1908, 150), (2050, 300), (10300, 1958), (10301, 1958)];
     /// let envelope = Envelope::new(&points).expect("invalid points given to envelope");
