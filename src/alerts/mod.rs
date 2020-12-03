@@ -8,7 +8,6 @@ pub type Alert = (Functionality, AlertLevel);
 
 /// Available alerts from the TAWS
 #[derive(Clone, Copy, Debug, PartialEq, Hash)]
-#[cfg_attr(feature = "wasi", derive(serde::Serialize))]
 #[derive(strum::EnumString)]
 pub enum Functionality {
     /// Forward Lookig Terrain Avoidance
@@ -39,7 +38,6 @@ impl Eq for Functionality {}
 ///
 /// Orderd by high priority to low priority
 #[derive(Clone, Copy, Debug, PartialEq, Hash)]
-#[cfg_attr(feature = "wasi", derive(serde::Serialize))]
 #[derive(strum::EnumString)]
 #[strum(serialize_all = "kebab_case")]
 pub enum AlertLevel {
@@ -55,7 +53,6 @@ impl Eq for AlertLevel {}
 
 /// Collection of a all alerts which are currently present
 #[derive(Debug, Default, PartialEq)]
-#[cfg_attr(feature = "wasi", derive(serde::Serialize))]
 pub struct AlertState {
     /// Alerts which are to be displayed to the crew
     pub alerts: HashSet<Alert>,
