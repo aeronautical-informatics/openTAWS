@@ -1,3 +1,7 @@
+[![Workflow Status](https://github.com/aeronautical-informatics/openTAWS/workflows/main/badge.svg)](https://github.com/aeronautical-informatics/openTAWS/actions?query=workflow%3A%22main%22)
+[![Percentage of issues still open](https://isitmaintained.com/badge/open/aeronautical-informatics/openTAWS.svg)](https://isitmaintained.com/project/aeronautical-informatics/openTAWS "Percentage of issues still open")
+![Maintenance](https://img.shields.io/badge/maintenance-activly--developed-brightgreen.svg)
+
 # opentaws
 
 This is a proof of concept TAWS as described in DO-367. It is not even close to fulfilling
