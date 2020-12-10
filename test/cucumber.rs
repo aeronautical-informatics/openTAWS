@@ -7,7 +7,7 @@ use rand::random;
 use uom::si::{f64::*, length::foot, ratio::ratio, time::second, velocity::foot_per_minute};
 
 use cucumber::{t, Steps};
-use opentaws::{AircraftState, AircraftStateReceiver, AlertLevel, Functionality, TAWSConfig, TAWS};
+use opentaws::prelude::*;
 
 struct ScenarioContext {}
 
@@ -57,11 +57,11 @@ pub fn steps() -> Steps<crate::MyWorld> {
         .given("the plane is flying", |world, _step| world)
         .given_regex("^(.+) is armed$", |world, mut matches, _step| {
             matches[1].retain(|c| !c.is_whitespace());
-            let functionality = matches[1].parse().unwrap();
+            let alert_system = matches[1].parse().unwrap();
             //if matches[2].starts_with("not") {
             //    assert!(!world.taws.function_is_armed(&functionality));
             //} else {
-            assert!(world.taws.function_is_armed(&functionality));
+            assert!(world.taws.is_armed(alert_system));
             //}
             world
         })
@@ -69,11 +69,11 @@ pub fn steps() -> Steps<crate::MyWorld> {
             "^(.+) is (.*)inhibited$",
             |mut world, mut matches, _step| {
                 matches[1].retain(|c| !c.is_whitespace());
-                let functionality = matches[1].parse().unwrap();
+                let alert_system = matches[1].parse().unwrap();
                 if matches[2].starts_with("not") {
-                    world.taws.function_uninhibit(&functionality);
+                    world.taws.uninhibit(alert_system);
                 } else {
-                    world.taws.function_inhibit(&functionality);
+                    world.taws.inhibit(alert_system);
                 }
                 world
             },
@@ -91,8 +91,8 @@ pub fn steps() -> Steps<crate::MyWorld> {
         )
         .then_regex(r"^(.+) shall be armed$", |world, mut matches, _step| {
             matches[1].retain(|c| !c.is_whitespace());
-            let functionalitiy = matches[1].parse().unwrap();
-            assert!(world.taws.function_is_armed(&functionalitiy));
+            let alert_system = matches[1].parse().unwrap();
+            assert!(world.taws.is_armed(alert_system));
             world
         })
         .when_regex(
@@ -131,26 +131,23 @@ pub fn steps() -> Steps<crate::MyWorld> {
                 let inside = world.props.height_inside.unwrap_or(random());
                 if inside {
                     frame.altitude_ground = min;
-                    assert_eq!(world.taws.push(&frame).alerts_count(alert), 0);
+                    assert_eq!(world.taws.process(&frame).alerts_count(alert), 0);
 
                     frame.altitude_ground = max;
-                    assert_eq!(world.taws.push(&frame).alerts_count(alert), 0);
+                    assert_eq!(world.taws.process(&frame).alerts_count(alert), 0);
 
                     frame.altitude_ground = (max + min) / Ratio::new::<ratio>(2.0);
-                    assert_eq!(world.taws.push(&frame).alerts_count(alert), 0);
+                    assert_eq!(world.taws.process(&frame).alerts_count(alert), 0);
                 } else {
                     frame.altitude_ground = min - Length::new::<foot>(1.0);
-                    assert_eq!(world.taws.push(&frame).alerts_count(alert), 0);
+                    assert_eq!(world.taws.process(&frame).alerts_count(alert), 0);
 
                     frame.altitude_ground = max + Length::new::<foot>(1.0);
-                    assert_eq!(world.taws.push(&frame).alerts_count(alert), 0);
+                    assert_eq!(world.taws.process(&frame).alerts_count(alert), 0);
                 }
 
                 assert_eq!(
-                    world
-                        .taws
-                        .push(&frame)
-                        .mode_alert_level(Functionality::Mode1),
+                    world.taws.process(&frame).mode_alert_level(Alert::Mode1),
                     None
                 );
 
@@ -191,19 +188,19 @@ pub fn steps() -> Steps<crate::MyWorld> {
                 let inside = world.props.height_inside.unwrap();
                 if inside {
                     frame.altitude_ground = min;
-                    assert!(world.taws.push(&frame).alerts_count(alert) > 0);
+                    assert!(world.taws.process(&frame).alerts_count(alert) > 0);
 
                     frame.altitude_ground = max;
-                    assert!(world.taws.push(&frame).alerts_count(alert) > 0);
+                    assert!(world.taws.process(&frame).alerts_count(alert) > 0);
 
                     frame.altitude_ground = (max + min) / Ratio::new::<ratio>(2.0);
-                    assert!(world.taws.push(&frame).alerts_count(alert) > 0);
+                    assert!(world.taws.process(&frame).alerts_count(alert) > 0);
                 } else {
                     frame.altitude_ground = min - Length::new::<foot>(1.0);
-                    assert!(world.taws.push(&frame).alerts_count(alert) > 0);
+                    assert!(world.taws.process(&frame).alerts_count(alert) > 0);
 
                     frame.altitude_ground = max + Length::new::<foot>(1.0);
-                    assert!(world.taws.push(&frame).alerts_count(alert) > 0);
+                    assert!(world.taws.process(&frame).alerts_count(alert) > 0);
                 }
                 world
             },

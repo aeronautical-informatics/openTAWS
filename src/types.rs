@@ -1,27 +1,22 @@
-pub use uom::si::{
-    acceleration::foot_per_second_squared,
-    angle::degree,
-    length::foot,
-    velocity::{foot_per_minute, knot},
-};
-
 use uom::si::f64::*;
 
+/// Represents the attitude of an aircraft
 #[derive(Clone, Debug, Default)]
 pub struct Attitude {
-    ///
+    /// The angle on the pitch axis. A positive value means the aircraft's nose points upwards compared to the horizon.
     pitch: Angle,
+    /// The angle on the roll axis. A positive value means the aircraft's left wing points upwards while the right wing points downwards compared to the horizon. Another way of phrasing it: a positive value means the aircraft is rotated clockwise (as seen from behind).
     roll: Angle,
 }
 
-/// Structure describing the current state of an Aicraft
+/// Represents the current state of an aircraft
 #[derive(Clone, Debug, Default)]
 pub struct AircraftState {
     /// Time when this aircraft state was emitted
     pub timestamp: Time,
 
-    /// Height above sealevel in foot
-    pub altitude_sealevel: Length,
+    /// Height above sea level in foot
+    pub altitude_sea: Length,
 
     /// Height above current terrain in foot
     pub altitude_ground: Length,
@@ -55,11 +50,14 @@ pub struct AircraftState {
 
 impl std::panic::UnwindSafe for AircraftState {}
 
-#[derive(Clone)]
+/// This configuration holds various details about the aircraft in use. These are necessary for example when estimating path trajectories for FLTA.
+#[derive(Clone, Debug)]
 pub struct TAWSConfig {
     pub max_climbrate: Velocity,
     pub max_climbrate_change: Acceleration,
 }
+
+use uom::si::{acceleration::foot_per_second_squared, velocity::foot_per_minute};
 
 impl Default for TAWSConfig {
     fn default() -> Self {
@@ -73,6 +71,8 @@ impl Default for TAWSConfig {
 #[cfg(test)]
 mod test {
     use super::*;
+
+    use uom::si::length::foot;
 
     #[test]
     pub fn negative_altitude() {

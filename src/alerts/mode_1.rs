@@ -20,8 +20,8 @@ impl Default for Mode1 {
     }
 }
 
-impl FunctionalityProcessor for Mode1 {
-    fn process(&mut self, state: &AircraftState) -> Option<Alert> {
+impl AlertSystem for Mode1 {
+    fn process(&mut self, state: &AircraftState) -> Option<(Alert, AlertLevel)> {
         let altitude = state.altitude_ground.get::<foot>();
         let rod = -state.climb_rate.get::<foot_per_minute>();
 
@@ -39,7 +39,7 @@ impl FunctionalityProcessor for Mode1 {
             _ => None,
         };
 
-        warning.map(|alert| (Functionality::Mode1, alert))
+        warning.map(|alert| (Alert::Mode1, alert))
     }
 
     fn is_armed(&self) -> bool {

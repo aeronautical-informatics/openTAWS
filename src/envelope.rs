@@ -1,3 +1,4 @@
+/// `Envelope` helps checking whether a 2D point is inside of a 2D Envelope - that is a polygon without vertical lines.
 pub struct Envelope {
     points: Vec<(f64, f64)>,
     derivatives: Vec<f64>,
@@ -13,15 +14,15 @@ impl Envelope {
     /// interpolation function of the last section is extendend to +∞. Use an additional point with
     /// the same y value as the prior point to cause an extrapolation parallel to the x axis for
     /// the slope after the last point.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use opentaws::envelope::Envelope;
-    /// // The last point ensure that the slope is extended with a function parallel to the x axis
-    /// let points = vec![(1908, 150), (2050, 300), (10300, 1958), (10301, 1958)];
-    /// let envelope = Envelope::new(&points).expect("invalid points given to envelope");
-    /// ```
+    //
+    // # Example
+    //
+    // ```
+    // use opentaws::envelope::Envelope;
+    // // The last point ensure that the slope is extended with a function parallel to the x axis
+    // let points = vec![(1908, 150), (2050, 300), (10300, 1958), (10301, 1958)];
+    // let envelope = Envelope::new(&points).expect("invalid points given to envelope");
+    // ```
     pub fn new<'a, I, T: 'a>(points: I) -> Option<Self>
     where
         I: IntoIterator<Item = &'a (T, T)>,
@@ -84,23 +85,6 @@ impl Envelope {
             + self.derivatives[interval_index] * (x - self.points[interval_index].0);
         println!("fx = {}", fx);
         y <= fx
-
-        /*
-        let mut p_iter = self.points.iter().zip(self.derivatives.iter().chain(iter::once(0.0))).peekable();
-
-        while let ( (p, d), (p_,_)) = (p_iter.next(), p_iter.peek(){
-            if p.0 <= x && x <= p_.0{
-                return p < p.y +
-            }
-        }
-
-        for p in self.points{
-            if x <= p.0 && p.0 <=
-        }
-        if input.0< self.minimum.0 || input.1 <self.minimum.1{
-            return false;
-        }
-        */
     }
 }
 
