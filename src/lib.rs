@@ -19,7 +19,6 @@ mod envelope;
 pub mod prelude;
 mod types;
 
-
 pub use alerts::{Alert, AlertLevel, AlertState};
 pub use types::*;
 
