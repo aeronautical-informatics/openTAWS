@@ -2,15 +2,34 @@ use std::collections::{HashMap, HashSet};
 
 use crate::types::AircraftState;
 
-pub mod mode_1;
+mod ffac;
+mod flta;
+mod mode_1;
+mod mode_2;
+mod mode_3;
+mod mode_4;
+mod mode_5;
+mod pda;
 
-pub type Alert = (Functionality, AlertLevel);
+pub use ffac::*;
+pub use flta::*;
+pub use mode_1::*;
+pub use mode_2::*;
+pub use mode_3::*;
+pub use mode_4::*;
+pub use mode_5::*;
+pub use pda::*;
 
-/// Available alerts from the TAWS
-#[derive(Clone, Copy, Debug, PartialEq, Hash, strum::EnumString)]
-pub enum Functionality {
+/// Available alerts from the TAWS.
+#[derive(Clone, Copy, Debug, PartialEq, Hash)]
+#[cfg_attr(feature = "wasi", derive(serde::Serialize))]
+#[derive(strum::EnumString)]
+pub enum Alert {
     /// Forward Lookig Terrain Avoidance
     FLTA,
+
+    /// Five Hundred foot altitude Callout
+    FFAC,
 
     /// Premature Descent Alerting
     PDA,
@@ -31,11 +50,11 @@ pub enum Functionality {
     Mode5,
     // TODO add more
 }
-impl Eq for Functionality {}
+impl Eq for Alert {}
 
-/// Severity level of an alert
+/// Importance level of an alert
 ///
-/// Orderd by high priority to low priority
+/// Orderd by high priority to low priority in ascending order
 #[derive(Clone, Copy, Debug, PartialEq, Hash, strum::EnumString)]
 #[strum(serialize_all = "kebab_case")]
 pub enum AlertLevel {
@@ -49,14 +68,14 @@ pub enum AlertLevel {
 }
 impl Eq for AlertLevel {}
 
-/// Collection of a all alerts which are currently present
+/// Collection of a all alerts which are currently present in the TAWS
 #[derive(Debug, Default, PartialEq)]
 pub struct AlertState {
     /// Alerts which are to be displayed to the crew
-    pub alerts: HashSet<Alert>,
+    pub alerts: HashSet<(Alert, AlertLevel)>,
 
     /// Alerts which are not to be disclosed to the crew to avoid nuisance
-    pub nuisance_alerts: HashSet<Alert>,
+    pub nuisance_alerts: HashSet<(Alert, AlertLevel)>,
 }
 
 impl AlertState {
@@ -68,7 +87,7 @@ impl AlertState {
         self.alerts.iter().filter(|e| e.1 == level).count()
     }
 
-    pub fn mode_alert_level(&self, mode: Functionality) -> Option<AlertLevel> {
+    pub fn mode_alert_level(&self, mode: Alert) -> Option<AlertLevel> {
         self.alerts
             .union(&self.nuisance_alerts)
             .find(|e| e.0 == mode)
@@ -78,7 +97,7 @@ impl AlertState {
     /// udpates internal alerts with new alerts, removing all old alerts. Prioritizes as well.
     pub fn update<'a, I>(&mut self, new_alerts: I)
     where
-        I: Iterator<Item = Alert>,
+        I: Iterator<Item = (Alert, AlertLevel)>,
     {
         let mut map = HashMap::new();
 
@@ -96,7 +115,7 @@ impl AlertState {
 }
 
 /// Trait which is to be fulfilled by all functionalities
-pub trait FunctionalityProcessor: std::fmt::Debug + Send {
+pub trait AlertSystem: std::fmt::Debug + Send {
     /// Returns whether this alarm is armed.
     ///
     /// Arming refers to the automatic switching on of a function by
@@ -113,7 +132,7 @@ pub trait FunctionalityProcessor: std::fmt::Debug + Send {
     fn is_inhibited(&self) -> bool;
 
     /// Process a new AircraftState, emit alerts if appropiate
-    fn process(&mut self, state: &AircraftState) -> Option<Alert>;
+    fn process(&mut self, state: &AircraftState) -> Option<(Alert, AlertLevel)>;
 }
 
 #[cfg(test)]
@@ -125,7 +144,7 @@ mod test {
         let mut key = String::from("Mode 1");
         key.retain(|c| !c.is_whitespace());
 
-        let f: Functionality = key
+        let f: Alert = key
             .parse()
             .expect(&format!("Unable to parse {} as Functionality ", key));
     }
@@ -135,10 +154,7 @@ mod test {
         let alts = AlertState::default();
 
         // using hashset contains
-        if alts
-            .alerts
-            .contains(&(Functionality::Mode1, AlertLevel::Caution))
-        {
+        if alts.alerts.contains(&(Alert::Mode1, AlertLevel::Caution)) {
             // do important stuff
         }
 
@@ -150,10 +166,10 @@ mod test {
         // using match
         for x in &alts.alerts {
             match x {
-                (Functionality::Mode1, AlertLevel::Caution) if 1 > 0 => {}
+                (Alert::Mode1, AlertLevel::Caution) if 1 > 0 => {}
 
-                (Functionality::Mode1, AlertLevel::Caution) => {}
-                (Functionality::Mode1, AlertLevel::Warning) => {}
+                (Alert::Mode1, AlertLevel::Caution) => {}
+                (Alert::Mode1, AlertLevel::Warning) => {}
                 _ => {}
             }
         }

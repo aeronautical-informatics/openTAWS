@@ -1,9 +1,9 @@
 use super::*;
 
 #[derive(Debug)]
-pub struct Mode3();
+pub struct Mode5();
 
-impl AlertSystem for Mode3 {
+impl AlertSystem for Mode5 {
     fn is_armed(&self) -> bool {
         false
     }
