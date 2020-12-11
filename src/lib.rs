@@ -180,12 +180,12 @@ impl TAWS {
     pub fn process(&mut self, state: &AircraftState) -> AlertState {
         let mut alert_state = alerts::AlertState::default();
 
-        let alerts = self
-            .functions
-            .iter_mut()
-            .filter_map(|(_k, v)| v.process(state));
+        for (alert, alert_system) in self.functions.iter_mut() {
+            if let Some(alert_level) = alert_system.process(state) {
+                alert_state.insert(*alert, alert_level);
+            }
+        }
 
-        alert_state.update(alerts);
         alert_state
     }
 }

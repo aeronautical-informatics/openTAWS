@@ -72,45 +72,35 @@ impl Eq for AlertLevel {}
 #[derive(Debug, Default, PartialEq)]
 pub struct AlertState {
     /// Alerts which are to be displayed to the crew
-    pub alerts: HashSet<(Alert, AlertLevel)>,
+    pub alerts: HashMap<Alert, AlertLevel>,
 
     /// Alerts which are not to be disclosed to the crew to avoid nuisance
-    pub nuisance_alerts: HashSet<(Alert, AlertLevel)>,
+    pub nuisance_alerts: HashMap<Alert, AlertLevel>,
 }
 
 impl AlertState {
     pub fn alerts_total_count(&self) -> usize {
-        self.alerts.union(&self.nuisance_alerts).count()
+        self.alerts.len() + self.nuisance_alerts.len()
     }
 
     pub fn alerts_count(&self, level: AlertLevel) -> usize {
-        self.alerts.iter().filter(|e| e.1 == level).count()
+        self.alerts.values().filter(|v| **v == level).count()
     }
 
-    pub fn mode_alert_level(&self, mode: Alert) -> Option<AlertLevel> {
-        self.alerts
-            .union(&self.nuisance_alerts)
-            .find(|e| e.0 == mode)
-            .map(|alert| alert.1)
+    pub fn mode_alert_level(&self, alert_system: Alert) -> Option<AlertLevel> {
+        self.alerts.get(&alert_system).cloned()
     }
 
-    /// udpates internal alerts with new alerts, removing all old alerts. Prioritizes as well.
-    pub fn update<'a, I>(&mut self, new_alerts: I)
-    where
-        I: Iterator<Item = (Alert, AlertLevel)>,
-    {
-        let mut map = HashMap::new();
-
-        for (function, new_alert_level) in new_alerts {
-            map.entry(function).and_modify(|old_alert_level| {
-                if (new_alert_level as isize) < (*old_alert_level as isize) {
-                    self.nuisance_alerts.insert((function, *old_alert_level));
-                    *old_alert_level = new_alert_level;
-                }
-            });
+    /// updates internal alerts with new alerts, removing all old alerts. Prioritizes as well.
+    pub(crate) fn insert(&mut self, alert: Alert, alert_level: AlertLevel) {
+        if let Some(old_alert_level) = self.alerts.get_mut(&alert) {
+            if (alert_level as isize) < (*old_alert_level as isize) {
+                self.nuisance_alerts.insert(alert, *old_alert_level);
+                *old_alert_level = alert_level;
+            }
+        } else {
+            self.alerts.insert(alert, alert_level);
         }
-
-        self.alerts = map.drain().collect();
     }
 }
 
@@ -132,7 +122,7 @@ pub trait AlertSystem: std::fmt::Debug + Send {
     fn is_inhibited(&self) -> bool;
 
     /// Process a new AircraftState, emit alerts if appropiate
-    fn process(&mut self, state: &AircraftState) -> Option<(Alert, AlertLevel)>;
+    fn process(&mut self, state: &AircraftState) -> Option<AlertLevel>;
 }
 
 #[cfg(test)]
@@ -150,16 +140,27 @@ mod test {
     }
 
     #[test]
+    pub fn alert_state_propagates_alerts() {
+        let mut alert_state = AlertState::default();
+        let test_alerts = vec![(Alert::Mode3, AlertLevel::Caution)];
+        for (new_alert, new_alert_level) in test_alerts.iter() {
+            alert_state.insert(*new_alert, *new_alert_level);
+        }
+
+        assert_eq!(test_alerts.len(), alert_state.alerts_total_count())
+    }
+
+    #[test]
     pub fn alert_state_usage() {
         let alts = AlertState::default();
 
         // using hashset contains
-        if alts.alerts.contains(&(Alert::Mode1, AlertLevel::Caution)) {
+        if alts.alerts.get(&Alert::Mode1) == Some(&AlertLevel::Caution) {
             // do important stuff
         }
 
         // using hashset any
-        if alts.alerts.iter().any(|e| e.1 == AlertLevel::Caution) {
+        if alts.alerts.iter().any(|(k, v)| *v == AlertLevel::Caution) {
             // do important stuff
         }
 

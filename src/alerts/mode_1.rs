@@ -21,25 +21,23 @@ impl Default for Mode1 {
 }
 
 impl AlertSystem for Mode1 {
-    fn process(&mut self, state: &AircraftState) -> Option<(Alert, AlertLevel)> {
+    fn process(&mut self, state: &AircraftState) -> Option<AlertLevel> {
         let altitude = state.altitude_ground.get::<foot>();
         let rod = -state.climb_rate.get::<foot_per_minute>();
 
-        let warning = match state.steep_approach {
-            true if WARNING_ENVELOPE_STEEP_APPROACH.contains(altitude, rod) => {
+        match state.steep_approach {
+            true if WARNING_ENVELOPE_STEEP_APPROACH.contains(rod, altitude) => {
                 Some(AlertLevel::Warning)
             }
-            true if CAUTION_ENVELOPE_STEEP_APPROACH.contains(altitude, rod) => {
+            true if CAUTION_ENVELOPE_STEEP_APPROACH.contains(rod, altitude) => {
                 Some(AlertLevel::Caution)
             }
-            false if WARNING_ENVELOPE.contains(altitude, rod) => Some(AlertLevel::Warning),
-            false if CAUTION_ENVELOPE.contains(altitude, rod) => Some(AlertLevel::Caution),
+            false if WARNING_ENVELOPE.contains(rod, altitude) => Some(AlertLevel::Warning),
+            false if CAUTION_ENVELOPE.contains(rod, altitude) => Some(AlertLevel::Caution),
 
             //self.caution_envelope
             _ => None,
-        };
-
-        warning.map(|alert| (Alert::Mode1, alert))
+        }
     }
 
     fn is_armed(&self) -> bool {

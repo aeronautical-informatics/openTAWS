@@ -20,7 +20,7 @@ impl AlertSystem for FFAC {
         unimplemented!()
     }
 
-    fn process(&mut self, _state: &AircraftState) -> Option<(Alert, AlertLevel)> {
-        unimplemented!()
+    fn process(&mut self, _state: &AircraftState) -> Option<AlertLevel> {
+        None
     }
 }

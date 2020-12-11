@@ -3,15 +3,19 @@
 use std::env;
 use std::error::Error;
 use std::io::{self, ErrorKind};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use futures::prelude::*;
-use tokio::{prelude::*, time::sleep};
 
 use opentaws::prelude::*;
 use reqwest::{Client, Url};
 use serde::Deserialize;
-use uom::si::{angle::degree, length::foot, time::second, velocity::knot};
+use uom::si::{
+    angle::degree,
+    length::foot,
+    time::second,
+    velocity::{foot_per_second, knot},
+};
 
 struct FlightgearConnection {
     base_url: Url,
@@ -25,7 +29,6 @@ impl FlightgearConnection {
         Self {
             base_url,
             client: Client::new(),
-            //leafs: KEYS.iter().map(|key| PropertyTreeLeaf{path:key.to_string(), ts:0.0, value:0.0}).collect()
         }
     }
 
@@ -50,6 +53,9 @@ impl FlightgearConnection {
             match leaf.path.as_str() {
                 "/velocities/groundspeed-kt" => {
                     aircraft_state.speed = Velocity::new::<knot>(leaf.value)
+                }
+                "/velocities/vertical-speed-fps" => {
+                    aircraft_state.climb_rate = Velocity::new::<foot_per_second>(leaf.value)
                 }
                 "/position/longitude-deg" => {
                     aircraft_state.position_lon = Angle::new::<degree>(leaf.value)
@@ -103,6 +109,7 @@ struct PropertyTreeLeaf {
 
 const KEYS: &'static [&'static str] = &[
     "/velocities/groundspeed-kt",
+    "/velocities/vertical-speed-fps",
     "/position/longitude-deg",
     "/position/latitude-deg",
     "/position/altitude-ft",
@@ -133,16 +140,23 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .expect(USAGE)
         .parse()
         .expect("unable to parse $2 as f64");
+    let cycle_time = Duration::from_secs_f64(1.0 / frequency);
 
     loop {
+        let now = Instant::now();
         let new_aircraft_state = fgconn.poll().await?;
 
         let alert_state = taws.process(&new_aircraft_state);
         print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
         frames += 1;
-        println!("Processed frame: {}", frames);
-        println!("{:#?}", alert_state);
+        println!(
+            "Processed frame: {}, time consumed: {:?}, time available: {:?}",
+            frames,
+            now.elapsed(),
+            cycle_time
+        );
+        println!("{}\n{:#?}", new_aircraft_state, alert_state);
 
-        sleep(Duration::from_secs_f64(1.0 / frequency)).await;
+        tokio::time::delay_until(tokio::time::Instant::from_std(now + cycle_time)).await;
     }
 }
