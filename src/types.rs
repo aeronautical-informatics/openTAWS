@@ -3,10 +3,13 @@ use uom::si::f64::*;
 /// Represents the attitude of an aircraft
 #[derive(Clone, Debug, Default)]
 pub struct Attitude {
-    /// The angle on the pitch axis. A positive value means the aircraft's nose points upwards compared to the horizon.
-    pitch: Angle,
-    /// The angle on the roll axis. A positive value means the aircraft's left wing points upwards while the right wing points downwards compared to the horizon. Another way of phrasing it: a positive value means the aircraft is rotated clockwise (as seen from behind).
-    roll: Angle,
+    /// The angle on the pitch axis. A positive value means the aircraft's nose points upwards
+    /// compared to the horizon.
+    pub pitch: Angle,
+    /// The angle on the roll axis. A positive value means the aircraft's left wing points upwards
+    /// while the right wing points downwards compared to the horizon. Another way of phrasing it:
+    /// a positive value means the aircraft is rotated clockwise (as seen from behind).
+    pub roll: Angle,
 }
 
 /// Represents the current state of an aircraft
@@ -50,7 +53,8 @@ pub struct AircraftState {
 
 impl std::panic::UnwindSafe for AircraftState {}
 
-/// This configuration holds various details about the aircraft in use. These are necessary for example when estimating path trajectories for FLTA.
+/// This configuration holds various details about the aircraft in use. These are necessary for
+/// example when estimating path trajectories for FLTA.
 #[derive(Clone, Debug)]
 pub struct TAWSConfig {
     pub max_climbrate: Velocity,

@@ -11,7 +11,7 @@ use opentaws::prelude::*;
 
 struct ScenarioContext {}
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct MyWorld {
     taws: TAWS,
     template_frame: AircraftState,
@@ -25,16 +25,6 @@ struct ScenarioProperties {
     height_inside: Option<bool>,
     rate_of_descent_min: Option<Velocity>,
 }
-
-impl quickcheck::Arbitrary for MyWorld {
-    fn arbitrary<G>(_: &mut G) -> Self
-    where
-        G: quickcheck::Gen,
-    {
-        todo!()
-    }
-}
-
 impl std::panic::UnwindSafe for MyWorld {}
 
 #[async_trait(?Send)]
@@ -155,14 +145,14 @@ pub fn steps() -> Steps<crate::MyWorld> {
                 use quickcheck::QuickCheck;
                 let mut qc = QuickCheck::new();
 
-                fn test(mut world: MyWorld )->bool {
+                fn tests(mut world: MyWorld )->bool {
                 let alert_state = world.taws.push(&world.template_frame);
 
                 alert_state.alerts.is_empty() &&
                 alert_state.nuisance_alerts.is_empty()
                 };
 
-                qc.quickcheck(test as fn(_)->_);
+                qc.quickcheck(tests as fn(_)->_);
 
 
                 let new_frame = world.template_frame.clone();
@@ -215,11 +205,6 @@ pub fn steps() -> Steps<crate::MyWorld> {
 
     builder
 }
-// Questions:
-//
-// + Decouple receival of Alert States and pushing of new AircraftState? Maybe yes!
-// + Add time (maybe tick/frame counter) to AircraftState
-// +
 
 fn main() {
     let runner = cucumber::Cucumber::<MyWorld>::new()

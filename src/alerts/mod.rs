@@ -144,9 +144,9 @@ mod test {
         let mut key = String::from("Mode 1");
         key.retain(|c| !c.is_whitespace());
 
-        let f: Alert = key
+        let _: Alert = key
             .parse()
-            .expect(&format!("Unable to parse {} as Functionality ", key));
+            .expect(&format!("Unable to parse {} as Alert ", key));
     }
 
     #[test]

@@ -33,11 +33,11 @@ pub struct TAWS {
     config: TAWSConfig,
 }
 
-impl Clone for TAWS {
-    fn clone(&self) -> Self {
-        todo!();
-    }
-}
+//impl Clone for TAWS {
+//    fn clone(&self) -> Self {
+//        todo!()
+//    }
+//}
 
 impl TAWS {
     /// Create a new instance of `TAWS`
@@ -194,7 +194,7 @@ impl TAWS {
 mod test {
     use super::*;
 
-    #[ignore] // TODO enable this test once all alert systems are implemented
+    #[ignore] // TODO enable this tests once all alert systems are implemented
     #[test]
     fn check_all_alert_systems() {
         let taws = TAWS::new(Default::default());
