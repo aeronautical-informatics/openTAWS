@@ -5,11 +5,8 @@ use std::error::Error;
 use std::io::{self, ErrorKind};
 use std::time::Duration;
 
-use tokio::{
-    prelude::*,
-    time::sleep,
-};
 use futures::prelude::*;
+use tokio::{prelude::*, time::sleep};
 
 use opentaws::prelude::*;
 use reqwest::{Client, Url};
