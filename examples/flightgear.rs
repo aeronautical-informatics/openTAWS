@@ -5,6 +5,10 @@ use std::error::Error;
 use std::io::{self, ErrorKind};
 use std::time::Duration;
 
+use tokio::{
+    prelude::*,
+    time::sleep,
+};
 use futures::prelude::*;
 
 use opentaws::prelude::*;
@@ -101,7 +105,6 @@ struct PropertyTreeLeaf {
 }
 
 const KEYS: &'static [&'static str] = &[
-    //"/velocities/airspeed-kt",
     "/velocities/groundspeed-kt",
     "/position/longitude-deg",
     "/position/latitude-deg",
@@ -115,8 +118,8 @@ const KEYS: &'static [&'static str] = &[
 const USAGE: &'static str = "usage: <Flightgear base url> <poll rate in Hz>";
 
 // http://localhost:5400/json/velocities?i=y&t=y&d=3
-
-pub fn main() -> Result<(), Box<dyn Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = env::args().collect();
     let base_url: Url = args
         .get(1)
@@ -134,17 +137,15 @@ pub fn main() -> Result<(), Box<dyn Error>> {
         .parse()
         .expect("unable to parse $2 as f64");
 
-    smol::block_on(async {
-        loop {
-            let new_aircraft_state = fgconn.poll().await?;
+    loop {
+        let new_aircraft_state = fgconn.poll().await?;
 
-            let alert_state = taws.process(&new_aircraft_state);
-            print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
-            frames += 1;
-            println!("Processed frame: {}", frames);
-            println!("{:#?}", alert_state);
+        let alert_state = taws.process(&new_aircraft_state);
+        print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
+        frames += 1;
+        println!("Processed frame: {}", frames);
+        println!("{:#?}", alert_state);
 
-            smol::Timer::after(Duration::from_secs_f64(1.0 / frequency)).await;
-        }
-    })
+        sleep(Duration::from_secs_f64(1.0 / frequency)).await;
+    }
 }

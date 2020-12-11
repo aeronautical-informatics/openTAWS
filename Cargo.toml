@@ -37,9 +37,9 @@ quickcheck = "^0.9.2"
 rand = "0.7"
 
 # for examples/flightgear
-reqwest = { version = "^0.10", default-features = false, features = [ "json" ] }
+reqwest = { version = "^0.10", no-default-features = true, features = [ "json" ] }
 serde = { version = "^1.0", features = [ "derive" ] }
-smol = "1.0"
+tokio = { version = "0.3", features = [ "full" ] }
 
 [[test]]
 name = "cucumber"
