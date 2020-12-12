@@ -1,14 +1,15 @@
 use std::fmt;
 
-use uom::fmt::DisplayStyle::Abbreviation;
-
-use uom::si::f64::*;
-use uom::si::{
-    acceleration::foot_per_second_squared,
-    angle::degree,
-    length::foot,
-    time::second,
-    velocity::{foot_per_minute, knot},
+use uom::{
+    fmt::DisplayStyle::Abbreviation,
+    si::f64::*,
+    si::{
+        acceleration::foot_per_second_squared,
+        angle::degree,
+        length::foot,
+        time::second,
+        velocity::{foot_per_minute, knot},
+    },
 };
 
 /// Represents the attitude of an aircraft
