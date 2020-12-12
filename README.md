@@ -14,12 +14,4 @@ Currently it is only possible to use openTAWS from Rust. We've looked briefly in
 and C ABI as addiotional targets, but this did not lead anywehre usable _so far_. We are very
 open to suggestions, so please open an issue if you have some feedback.
 
-## Contributing
-
-Here is our current wishlist:
-
-+ [ ] Provide a way for non Rust software to use openTAWS
-+ [ ] Implement more from the standard
-+ [ ] Add a shim-example for attaching openTAWS to FlightGear
-
 License: MIT OR Apache-2.0

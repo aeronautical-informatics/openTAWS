@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use crate::types::AircraftState;
 
@@ -160,7 +160,7 @@ mod test {
         }
 
         // using hashset any
-        if alts.alerts.iter().any(|(k, v)| *v == AlertLevel::Caution) {
+        if alts.alerts.iter().any(|(_k, v)| *v == AlertLevel::Caution) {
             // do important stuff
         }
 

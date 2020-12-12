@@ -1,55 +1,100 @@
 //! This demo illustrates how the openTAWS system can be integrated with Flightgear
 
-use std::env;
-use std::error::Error;
-use std::io::{self, ErrorKind};
-use std::time::{Duration, Instant};
+use std::{env, error::Error, time::Instant};
 
 use futures::prelude::*;
 
-use opentaws::prelude::*;
-use reqwest::{Client, Url};
-use serde::Deserialize;
-use uom::si::{
-    angle::degree,
-    length::foot,
-    time::second,
-    velocity::{foot_per_second, knot},
-};
+use async_tungstenite::{async_std::ConnectStream, tungstenite::Message, WebSocketStream};
+use serde::{Deserialize, Serialize};
+use uom::si::velocity::foot_per_second;
 
-struct FlightgearConnection {
-    base_url: Url,
-    client: Client,
-    //leafs: Vec<PropertyTreeLeaf>,
+use opentaws::prelude::*;
+
+#[derive(Serialize)]
+struct FlightgearCommand {
+    command: String,
+    node: String,
 }
 
-/// Yields AircrafStates from a Flightgear http/json connection
-impl FlightgearConnection {
-    pub fn new(base_url: Url) -> Self {
-        Self {
-            base_url,
-            client: Client::new(),
-        }
+/// Yields AircraftStates from a Flightgear http/json connection
+///
+/// # Arguments
+/// `base_uri` - The base URI of the Flightgear http interface. Something like `localhost:5400`.
+async fn new_flightgear_stream(
+    base_uri: &str,
+) -> Result<WebSocketStream<ConnectStream>, Box<dyn Error>> {
+    let url = format!("ws://{}/PropertyListener", base_uri);
+    let (mut stream, _) = async_tungstenite::async_std::connect_async(url).await?;
+
+    for node in KEYS {
+        let sub = FlightgearCommand {
+            command: "addListener".to_string(),
+            node: node.to_string(),
+        };
+        stream
+            .send(Message::Binary(serde_json::to_vec(&sub)?))
+            .await?;
     }
 
-    pub async fn poll(&self) -> Result<AircraftState, Box<dyn Error>> {
-        let response_futures: Result<Vec<_>, Box<dyn Error>> = KEYS
-            .iter()
-            .map(|key| {
-                let url = self.generate_url(key)?;
-                let req = self.client.get(url).build()?;
-                Ok(self.client.execute(req))
-            })
-            .collect();
+    Ok(stream)
+}
 
-        let responses: Vec<Result<_, _>> = future::join_all(response_futures?).await;
+#[derive(Deserialize)]
+struct PropertyTreeLeaf {
+    pub path: String,
+    pub ts: f64,
+    pub value: f64,
+}
+
+const KEYS: &'static [&'static str] = &[
+    "/velocities/groundspeed-kt",
+    "/velocities/vertical-speed-fps",
+    "/position/longitude-deg",
+    "/position/latitude-deg",
+    "/position/altitude-ft",
+    "/position/altitude-agl-ft",
+    "/orientation/pitch-deg",
+    "/orientation/roll-deg",
+    "/orientation/heading-deg",
+];
+
+const USAGE: &'static str = "usage: <Flightgear base url> <poll rate in Hz>";
+
+// http://localhost:5400/json/velocities?i=y&t=y&d=3
+
+fn main() -> Result<(), Box<dyn Error>> {
+    smol::block_on(async {
+        let args: Vec<String> = env::args().collect();
+        let base_url = args.get(1).expect(USAGE);
+
+        let mut taws = TAWS::new(Default::default());
+        let mut fg_stream = new_flightgear_stream(base_url.as_str()).await?;
+        let mut frames: u128 = 0;
 
         let mut aircraft_state = AircraftState::default();
-        let mut timestamp_avg: f64 = 0.0;
 
-        for response in responses {
-            let leaf: PropertyTreeLeaf = response?.json().await?;
-            timestamp_avg += leaf.ts / KEYS.len() as f64;
+        loop {
+            let now = Instant::now();
+
+            let message = fg_stream.next().await.unwrap()?;
+
+            let leaf: PropertyTreeLeaf = serde_json::from_slice(&message.into_data())?;
+            let ts = Time::new::<second>(leaf.ts);
+
+            // Next frame begins
+            if ts > aircraft_state.timestamp {
+                let alert_state = taws.process(&aircraft_state);
+                print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
+                frames += 1;
+                println!(
+                    "Processed frame: {}, time consumed: {:?}",
+                    frames,
+                    now.elapsed(),
+                );
+                println!("{}\n{:#?}", aircraft_state, alert_state);
+            }
+            aircraft_state.timestamp = ts;
+
             match leaf.path.as_str() {
                 "/velocities/groundspeed-kt" => {
                     aircraft_state.speed = Velocity::new::<knot>(leaf.value)
@@ -78,85 +123,8 @@ impl FlightgearConnection {
                 "/orientation/heading-deg" => {
                     aircraft_state.heading = Angle::new::<degree>(leaf.value)
                 }
-                _ => {
-                    return Err(Box::new(io::Error::new(
-                        ErrorKind::InvalidData,
-                        "received an unknown path in property tree leaf",
-                    )))
-                }
+                _ => {}
             }
         }
-
-        aircraft_state.timestamp = Time::new::<second>(timestamp_avg);
-
-        Ok(aircraft_state)
-    }
-
-    fn generate_url(&self, key: &str) -> Result<Url, Box<dyn Error>> {
-        let mut url = self.base_url.join(&format!("json/{}", key))?;
-        url.set_query(Some("t=y"));
-
-        Ok(url)
-    }
-}
-
-#[derive(Deserialize)]
-struct PropertyTreeLeaf {
-    pub path: String,
-    pub ts: f64,
-    pub value: f64,
-}
-
-const KEYS: &'static [&'static str] = &[
-    "/velocities/groundspeed-kt",
-    "/velocities/vertical-speed-fps",
-    "/position/longitude-deg",
-    "/position/latitude-deg",
-    "/position/altitude-ft",
-    "/position/altitude-agl-ft",
-    "/orientation/pitch-deg",
-    "/orientation/roll-deg",
-    "/orientation/heading-deg",
-];
-
-const USAGE: &'static str = "usage: <Flightgear base url> <poll rate in Hz>";
-
-// http://localhost:5400/json/velocities?i=y&t=y&d=3
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
-    let args: Vec<String> = env::args().collect();
-    let base_url: Url = args
-        .get(1)
-        .expect(USAGE)
-        .parse()
-        .expect("unable to parse $1 as url");
-
-    let mut taws = TAWS::new(Default::default());
-    let fgconn = FlightgearConnection::new(base_url);
-    let mut frames: u128 = 0;
-
-    let frequency: f64 = args
-        .get(2)
-        .expect(USAGE)
-        .parse()
-        .expect("unable to parse $2 as f64");
-    let cycle_time = Duration::from_secs_f64(1.0 / frequency);
-
-    loop {
-        let now = Instant::now();
-        let new_aircraft_state = fgconn.poll().await?;
-
-        let alert_state = taws.process(&new_aircraft_state);
-        print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
-        frames += 1;
-        println!(
-            "Processed frame: {}, time consumed: {:?}, time available: {:?}",
-            frames,
-            now.elapsed(),
-            cycle_time
-        );
-        println!("{}\n{:#?}", new_aircraft_state, alert_state);
-
-        tokio::time::delay_until(tokio::time::Instant::from_std(now + cycle_time)).await;
-    }
+    })
 }

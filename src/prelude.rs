@@ -14,5 +14,6 @@ pub use uom::si::{
     angle::degree,
     f64::*,
     length::foot,
+    time::second,
     velocity::{foot_per_minute, knot},
 };
