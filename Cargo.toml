@@ -25,9 +25,8 @@ default = [ ]
 [dependencies]
 lazy_static = "1"
 uom = "0"
-
-### Test deps
 strum = { version = "^0.19", features = ["derive"]}
+ringbuffer = "^0.4"
 
 [dev-dependencies]
 async-trait = "^0.1.41"

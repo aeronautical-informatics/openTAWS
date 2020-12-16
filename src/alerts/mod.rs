@@ -21,9 +21,7 @@ pub use mode_5::*;
 pub use pda::*;
 
 /// Available alerts from the TAWS.
-#[derive(Clone, Copy, Debug, PartialEq, Hash)]
-#[cfg_attr(feature = "wasi", derive(serde::Serialize))]
-#[derive(strum::EnumString)]
+#[derive(Clone, Copy, Debug, PartialEq, Hash, strum::EnumString)]
 pub enum Alert {
     /// Forward Lookig Terrain Avoidance
     FLTA,
@@ -54,7 +52,7 @@ impl Eq for Alert {}
 
 /// Importance level of an alert
 ///
-/// Orderd by high priority to low priority in ascending order
+/// Orderd by high priority to low priority (top to bottom)
 #[derive(Clone, Copy, Debug, PartialEq, Hash, strum::EnumString)]
 #[strum(serialize_all = "kebab_case")]
 pub enum AlertLevel {
@@ -65,6 +63,10 @@ pub enum AlertLevel {
     /// The level or category of alert for conditions that require immediate flight crew awareness
     /// and a less urgent subsequent flight crew response than a warning alert.  
     Caution,
+
+    /// The level or category of an annunciation which does not represent a threat but still
+    /// requires awareness by the crew
+    Annunciation,
 }
 impl Eq for AlertLevel {}
 

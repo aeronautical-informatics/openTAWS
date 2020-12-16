@@ -60,14 +60,14 @@ impl TAWS {
         let mut functions = HashMap::new();
         let b: Box<dyn AlertSystem + UnwindSafe> = Box::new(Mode1::default());
         functions.insert(Alert::Mode1, b);
+        functions.insert(Alert::FFAC, Box::new(FFAC::default()));
 
-        //functions.insert(Alert::Mode2,  Box::new(Mode2()));
-        //functions.insert(Alert::Mode3,  Box::new(Mode3()));
-        //functions.insert(Alert::Mode4,  Box::new(Mode4()));
-        //functions.insert(Alert::Mode5,  Box::new(Mode5()));
-        //functions.insert(Alert::FLTA,  Box::new(FLTA()));
-        //functions.insert(Alert::PDA,  Box::new(PDA()));
-        //functions.insert(Alert::FFAC,  Box::new(FFAC()));
+        //functions.insert(Alert::Mode3, Box::new(Mode3()));
+        //functions.insert(Alert::Mode2, Box::new(Mode2()));
+        //functions.insert(Alert::Mode4, Box::new(Mode4()));
+        //functions.insert(Alert::Mode5, Box::new(Mode5()));
+        //functions.insert(Alert::FLTA, Box::new(FLTA()));
+        //functions.insert(Alert::PDA, Box::new(PDA()));
 
         Self {
             armed: true,
@@ -180,7 +180,11 @@ impl TAWS {
     pub fn process(&mut self, state: &AircraftState) -> AlertState {
         let mut alert_state = alerts::AlertState::default();
 
-        for (alert, alert_system) in self.functions.iter_mut() {
+        for (alert, alert_system) in self
+            .functions
+            .iter_mut()
+            .filter(|(_, alert_system)| !alert_system.is_inhibited())
+        {
             if let Some(alert_level) = alert_system.process(state) {
                 alert_state.insert(*alert, alert_level);
             }

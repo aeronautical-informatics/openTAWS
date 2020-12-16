@@ -4,7 +4,7 @@ use std::{env, error::Error, time::Instant};
 
 use futures::prelude::*;
 
-use async_tungstenite::{async_std::ConnectStream, tungstenite::Message, WebSocketStream};
+use async_tungstenite::tungstenite::Message;
 use serde::{Deserialize, Serialize};
 use uom::si::velocity::foot_per_second;
 
@@ -22,7 +22,7 @@ struct FlightgearCommand {
 /// `base_uri` - The base URI of the Flightgear http interface. Something like `localhost:5400`.
 async fn new_flightgear_stream(
     base_uri: &str,
-) -> Result<WebSocketStream<ConnectStream>, Box<dyn Error>> {
+) -> Result<impl Stream<Item = Result<PropertyTreeLeaf, Box<dyn Error>>>, Box<dyn Error>> {
     let url = format!("ws://{}/PropertyListener", base_uri);
     let (mut stream, _) = async_tungstenite::async_std::connect_async(url).await?;
 
@@ -36,7 +36,8 @@ async fn new_flightgear_stream(
             .await?;
     }
 
-    Ok(stream)
+    Ok(stream
+        .map(|msg| -> Result<_, Box<dyn Error>> { Ok(serde_json::from_slice(&msg?.into_data())?) }))
 }
 
 #[derive(Deserialize)]
@@ -58,7 +59,7 @@ const KEYS: &'static [&'static str] = &[
     "/orientation/heading-deg",
 ];
 
-const USAGE: &'static str = "usage: <Flightgear base url> <poll rate in Hz>";
+const USAGE: &'static str = "usage: <Flightgear base url>";
 
 // http://localhost:5400/json/velocities?i=y&t=y&d=3
 
@@ -76,9 +77,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         loop {
             let now = Instant::now();
 
-            let message = fg_stream.next().await.unwrap()?;
-
-            let leaf: PropertyTreeLeaf = serde_json::from_slice(&message.into_data())?;
+            let leaf = fg_stream.next().await.unwrap()?;
             let ts = Time::new::<second>(leaf.ts);
 
             // Next frame begins
@@ -97,7 +96,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
             match leaf.path.as_str() {
                 "/velocities/groundspeed-kt" => {
-                    aircraft_state.speed = Velocity::new::<knot>(leaf.value)
+                    aircraft_state.speed_ground = Velocity::new::<knot>(leaf.value)
                 }
                 "/velocities/vertical-speed-fps" => {
                     aircraft_state.climb_rate = Velocity::new::<foot_per_second>(leaf.value)
@@ -109,17 +108,13 @@ fn main() -> Result<(), Box<dyn Error>> {
                     aircraft_state.position_lat = Angle::new::<degree>(leaf.value)
                 }
                 "/position/altitude-ft" => {
-                    aircraft_state.altitude_sea = Length::new::<foot>(leaf.value)
+                    aircraft_state.altitude = Length::new::<foot>(leaf.value)
                 }
                 "/position/altitude-agl-ft" => {
                     aircraft_state.altitude_ground = Length::new::<foot>(leaf.value)
                 }
-                "/orientation/pitch-deg" => {
-                    aircraft_state.attitude.pitch = Angle::new::<degree>(leaf.value)
-                }
-                "/orientation/roll-deg" => {
-                    aircraft_state.attitude.roll = Angle::new::<degree>(leaf.value)
-                }
+                "/orientation/pitch-deg" => aircraft_state.pitch = Angle::new::<degree>(leaf.value),
+                "/orientation/roll-deg" => aircraft_state.roll = Angle::new::<degree>(leaf.value),
                 "/orientation/heading-deg" => {
                     aircraft_state.heading = Angle::new::<degree>(leaf.value)
                 }

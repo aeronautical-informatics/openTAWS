@@ -12,18 +12,6 @@ use uom::{
     },
 };
 
-/// Represents the attitude of an aircraft
-#[derive(Clone, Debug, Default)]
-pub struct Attitude {
-    /// The angle on the pitch axis. A positive value means the aircraft's nose points upwards
-    /// compared to the horizon.
-    pub pitch: Angle,
-    /// The angle on the roll axis. A positive value means the aircraft's left wing points upwards
-    /// while the right wing points downwards compared to the horizon. Another way of phrasing it:
-    /// a positive value means the aircraft is rotated clockwise (as seen from behind).
-    pub roll: Angle,
-}
-
 /// Represents the current state of an aircraft
 #[derive(Clone, Debug, Default)]
 pub struct AircraftState {
@@ -31,7 +19,7 @@ pub struct AircraftState {
     pub timestamp: Time,
 
     /// Height above sea level in foot
-    pub altitude_sea: Length,
+    pub altitude: Length,
 
     /// Height above current terrain in foot
     pub altitude_ground: Length,
@@ -49,15 +37,24 @@ pub struct AircraftState {
     /// destination or nav aid
     //pub bearing: degree,
 
+    ///  Aircraft speed as measured by GPS
+    pub speed_ground: Velocity,
+
+    /// Airspeed as measured by pressure sensors
+    pub speed_air: Velocity,
+
     /// Angle in degrees (clockwise) between north and the direction where the
     /// aircrafts nose is pointing
     pub heading: Angle,
 
-    /// Estimated aicraft speed
-    pub speed: Velocity,
+    /// The angle on the pitch axis. A positive value means the aircraft's nose points upwards
+    /// compared to the horizon.
+    pub pitch: Angle,
 
-    /// Attitude of the aircraft including pitch & roll
-    pub attitude: Attitude,
+    /// The angle on the roll axis. A positive value means the aircraft's left wing points upwards
+    /// while the right wing points downwards compared to the horizon. Another way of phrasing it:
+    /// a positive value means the aircraft is rotated clockwise (as seen from behind).
+    pub roll: Angle,
 
     /// Whether steep approach is selected
     pub steep_approach: bool,
@@ -96,15 +93,15 @@ impl fmt::Display for AircraftState {
   roll_angle: {roll_angle:.2}
   steep_approach: {steep_approach}\n",
             timestamp = s.with(self.timestamp),
-            altitude_sea = ft.with(self.altitude_sea),
+            altitude_sea = ft.with(self.altitude),
             altitude_ground = ft.with(self.altitude_ground),
             climb_rate = fpm.with(self.climb_rate),
             position_lat = dg.with(self.position_lat),
             position_lon = dg.with(self.position_lon),
             heading = dg.with(self.heading),
-            speed = kt.with(self.speed),
-            pitch_angle = dg.with(self.attitude.pitch),
-            roll_angle = dg.with(self.attitude.roll),
+            speed = kt.with(self.speed_ground),
+            pitch_angle = dg.with(self.pitch),
+            roll_angle = dg.with(self.roll),
             steep_approach = self.steep_approach,
         )
     }

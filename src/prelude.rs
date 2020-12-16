@@ -5,7 +5,7 @@
 
 pub use crate::{
     alerts::{Alert, AlertLevel, AlertState, AlertSystem},
-    types::{AircraftState, Attitude, TAWSConfig},
+    types::{AircraftState, TAWSConfig},
     TAWS,
 };
 
