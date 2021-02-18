@@ -1,11 +1,11 @@
-use std::fmt;
+use core::fmt;
 
 use uom::{
     fmt::DisplayStyle::Abbreviation,
     si::f64::*,
     si::{
         acceleration::foot_per_second_squared,
-        angle::degree,
+        angle::{degree, revolution},
         length::foot,
         time::second,
         velocity::{foot_per_minute, knot},
@@ -68,7 +68,13 @@ pub struct TAWSConfig {
     pub max_climbrate_change: Acceleration,
 }
 
-impl std::panic::UnwindSafe for AircraftState {}
+impl AircraftState {
+    /// Normalizes an `AircraftState`. Only normalized `AircraftStates` should be fed to the TAWS.
+    pub(crate) fn normalize(&mut self) {
+        self.heading -= self.heading.floor::<revolution>();
+        // TODO normalize all angles
+    }
+}
 
 impl fmt::Display for AircraftState {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -122,9 +128,35 @@ mod test {
 
     use uom::si::length::foot;
 
+    const EPS: f64 = 1e-10;
+
     #[test]
-    pub fn negative_altitude() {
+    fn negative_altitude() {
         let mut state = AircraftState::default();
         state.altitude_ground = Length::new::<foot>(-12.0);
+    }
+
+    #[test]
+    fn normalize_angle_below_zero() {
+        let mut aircraft_state = AircraftState::default();
+        aircraft_state.heading = Angle::new::<degree>(-1.0);
+        aircraft_state.normalize();
+        assert_eq!(aircraft_state.heading, Angle::new::<degree>(359.0));
+    }
+
+    #[test]
+    fn normalize_angle_far_below_zero() {
+        let mut aircraft_state = AircraftState::default();
+        aircraft_state.heading = Angle::new::<degree>(-1024.0);
+        aircraft_state.normalize();
+        assert!((aircraft_state.heading - Angle::new::<degree>(56.0)).get::<degree>() < EPS);
+    }
+
+    #[test]
+    fn normalize_angle_far_above_zero() {
+        let mut aircraft_state = AircraftState::default();
+        aircraft_state.heading = Angle::new::<degree>(1024.0);
+        aircraft_state.normalize();
+        assert!((aircraft_state.heading - Angle::new::<degree>(304.0)).get::<degree>() < EPS);
     }
 }

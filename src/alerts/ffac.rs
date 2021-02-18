@@ -8,6 +8,13 @@ pub struct FFAC {
 }
 
 impl AlertSystem for FFAC {
+    fn new(_config: &TAWSConfig) -> Self {
+        Self {
+            inhibited: false,
+            last_height: Length::new::<foot>(0.0),
+        }
+    }
+
     fn is_armed(&self) -> bool {
         true
     }
@@ -37,15 +44,3 @@ impl AlertSystem for FFAC {
         None
     }
 }
-
-impl Default for FFAC {
-    fn default() -> Self {
-        Self {
-            inhibited: false,
-            last_height: Length::new::<foot>(0.0),
-        }
-    }
-}
-
-// TODO is this sound usage?
-impl std::panic::UnwindSafe for FFAC {}

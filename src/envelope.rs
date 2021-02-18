@@ -1,10 +1,10 @@
 /// `Envelope` helps checking whether a 2D point is inside of a 2D Envelope - that is a polygon without vertical lines.
-pub struct Envelope {
-    points: Vec<(f64, f64)>,
-    derivatives: Vec<f64>,
+pub struct Envelope<const N: usize> {
+    points: [(f64, f64); N],
+    derivatives: [f64; N], // TODO make this N-1
 }
 
-impl Envelope {
+impl<const N: usize> Envelope<N> {
     /// Creates an envelope from point pairs
     ///
     /// The point pairs must be orderd by x values in ascending order. There must be no two points
@@ -23,35 +23,43 @@ impl Envelope {
     // let points = vec![(1908, 150), (2050, 300), (10300, 1958), (10301, 1958)];
     // let envelope = Envelope::new(&points).expect("invalid points given to envelope");
     // ```
-    pub fn new<'a, I, T: 'a>(points: I) -> Option<Self>
+    pub fn new<T, U>(points: [(T, U); N]) -> Option<Self>
     where
-        I: IntoIterator<Item = &'a (T, T)>,
         T: Into<f64> + Copy,
+        U: Into<f64> + Copy,
     {
-        let points: Vec<(f64, f64)> = points
-            .into_iter()
-            .map(|e| (e.0.into(), e.1.into()))
-            .collect();
-
-        if points.len() < 2 {
+        if N < 2 {
             // List is too small!
             return None;
         }
+        let points_raw = points;
 
-        for i in 1..points.len() {
+        let mut points: [(f64, f64); N] = [(points_raw[0].0.into(), points_raw[0].1.into()); N];
+        for i in 1..N {
+            points[i] = (points_raw[i].0.into(), points_raw[i].1.into());
             if points[i - 1].0 >= points[i].0 {
                 // This means either the list is not sorted or two values are identical
                 return None;
             }
         }
 
-        let derivatives = (0..(points.len() - 1))
+        // TODO port this to iter code once libcore allows to collect into arrays
+        /*
+        let derivatives = (0..(N - 1))
             .map(|i| {
                 let (x, y) = points[i];
                 let (x_, y_) = points[i + 1];
                 (y_ - y) / (x_ - x)
             })
             .collect();
+         */
+
+        let mut derivatives = [0f64; N];
+        for i in 0..(N - 1) {
+            let (x, y) = points[i];
+            let (x_, y_) = points[i + 1];
+            derivatives[i] = (y_ - y) / (x_ - x)
+        }
 
         Some(Self {
             points,
@@ -66,14 +74,17 @@ impl Envelope {
         U: Into<f64> + Copy,
     {
         let (x, y) = (x.into(), y.into());
-        let minium = self.points[0];
-        if x < minium.0 || y < minium.1 {
+        let minimum = self.points[0];
+        if x < minimum.0 || y < minimum.1 {
             return false;
         }
 
-        //let position = self.points.iter().position(|p| )
-        let mut interval_index = self.derivatives.len() - 1;
-        for (i, p) in self.points.iter().enumerate().take(self.derivatives.len()) {
+        let mut interval_index = (N - 1) - 1; // TODO make this `derivatives.len() - 1`
+        for (i, p) in self.points[0..self.derivatives.len() - 1]
+            .iter()
+            .enumerate()
+        {
+            // TODO remove the -1
             let p_ = self.points[i + 1];
             if p.0 <= x && x <= p_.0 {
                 interval_index = i;
@@ -83,7 +94,6 @@ impl Envelope {
 
         let fx = self.points[interval_index].1
             + self.derivatives[interval_index] * (x - self.points[interval_index].0);
-        println!("fx = {}", fx);
         y <= fx
     }
 }
@@ -92,9 +102,9 @@ impl Envelope {
 mod test {
     use super::*;
 
-    fn init_envelope() -> Envelope {
-        let vec_points = vec![(1600, 100), (1850, 300), (10100, 1958), (10101, 1958)];
-        Envelope::new(&vec_points).unwrap()
+    fn init_envelope() -> Envelope<4> {
+        let vec_points = [(1600, 100), (1850, 300), (10100, 1958), (10101, 1958)];
+        Envelope::new(vec_points).unwrap()
     }
 
     #[test]

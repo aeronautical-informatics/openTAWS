@@ -4,6 +4,10 @@ use super::*;
 pub struct PDA();
 
 impl AlertSystem for PDA {
+    fn new(_config: &TAWSConfig) -> Self {
+        Self()
+    }
+
     fn is_armed(&self) -> bool {
         false
     }

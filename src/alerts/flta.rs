@@ -4,6 +4,10 @@ use super::*;
 pub struct FLTA();
 
 impl AlertSystem for FLTA {
+    fn new(_config: &TAWSConfig) -> Self {
+        Self()
+    }
+
     fn is_armed(&self) -> bool {
         false
     }

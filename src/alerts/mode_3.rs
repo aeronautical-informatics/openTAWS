@@ -4,6 +4,10 @@ use super::*;
 pub struct Mode3();
 
 impl AlertSystem for Mode3 {
+    fn new(_config: &TAWSConfig) -> Self {
+        Self()
+    }
+
     fn is_armed(&self) -> bool {
         false
     }

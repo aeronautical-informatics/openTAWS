@@ -23,6 +23,7 @@ maintenance = { status = "actively-developed" }
 default = [ ]
 
 [dependencies]
+casey = "0.3"
 lazy_static = "1"
 uom = "0"
 strum = { version = "^0.19", features = ["derive"]}
