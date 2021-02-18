@@ -20,13 +20,15 @@ is-it-maintained-open-issues = { repository = "aeronautical-informatics/openTAWS
 maintenance = { status = "actively-developed" }
 
 [features]
-default = [ ]
+default = ["use-serde"]
+use-serde = ["serde", "uom/use_serde"]
 
 [dependencies]
+casey = "0.3"
 lazy_static = "1"
-uom = "0"
-strum = { version = "^0.19", features = ["derive"]}
-ringbuffer = "^0.4"
+uom = { version = "0" }
+ringbuffer = "0.4"
+serde = { version = "1.0", default-features = false, features = ["derive"], optional = true }
 
 [dev-dependencies]
 async-trait = "^0.1.41"

@@ -2,12 +2,19 @@ use super::*;
 use crate::prelude::*;
 
 #[derive(Debug)]
-pub struct FFAC {
+pub struct Ffac {
     inhibited: bool,
     last_height: Length,
 }
 
-impl AlertSystem for FFAC {
+impl AlertSystem for Ffac {
+    fn new(_config: &TawsConfig) -> Self {
+        Self {
+            inhibited: false,
+            last_height: Length::new::<foot>(0.0),
+        }
+    }
+
     fn is_armed(&self) -> bool {
         true
     }
@@ -37,15 +44,3 @@ impl AlertSystem for FFAC {
         None
     }
 }
-
-impl Default for FFAC {
-    fn default() -> Self {
-        Self {
-            inhibited: false,
-            last_height: Length::new::<foot>(0.0),
-        }
-    }
-}
-
-// TODO is this sound usage?
-impl std::panic::UnwindSafe for FFAC {}
