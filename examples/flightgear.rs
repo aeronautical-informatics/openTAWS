@@ -68,7 +68,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let args: Vec<String> = env::args().collect();
         let base_uri = args.get(1).expect(USAGE);
 
-        let mut taws = TAWS::new(Default::default());
+        let mut taws = Taws::new(Default::default());
         let mut fg_stream = new_flightgear_stream(base_uri.as_str()).await?;
         let mut frames: u128 = 0;
 

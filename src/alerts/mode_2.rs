@@ -7,7 +7,7 @@ pub struct Mode2 {
 }
 
 impl AlertSystem for Mode2 {
-    fn new(_config: &TAWSConfig) -> Self {
+    fn new(_config: &TawsConfig) -> Self {
         Self {
             armed: false,
             inhibited: false,

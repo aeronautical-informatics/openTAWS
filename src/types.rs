@@ -64,7 +64,7 @@ pub struct AircraftState {
 /// This configuration holds various details about the aircraft in use. These are necessary for
 /// example when estimating path trajectories for FLTA.
 #[derive(Clone, Debug)]
-pub struct TAWSConfig {
+pub struct TawsConfig {
     pub max_climbrate: Velocity,
     pub max_climbrate_change: Acceleration,
 }
@@ -114,7 +114,7 @@ impl fmt::Display for AircraftState {
     }
 }
 
-impl Default for TAWSConfig {
+impl Default for TawsConfig {
     fn default() -> Self {
         Self {
             max_climbrate: Velocity::new::<foot_per_minute>(700.0),

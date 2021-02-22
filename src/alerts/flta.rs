@@ -1,13 +1,13 @@
 use super::*;
 
 #[derive(Debug)]
-pub struct FLTA {
+pub struct Flta {
     armed: bool,
     inhibited: bool,
 }
 
-impl AlertSystem for FLTA {
-    fn new(_config: &TAWSConfig) -> Self {
+impl AlertSystem for Flta {
+    fn new(_config: &TawsConfig) -> Self {
         Self {
             armed: false,
             inhibited: false,

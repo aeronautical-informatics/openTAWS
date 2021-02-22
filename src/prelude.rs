@@ -5,8 +5,8 @@
 
 pub use crate::{
     alerts::{Alert, AlertLevel, AlertState, AlertSystem},
-    types::{AircraftState, TAWSConfig},
-    TAWS,
+    types::{AircraftState, TawsConfig},
+    Taws,
 };
 
 pub use uom::si::{

@@ -2,13 +2,13 @@ use super::*;
 use crate::prelude::*;
 
 #[derive(Debug)]
-pub struct FFAC {
+pub struct Ffac {
     inhibited: bool,
     last_height: Length,
 }
 
-impl AlertSystem for FFAC {
-    fn new(_config: &TAWSConfig) -> Self {
+impl AlertSystem for Ffac {
+    fn new(_config: &TawsConfig) -> Self {
         Self {
             inhibited: false,
             last_height: Length::new::<foot>(0.0),

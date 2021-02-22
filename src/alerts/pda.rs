@@ -1,13 +1,13 @@
 use super::*;
 
 #[derive(Debug)]
-pub struct PDA {
+pub struct Pda {
     armed: bool,
     inhibited: bool,
 }
 
-impl AlertSystem for PDA {
-    fn new(_config: &TAWSConfig) -> Self {
+impl AlertSystem for Pda {
+    fn new(_config: &TawsConfig) -> Self {
         Self {
             armed: false,
             inhibited: false,

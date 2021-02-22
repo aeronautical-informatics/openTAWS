@@ -22,20 +22,20 @@ mod types;
 
 /// Represents one instance of a TAWS
 #[derive(Debug)]
-pub struct TAWS {
+pub struct Taws {
     /// `true` if the TAWS is armed
     ///
     /// There is no specific condition for changing this to `false`.
     pub armed: bool,
-    config: TAWSConfig,
-    ffac: functionalities::FFAC,
-    flta: functionalities::FLTA,
+    config: TawsConfig,
+    ffac: functionalities::Ffac,
+    flta: functionalities::Flta,
     mode1: functionalities::Mode1,
     mode2: functionalities::Mode2,
     mode3: functionalities::Mode3,
     mode4: functionalities::Mode4,
     mode5: functionalities::Mode5,
-    pda: functionalities::PDA,
+    pda: functionalities::Pda,
 }
 
 macro_rules! functionalities {
@@ -73,10 +73,10 @@ macro_rules! count {
     ( $x:tt $($xs:tt)* ) => (1usize + count!($($xs)*));
 }
 
-impl TAWS {
-    functionalities![FFAC, FLTA, Mode1, Mode2, Mode3, Mode4, Mode5, PDA];
+impl Taws {
+    functionalities![Ffac, Flta, Mode1, Mode2, Mode3, Mode4, Mode5, Pda];
 
-    /// Create a new instance of `TAWS`
+    /// Create a new instance of `Taws`
     ///  
     /// # Arguments
     ///
@@ -87,20 +87,20 @@ impl TAWS {
     /// ```
     /// use opentaws::prelude::*;
     ///
-    /// let config = TAWSConfig::default();
-    /// let taws = TAWS::new(config);
+    /// let config = TawsConfig::default();
+    /// let taws = Taws::new(config);
     /// ```
-    pub fn new(config: TAWSConfig) -> Self {
+    pub fn new(config: TawsConfig) -> Self {
         use alerts::*;
 
-        let ffac = functionalities::FFAC::new(&config);
-        let flta = functionalities::FLTA::new(&config);
+        let ffac = functionalities::Ffac::new(&config);
+        let flta = functionalities::Flta::new(&config);
         let mode1 = functionalities::Mode1::new(&config);
         let mode2 = functionalities::Mode2::new(&config);
         let mode3 = functionalities::Mode3::new(&config);
         let mode4 = functionalities::Mode4::new(&config);
         let mode5 = functionalities::Mode5::new(&config);
-        let pda = functionalities::PDA::new(&config);
+        let pda = functionalities::Pda::new(&config);
 
         Self {
             armed: true,
@@ -126,8 +126,8 @@ impl TAWS {
     ///
     /// ```
     /// # use opentaws::prelude::*;
-    /// # let config = TAWSConfig::default();
-    /// # let taws = TAWS::new(config);
+    /// # let config = TawsConfig::default();
+    /// # let taws = Taws::new(config);
     /// if taws.is_armed(Alert::Mode1) {
     ///     // ...
     /// }
@@ -146,8 +146,8 @@ impl TAWS {
     ///
     /// ```
     /// # use opentaws::prelude::*;
-    /// # let config = TAWSConfig::default();
-    /// # let taws = TAWS::new(config);
+    /// # let config = TawsConfig::default();
+    /// # let taws = Taws::new(config);
     /// if taws.is_inhibited(Alert::Mode1) {
     ///     // ...
     /// }
@@ -166,8 +166,8 @@ impl TAWS {
     ///
     /// ```
     /// # use opentaws::prelude::*;
-    /// # let config = TAWSConfig::default();
-    /// # let mut taws = TAWS::new(config);
+    /// # let config = TawsConfig::default();
+    /// # let mut taws = Taws::new(config);
     /// taws.inhibit(Alert::Mode1);
     ///
     /// assert!(taws.is_inhibited(Alert::Mode1));
@@ -186,8 +186,8 @@ impl TAWS {
     ///
     /// ```
     /// # use opentaws::prelude::*;
-    /// # let config = TAWSConfig::default();
-    /// # let mut taws = TAWS::new(config);
+    /// # let config = TawsConfig::default();
+    /// # let mut taws = Taws::new(config);
     /// taws.uninhibit(Alert::Mode1);
     ///
     /// assert_eq!(taws.is_inhibited(Alert::Mode1), false);
@@ -209,8 +209,8 @@ impl TAWS {
     ///
     /// ```
     /// # use opentaws::prelude::*;
-    /// # let config = TAWSConfig::default();
-    /// # let mut taws = TAWS::new(config);
+    /// # let config = TawsConfig::default();
+    /// # let mut taws = Taws::new(config);
     /// let aicraft_state = AircraftState::default();
     ///
     /// let alert_state = taws.process(&aicraft_state);
@@ -240,14 +240,14 @@ mod test {
     #[ignore] // TODO enable this tests once all alert systems are implemented
     #[test]
     fn check_all_alert_systems() {
-        let taws = TAWS::new(Default::default());
-        let _ = taws.is_armed(Alert::FFAC);
-        let _ = taws.is_armed(Alert::FLTA);
+        let taws = Taws::new(Default::default());
+        let _ = taws.is_armed(Alert::Ffac);
+        let _ = taws.is_armed(Alert::Flta);
         let _ = taws.is_armed(Alert::Mode1);
         let _ = taws.is_armed(Alert::Mode2);
         let _ = taws.is_armed(Alert::Mode3);
         let _ = taws.is_armed(Alert::Mode4);
         let _ = taws.is_armed(Alert::Mode5);
-        let _ = taws.is_armed(Alert::PDA);
+        let _ = taws.is_armed(Alert::Pda);
     }
 }

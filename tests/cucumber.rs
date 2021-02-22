@@ -12,7 +12,7 @@ struct ScenarioContext {}
 
 #[derive(Debug)]
 pub struct MyWorld {
-    taws: TAWS,
+    taws: Taws,
     template_frame: AircraftState,
     props: ScenarioProperties,
 }
@@ -32,7 +32,7 @@ impl cucumber::World for MyWorld {
 
     async fn new() -> Result<Self, Infallible> {
         Ok(Self {
-            taws: TAWS::new(Default::default()),
+            taws: Taws::new(Default::default()),
             template_frame: Default::default(),
             props: Default::default(),
         })
@@ -222,14 +222,14 @@ fn parse_alert<T: AsRef<str>>(from: &T) -> Alert {
     let mut input_word = from.as_ref().to_lowercase();
     input_word.retain(|c| !c.is_whitespace());
     match input_word.as_str() {
-        "ffac" => Alert::FFAC,
-        "flta" => Alert::FLTA,
+        "ffac" => Alert::Ffac,
+        "flta" => Alert::Flta,
         "mode1" => Alert::Mode1,
         "mode2" => Alert::Mode2,
         "mode3" => Alert::Mode3,
         "mode4" => Alert::Mode4,
         "mode5" => Alert::Mode5,
-        "pda" => Alert::PDA,
+        "pda" => Alert::Pda,
         _ => {
             panic!(
                 "unable to convert {} into a variant of `Alert`",

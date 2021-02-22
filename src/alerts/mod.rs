@@ -1,6 +1,6 @@
 use core::fmt;
 
-use crate::types::{AircraftState, TAWSConfig};
+use crate::types::{AircraftState, TawsConfig};
 
 mod ffac;
 mod flta;
@@ -29,13 +29,13 @@ pub mod functionalities {
 #[cfg_attr(feature = "use-serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Alert {
     /// Forward Lookig Terrain Avoidance
-    FLTA,
+    Flta,
 
     /// Five Hundred foot altitude Callout
-    FFAC,
+    Ffac,
 
     /// Premature Descent Alerting
-    PDA,
+    Pda,
 
     /// Excessive Rate of Descent
     Mode1,
@@ -85,11 +85,11 @@ pub fn priority(alert: Alert, alert_level: AlertLevel) -> u8 {
     match (alert, alert_level) {
         (Mode1, Warning) => 2,
         (Mode2, Warning) => 3,
-        (FLTA, Warning) => 6,
+        (Flta, Warning) => 6,
         (Mode2, Caution) => 9,
-        (FLTA, Caution) => 11,
+        (Flta, Caution) => 11,
         (Mode4, Caution) => 13, // Terrain caution
-        (PDA, Caution) => 14,
+        (Pda, Caution) => 14,
         //(Mode4, Caution)=>16 // Gear caution
         //(Mode4, Caution)=>17 // Flaps caution
         (Mode1, Caution) => 18,
@@ -183,7 +183,7 @@ impl IntoIterator for &AlertState {
     type Item = (Alert, AlertLevel);
     type IntoIter = AlertStateIter;
     fn into_iter(self) -> Self::IntoIter {
-        let mut alerts = self.all_alerts.clone();
+        let mut alerts = self.all_alerts;
         alerts.sort_by_key(|option| option.map(|(a, l)| priority(a, l)).unwrap_or(u8::MAX));
 
         AlertStateIter {
@@ -196,7 +196,7 @@ impl IntoIterator for &AlertState {
 /// Trait which is to be fulfilled by all functionalities
 pub trait AlertSystem: fmt::Debug + Send {
     /// Allows this system to be instantiated
-    fn new(config: &TAWSConfig) -> Self
+    fn new(config: &TawsConfig) -> Self
     where
         Self: Sized;
 

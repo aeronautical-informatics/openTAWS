@@ -21,7 +21,7 @@ impl Default for Mode1 {
 }
 
 impl AlertSystem for Mode1 {
-    fn new(_config: &TAWSConfig) -> Self {
+    fn new(_config: &TawsConfig) -> Self {
         Self {
             armed: true,
             inhibited: false,
