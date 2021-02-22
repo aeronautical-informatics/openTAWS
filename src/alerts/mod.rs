@@ -104,6 +104,7 @@ const ALERT_STATE_SIZE: usize = 8;
 
 /// Collection of a all alerts which are currently present in the TAWS
 #[derive(Debug, PartialEq)]
+#[cfg_attr(feature = "use-serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AlertState {
     /// Alerts which are not to be disclosed to the crew to avoid nuisance, but still where triggered
     all_alerts: [Option<(Alert, AlertLevel)>; ALERT_STATE_SIZE],
