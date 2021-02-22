@@ -1,11 +1,17 @@
 use super::*;
 
 #[derive(Debug)]
-pub struct PDA();
+pub struct PDA {
+    armed: bool,
+    inhibited: bool,
+}
 
 impl AlertSystem for PDA {
     fn new(_config: &TAWSConfig) -> Self {
-        Self()
+        Self {
+            armed: false,
+            inhibited: false,
+        }
     }
 
     fn is_armed(&self) -> bool {
@@ -13,15 +19,15 @@ impl AlertSystem for PDA {
     }
 
     fn is_inhibited(&self) -> bool {
-        unimplemented!()
+        self.inhibited
     }
 
     fn inhibit(&mut self) {
-        unimplemented!()
+        self.inhibited = true;
     }
 
     fn uninhibit(&mut self) {
-        unimplemented!()
+        self.inhibited = false;
     }
 
     fn process(&mut self, _state: &AircraftState) -> Option<AlertLevel> {
