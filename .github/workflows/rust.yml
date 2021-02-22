@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
-            toolchain: stable
+            toolchain: beta
             components: rustfmt
             override: true
       - uses: mbrobbel/rustfmt-check@0.2.0
@@ -33,7 +33,7 @@ jobs:
         key: ${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.lock') }}
     - uses: actions-rs/toolchain@v1
       with:
-        toolchain: stable
+        toolchain: beta
         target: x86_64-unknown-linux-gnu
         override: true
     - name: Run tests
