@@ -26,6 +26,7 @@ pub mod functionalities {
 
 /// Available alerts from the TAWS.
 #[derive(Clone, Copy, Debug, PartialEq, Hash)]
+#[cfg_attr(feature = "use-serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Alert {
     /// Forward Lookig Terrain Avoidance
     FLTA,
@@ -58,7 +59,7 @@ impl Eq for Alert {}
 ///
 /// Orderd by high priority to low priority (top to bottom)
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Hash)]
-//#[strum(serialize_all = "kebab_case")]
+#[cfg_attr(feature = "use-serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum AlertLevel {
     /// The level or category of alert for conditions that require immediate flight crew awareness
     /// and immediate flight crew response.
@@ -117,9 +118,9 @@ impl AlertState {
         self.all_alerts
             .iter()
             .filter_map(|o| {
-                o.map(|(alert, alert_level)| ((priority(alert, alert_level), (alert, alert_level))))
+                o.map(|(alert, alert_level)| (priority(alert, alert_level), (alert, alert_level)))
             })
-            .min_by_key(|(p, _)| p.clone())
+            .min_by_key(|(p, _)| *p)
             .map(|(_, alert_stuff)| alert_stuff)
     }
 
@@ -147,7 +148,7 @@ impl AlertState {
 
         // lets find a free spot
         if !already_present {
-            if let Some(option) = self.all_alerts.iter_mut().filter(|e| e.is_none()).next() {
+            if let Some(option) = self.all_alerts.iter_mut().find(|e| e.is_none()) {
                 *option = Some((new_alert, new_alert_level));
             }
         }

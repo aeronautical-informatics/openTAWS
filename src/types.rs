@@ -14,6 +14,7 @@ use uom::{
 
 /// Represents the current state of an aircraft
 #[derive(Clone, Debug, Default)]
+#[cfg_attr(feature = "use-serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AircraftState {
     /// Time when this aircraft state was emitted
     pub timestamp: Time,
