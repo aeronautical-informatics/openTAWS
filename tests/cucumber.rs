@@ -1,30 +1,28 @@
 use std::convert::Infallible;
 
 use async_trait::async_trait;
-use rand::random;
+//use rand::random;
 
 use uom::si::{f64::*, length::foot, ratio::ratio, time::second, velocity::foot_per_minute};
 
+use arbitrary::{Arbitrary, Unstructured};
 use cucumber::Steps;
 use opentaws::prelude::*;
 
-struct ScenarioContext {}
+fn main() {
+    let runner = cucumber::Cucumber::<MyWorld>::new()
+        .features(&["features"])
+        .steps(steps());
 
-#[derive(Debug)]
+    futures::executor::block_on(runner.run());
+}
+
 pub struct MyWorld {
     taws: Taws,
-    template_frame: AircraftState,
-    props: ScenarioProperties,
+    moulds: Vec<Box<dyn Fn(&mut AircraftState)>>,
 }
 
-#[derive(Clone, Debug, Default)]
-struct ScenarioProperties {
-    height_min: Option<Length>,
-    height_max: Option<Length>,
-    height_inside: Option<bool>,
-    rate_of_descent_min: Option<Velocity>,
-}
-impl std::panic::UnwindSafe for MyWorld {}
+struct AircraftStateWrapper(AircraftState);
 
 #[async_trait(?Send)]
 impl cucumber::World for MyWorld {
@@ -33,15 +31,14 @@ impl cucumber::World for MyWorld {
     async fn new() -> Result<Self, Infallible> {
         Ok(Self {
             taws: Taws::new(Default::default()),
-            template_frame: Default::default(),
-            props: Default::default(),
+            moulds: Vec::new(),
         })
     }
 }
 
 pub fn steps() -> Steps<crate::MyWorld> {
     let mut builder: Steps<crate::MyWorld> = Steps::new();
-
+    /*
     builder
         .given("the plane is flying", |world, _step| world)
         .given_regex("^(.+) is armed$", |world, mut matches, _step| {
@@ -201,23 +198,41 @@ pub fn steps() -> Steps<crate::MyWorld> {
     //        world
     //    },
     //);
+    */
 
     builder
 }
 
-fn main() {
-    let runner = cucumber::Cucumber::<MyWorld>::new()
-        .features(&["features"])
-        .steps(steps());
+// Brot und Butter implementations
+impl std::fmt::Debug for MyWorld {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        todo!();
+    }
+}
 
-    futures::executor::block_on(runner.run());
+impl std::panic::UnwindSafe for MyWorld {} // This is a lie, but way they gonna do, panic?
+
+impl<'a> Arbitrary<'a> for AircraftStateWrapper {
+    fn arbitrary(u: &mut Unstructured<'a>) -> arbitrary::Result<Self> {
+        Ok(AircraftStateWrapper(AircraftState {
+            timestamp: Time::new::<second>(u.arbitrary()?),
+            altitude: Length::new::<foot>(u.arbitrary()?),
+            altitude_ground: Length::new::<foot>(u.arbitrary()?),
+            climb_rate: Velocity::new::<foot_per_minute>(u.arbitrary()?),
+            position_lat: Angle::new::<degree>(u.arbitrary()?),
+            position_lon: Angle::new::<degree>(u.arbitrary()?),
+            speed_ground: Velocity::new::<knot>(u.arbitrary()?),
+            speed_air: Velocity::new::<knot>(u.arbitrary()?),
+            heading: Angle::new::<degree>(u.arbitrary()?),
+            pitch: Angle::new::<degree>(u.arbitrary()?),
+            roll: Angle::new::<degree>(u.arbitrary()?),
+            steep_approach: u.arbitrary()?,
+        }))
+    }
 }
 
 // Parser magic
 
-/// Try to convert a `&str` to an `Alert` variant
-///
-/// Panics on error
 fn parse_alert<T: AsRef<str>>(from: &T) -> Alert {
     let mut input_word = from.as_ref().to_lowercase();
     input_word.retain(|c| !c.is_whitespace());

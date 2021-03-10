@@ -26,16 +26,16 @@ use-serde = ["serde", "uom/use_serde"]
 [dependencies]
 casey = "0.3"
 lazy_static = "1"
-uom = { version = "0" }
+uom = { version = "0", default-features = false, features = [ "f64", "si", "use_serde" ] }
 ringbuffer = "0.4"
 serde = { version = "1.0", default-features = false, features = ["derive"], optional = true }
 
 [dev-dependencies]
+arbitrary = { version = "1", features = ["derive"] }
 async-trait = "^0.1.41"
-cucumber = { package = "cucumber_rust", git = "https://github.com/bbqsrc/cucumber-rust", branch = "main" } # TODO revert to regular release
+cucumber = { package = "cucumber_rust", version = "0.8" }
 futures = "0"
-quickcheck = "^0.9.2"
-rand = "0.7"
+#rand = "0.7"
 
 # for examples/flightgear
 async-tungstenite = { version = "*", features = [ "async-std-runtime" ] }
