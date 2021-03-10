@@ -37,6 +37,7 @@ cucumber = { package = "cucumber_rust", version = "0.8" }
 futures = "0"
 rand = "*"
 rand_pcg = "*"
+uom = { version = "*", features = [ "f64", "si", "std", "use_serde" ] }
 
 # for examples/flightgear
 async-tungstenite = { version = "*", features = [ "async-std-runtime" ] }

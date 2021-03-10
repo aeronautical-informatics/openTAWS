@@ -20,27 +20,17 @@ use cucumber::Steps;
 use opentaws::prelude::*;
 
 fn main() {
-    let my_vec: Vec<_> = AircraftStateGenerator::default().take(100).collect();
+    let runner = cucumber::Cucumber::<MyWorld>::new()
+        .features(&["features"])
+        .steps(steps());
 
-    println!("{:#?}", my_vec);
-
-    //let mut rng = rand_pcg::Mcg128Xsl64::new(0xcafef00dd15ea5e5);
-    //let mut unstructured = Unstructured::new(AsMut::<[u8]>::as_mut(&mut rng));
-
-    //let aircraft_state = AircraftStateWrapper::arbitrary(&mut unstructured)
-    //    .expect("`unstructured` has enough underlying data to create all variants of `MyEnum`");
-    //println!("Random aircraft state: {:#?}", aircraft_state);
-
-    //let runner = cucumber::Cucumber::<MyWorld>::new()
-    //    .features(&["features"])
-    //    .steps(steps());
-
-    //futures::executor::block_on(runner.run());
+    futures::executor::block_on(runner.run());
 }
 
 pub struct MyWorld {
     taws: Taws,
     mould_pipeline: Vec<Box<dyn FnMut(&mut AircraftState)>>,
+    test_length: usize,
 }
 
 #[derive(Debug, Clone)]
@@ -54,6 +44,7 @@ impl cucumber::World for MyWorld {
         Ok(Self {
             taws: Taws::new(Default::default()),
             mould_pipeline: Vec::new(),
+            test_length: 1000, // TODO is this a good number?
         })
     }
 }
@@ -118,9 +109,9 @@ pub fn steps() -> Steps<crate::MyWorld> {
             r"^the rate of descent is at least (\d+) feet per minute$",
             |mut world, matches, _step| {
                 let roc = Velocity::new::<foot_per_minute>(matches[1].parse().unwrap());
-                let bouncer = BouncingClamp();
+                let mut bouncer = BouncingClamp();
                 pipeline_extend!(world, move |a| {
-                    a.climb_rate = -bouncer.at_least(-a.rate_of_climb, roc);
+                    a.climb_rate = -bouncer.at_least(-a.climb_rate, roc);
                 });
                 world
             },
@@ -128,101 +119,79 @@ pub fn steps() -> Steps<crate::MyWorld> {
         .when_regex(
             r"^the height above terrain is (.*)between (\d+) and (\d+) feet$",
             |mut world, matches, _step| {
-                world.props.height_inside = Some(!matches[1].starts_with("not"));
-                //world.props.height_min = Some(Length::new::<foot>(matches[2].parse().unwrap()));
-                //world.props.height_max = Some(Length::new::<foot>(matches[3].parse().unwrap()));
+                let height_at_least = Length::new::<foot>(matches[2].parse().unwrap());
+                let height_at_most = Length::new::<foot>(matches[3].parse().unwrap());
+
+                let mut bouncer = BouncingClamp();
+
+                if matches[1].starts_with("not") {
+                    unimplemented!("We really needed this? Oh no :(");
+                } else {
+                    pipeline_extend!(world, move |a| {
+                        a.altitude_ground =
+                            bouncer.in_range(a.altitude_ground, height_at_least, height_at_most)
+                    }); // TODO altitude or altitude_ground
+                }
                 world
             },
         )
         .then_regex(
             "^a Mode 1 (.*) alert is not emitted at all$",
             |mut world, matches, _step| {
-                let alert = parse_level(&matches[1]);
+                let level = parse_level(&matches[1]);
 
-                let mut frame = world.template_frame.clone();
+                let mut aircraft_states: Vec<_> = AircraftStateGenerator::default()
+                    .take(world.test_length)
+                    .collect();
 
-                let min = world
-                    .props
-                    .height_min
-                    .unwrap_or(Length::new::<foot>(random()));
-                let max = world
-                    .props
-                    .height_max
-                    .unwrap_or(Length::new::<foot>(random()));
-                let inside = world.props.height_inside.unwrap_or(random());
-
-                /* TODO rewrite this, it's ugly
-                if inside {
-                    frame.altitude_ground = min;
-                    assert_eq!(world.taws.process(&frame).iter().filter(|((a,_))| a == alert).count(), 0);
-
-                    frame.altitude_ground = max;
-                    assert_eq!(world.taws.process(&frame).alerts_count(alert), 0);
-
-                    frame.altitude_ground = (max + min) / Ratio::new::<ratio>(2.0);
-                    assert_eq!(world.taws.process(&frame).alerts_count(alert), 0);
-                } else {
-                    frame.altitude_ground = min - Length::new::<foot>(1.0);
-                    assert_eq!(world.taws.process(&frame).alerts_count(alert), 0);
-
-                    frame.altitude_ground = max + Length::new::<foot>(1.0);
-                    assert_eq!(world.taws.process(&frame).alerts_count(alert), 0);
+                // press the test data in our moulds
+                for frame in aircraft_states.iter_mut() {
+                    for f in world.mould_pipeline.iter_mut() {
+                        f(frame);
+                    }
                 }
 
-                assert_eq!(world.taws.process(&frame).alert_level(Alert::Mode1), None);
-
-                   use quickcheck::QuickCheck;
-                   let mut qc = QuickCheck::new();
-
-                   fn tests(mut world: MyWorld )->bool {
-                   let alert_state = world.taws.push(&world.template_frame);
-
-                   alert_state.alerts.is_empty() &&
-                   alert_state.nuisance_alerts.is_empty()
-                   };
-
-                   qc.quickcheck(tests as fn(_)->_);
-
-
-                   let new_frame = world.template_frame.clone();
-
-                   let alert_state = world.taws.push(&new_frame);
-
-                   assert!(alert_state.alerts.is_empty());
-                   assert!(alert_state.nuisance_alerts.is_empty());
-                   */
+                for frame in aircraft_states {
+                    assert_eq!(
+                        world
+                            .taws
+                            .process(&frame)
+                            .iter()
+                            .filter(|((_, l))| *l == level)
+                            .count(),
+                        0
+                    );
+                }
                 world
             },
         )
         .then_regex(
             r"^a Mode 1 (.*) alert is emitted within (\d+) seconds$",
             |mut world, matches, _step| {
-                let alert = parse_level(&matches[1]);
-                let _max_latency = Time::new::<second>(matches[2].parse().unwrap());
+                let level = parse_level(&matches[1]);
 
-                let mut frame = world.template_frame.clone();
-                frame.timestamp += Time::new::<second>(0.1);
-                let min = world.props.height_min.unwrap();
-                let max = world.props.height_max.unwrap();
-                let inside = world.props.height_inside.unwrap();
-                /* TODO rewrite this, it's ugly
-                if inside {
-                    frame.altitude_ground = min;
-                    assert!(world.taws.process(&frame).alerts_count(alert) > 0);
+                let mut aircraft_states: Vec<_> = AircraftStateGenerator::default()
+                    .take(world.test_length)
+                    .collect();
 
-                    frame.altitude_ground = max;
-                    assert!(world.taws.process(&frame).alerts_count(alert) > 0);
-
-                    frame.altitude_ground = (max + min) / Ratio::new::<ratio>(2.0);
-                    assert!(world.taws.process(&frame).alerts_count(alert) > 0);
-                } else {
-                    frame.altitude_ground = min - Length::new::<foot>(1.0);
-                    assert!(world.taws.process(&frame).alerts_count(alert) > 0);
-
-                    frame.altitude_ground = max + Length::new::<foot>(1.0);
-                    assert!(world.taws.process(&frame).alerts_count(alert) > 0);
+                // press the test data in our moulds
+                for frame in aircraft_states.iter_mut() {
+                    for f in world.mould_pipeline.iter_mut() {
+                        f(frame);
+                    }
                 }
-                */
+
+                for frame in aircraft_states {
+                    assert!(
+                        world
+                            .taws
+                            .process(&frame)
+                            .iter()
+                            .filter(|((_, l))| *l == level)
+                            .count()
+                            != 0
+                    ); // TODO what about the time constraint?
+                }
                 world
             },
         );
@@ -344,7 +313,7 @@ struct BouncingClamp();
 
 impl<T> PressMould<T> for BouncingClamp
 where
-    T: PartialOrd + Add<Output = T> + Rem<Output = T> + Sub<Output = T> + Signed,
+    T: Copy + Clone + PartialOrd + Add<Output = T> + Rem<Output = T> + Sub<Output = T> + Abs,
 {
     fn at_least(&mut self, value: T, at_least: T) -> T {
         if value >= at_least {
@@ -367,5 +336,26 @@ where
         let span = at_most - at_least;
         let bounced = ((value + span) % (span + span) - span).abs();
         bounced + at_least
+    }
+}
+
+trait Abs: Sized {
+    fn abs(self) -> Self;
+}
+
+impl Abs for f64 {
+    fn abs(self) -> Self {
+        self.abs()
+    }
+}
+
+impl<D: ?Sized, U: ?Sized, V: ?Sized> Abs for uom::si::Quantity<D, U, V>
+where
+    D: uom::si::Dimension,
+    U: uom::si::Units<V>,
+    V: uom::num_traits::Num + uom::Conversion<V> + Signed,
+{
+    fn abs(self) -> Self {
+        self.abs()
     }
 }
