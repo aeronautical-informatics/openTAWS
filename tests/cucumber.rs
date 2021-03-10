@@ -88,13 +88,9 @@ pub fn steps() -> Steps<crate::MyWorld> {
             r"^steep approach is (.*)selected$",
             |mut world, matches, _step| {
                 if matches[1].starts_with("not") {
-                    pipeline_extend!(world, |a| {
-                        a.steep_approach = false;
-                    });
+                    pipeline_extend!(world, |a| a.steep_approach = false);
                 } else {
-                    pipeline_extend!(world, |a| {
-                        a.steep_approach = true;
-                    });
+                    pipeline_extend!(world, |a| a.steep_approach = true);
                 }
                 world
             },
@@ -110,9 +106,7 @@ pub fn steps() -> Steps<crate::MyWorld> {
             |mut world, matches, _step| {
                 let roc = Velocity::new::<foot_per_minute>(matches[1].parse().unwrap());
                 let mut bouncer = BouncingClamp();
-                pipeline_extend!(world, move |a| {
-                    a.climb_rate = -bouncer.at_least(-a.climb_rate, roc);
-                });
+                pipeline_extend!(world, move |a| bouncer.at_most(&mut a.climb_rate, -roc)); // TODO safe assumption?
                 world
             },
         )
@@ -125,12 +119,17 @@ pub fn steps() -> Steps<crate::MyWorld> {
                 let mut bouncer = BouncingClamp();
 
                 if matches[1].starts_with("not") {
-                    unimplemented!("We really needed this? Oh no :(");
+                    pipeline_extend!(world, move |a| bouncer.not_in_range(
+                        &mut a.altitude_ground,
+                        height_at_least,
+                        height_at_most
+                    ));
                 } else {
-                    pipeline_extend!(world, move |a| {
-                        a.altitude_ground =
-                            bouncer.in_range(a.altitude_ground, height_at_least, height_at_most)
-                    }); // TODO altitude or altitude_ground
+                    pipeline_extend!(world, move |a| bouncer.in_range(
+                        &mut a.altitude_ground,
+                        height_at_least,
+                        height_at_most
+                    )); // TODO altitude or altitude_ground
                 }
                 world
             },
@@ -182,26 +181,21 @@ pub fn steps() -> Steps<crate::MyWorld> {
                 }
 
                 for frame in aircraft_states {
-                    assert!(
-                        world
-                            .taws
-                            .process(&frame)
-                            .iter()
-                            .filter(|((_, l))| *l == level)
-                            .count()
-                            != 0
-                    ); // TODO what about the time constraint?
+                    // TODO what about the time constraint?
+                    if world
+                        .taws
+                        .process(&frame)
+                        .iter()
+                        .filter(|((_, l))| *l == level)
+                        .count()
+                        == 0
+                    {
+                        panic!("Aicraft state that violated the scenario: {:#?}", frame);
+                    }
                 }
                 world
             },
         );
-    //.given_regex(
-    //    r"the rate of rage is at least (.+) feet per minute",
-    //    |world, matches, _step| {
-    //        panic!("{}", matches[1]);
-    //        world
-    //    },
-    //);
 
     builder
 }
@@ -293,7 +287,7 @@ impl Iterator for AircraftStateGenerator {
         let bytes_needed = AircraftStateWrapper::size_hint(0).0;
         let mut buf = Vec::with_capacity(bytes_needed);
         while buf.len() < bytes_needed {
-            buf.extend(&self.0.next_u64().to_le_bytes());
+            buf.extend_from_slice(&self.0.next_u64().to_le_bytes());
         }
         let mut u = Unstructured::new(&mut buf);
 
@@ -303,9 +297,10 @@ impl Iterator for AircraftStateGenerator {
 
 // for the lack of a better word
 trait PressMould<T> {
-    fn at_least(&mut self, value: T, at_least: T) -> T;
-    fn at_most(&mut self, value: T, at_most: T) -> T;
-    fn in_range(&mut self, value: T, at_least: T, at_most: T) -> T;
+    fn at_least(&mut self, value: &mut T, at_least: T);
+    fn at_most(&mut self, value: &mut T, at_most: T);
+    fn in_range(&mut self, value: &mut T, at_least: T, at_most: T);
+    fn not_in_range(&mut self, value: &mut T, range_from: T, range_to: T);
 }
 
 // Stupid
@@ -315,27 +310,28 @@ impl<T> PressMould<T> for BouncingClamp
 where
     T: Copy + Clone + PartialOrd + Add<Output = T> + Rem<Output = T> + Sub<Output = T> + Abs,
 {
-    fn at_least(&mut self, value: T, at_least: T) -> T {
-        if value >= at_least {
-            value
-        } else {
-            at_least + (at_least - value)
+    fn at_least(&mut self, value: &mut T, at_least: T) {
+        if *value < at_least {
+            *value = at_least + (at_least - *value)
         }
     }
 
-    fn at_most(&mut self, value: T, at_most: T) -> T {
-        if value <= at_most {
-            value
-        } else {
-            at_most - (value - at_most)
+    fn at_most(&mut self, value: &mut T, at_most: T) {
+        if *value > at_most {
+            *value = at_most - (*value - at_most)
         }
     }
 
-    /// clamp 'n bounce
-    fn in_range(&mut self, value: T, at_least: T, at_most: T) -> T {
+    fn in_range(&mut self, value: &mut T, at_least: T, at_most: T) {
         let span = at_most - at_least;
-        let bounced = ((value + span) % (span + span) - span).abs();
-        bounced + at_least
+        let bounced = ((*value + span) % (span + span) - span).abs();
+        *value = bounced + at_least
+    }
+
+    fn not_in_range(&mut self, value: &mut T, at_most: T, at_least: T) {
+        if *value > at_most && *value < at_least {
+            *value = *value + (at_least - at_most);
+        }
     }
 }
 
