@@ -1,27 +1,49 @@
-use std::convert::Infallible;
+use std::sync::Arc;
+use std::{
+    convert::Infallible,
+    ops::{Add, Rem, Sub},
+};
 
 use async_trait::async_trait;
-//use rand::random;
+use rand::{Rng, RngCore};
 
-use uom::si::{f64::*, length::foot, ratio::ratio, time::second, velocity::foot_per_minute};
+use uom::{
+    num::Signed,
+    si::{
+        f64::*, information::byte, length::foot, ratio::ratio, time::second,
+        velocity::foot_per_minute,
+    },
+};
 
 use arbitrary::{Arbitrary, Unstructured};
 use cucumber::Steps;
 use opentaws::prelude::*;
 
 fn main() {
-    let runner = cucumber::Cucumber::<MyWorld>::new()
-        .features(&["features"])
-        .steps(steps());
+    let my_vec: Vec<_> = AircraftStateGenerator::default().take(100).collect();
 
-    futures::executor::block_on(runner.run());
+    println!("{:#?}", my_vec);
+
+    //let mut rng = rand_pcg::Mcg128Xsl64::new(0xcafef00dd15ea5e5);
+    //let mut unstructured = Unstructured::new(AsMut::<[u8]>::as_mut(&mut rng));
+
+    //let aircraft_state = AircraftStateWrapper::arbitrary(&mut unstructured)
+    //    .expect("`unstructured` has enough underlying data to create all variants of `MyEnum`");
+    //println!("Random aircraft state: {:#?}", aircraft_state);
+
+    //let runner = cucumber::Cucumber::<MyWorld>::new()
+    //    .features(&["features"])
+    //    .steps(steps());
+
+    //futures::executor::block_on(runner.run());
 }
 
 pub struct MyWorld {
     taws: Taws,
-    moulds: Vec<Box<dyn Fn(&mut AircraftState)>>,
+    mould_pipeline: Vec<Box<dyn FnMut(&mut AircraftState)>>,
 }
 
+#[derive(Debug, Clone)]
 struct AircraftStateWrapper(AircraftState);
 
 #[async_trait(?Send)]
@@ -31,14 +53,20 @@ impl cucumber::World for MyWorld {
     async fn new() -> Result<Self, Infallible> {
         Ok(Self {
             taws: Taws::new(Default::default()),
-            moulds: Vec::new(),
+            mould_pipeline: Vec::new(),
         })
     }
 }
 
+// convenience macro
+macro_rules! pipeline_extend {
+    ($world:expr, $closure:expr) => {
+        $world.mould_pipeline.push(Box::new($closure));
+    };
+}
+
 pub fn steps() -> Steps<crate::MyWorld> {
     let mut builder: Steps<crate::MyWorld> = Steps::new();
-    /*
     builder
         .given("the plane is flying", |world, _step| world)
         .given_regex("^(.+) is armed$", |world, mut matches, _step| {
@@ -56,6 +84,7 @@ pub fn steps() -> Steps<crate::MyWorld> {
             |mut world, mut matches, _step| {
                 matches[1].retain(|c| !c.is_whitespace());
                 let alert_system = parse_alert(&matches[1]);
+
                 if matches[2].starts_with("not") {
                     world.taws.uninhibit(alert_system);
                 } else {
@@ -68,9 +97,13 @@ pub fn steps() -> Steps<crate::MyWorld> {
             r"^steep approach is (.*)selected$",
             |mut world, matches, _step| {
                 if matches[1].starts_with("not") {
-                    world.template_frame.steep_approach = false;
+                    pipeline_extend!(world, |a| {
+                        a.steep_approach = false;
+                    });
                 } else {
-                    world.template_frame.steep_approach = true;
+                    pipeline_extend!(world, |a| {
+                        a.steep_approach = true;
+                    });
                 }
                 world
             },
@@ -84,9 +117,11 @@ pub fn steps() -> Steps<crate::MyWorld> {
         .when_regex(
             r"^the rate of descent is at least (\d+) feet per minute$",
             |mut world, matches, _step| {
-                world.props.rate_of_descent_min = Some(Velocity::new::<foot_per_minute>(
-                    matches[1].parse().unwrap(),
-                ));
+                let roc = Velocity::new::<foot_per_minute>(matches[1].parse().unwrap());
+                let bouncer = BouncingClamp();
+                pipeline_extend!(world, move |a| {
+                    a.climb_rate = -bouncer.at_least(-a.rate_of_climb, roc);
+                });
                 world
             },
         )
@@ -198,7 +233,6 @@ pub fn steps() -> Steps<crate::MyWorld> {
     //        world
     //    },
     //);
-    */
 
     builder
 }
@@ -229,10 +263,13 @@ impl<'a> Arbitrary<'a> for AircraftStateWrapper {
             steep_approach: u.arbitrary()?,
         }))
     }
+
+    fn size_hint(_depth: usize) -> (usize, Option<usize>) {
+        (std::mem::size_of::<AircraftStateWrapper>(), None)
+    }
 }
 
 // Parser magic
-
 fn parse_alert<T: AsRef<str>>(from: &T) -> Alert {
     let mut input_word = from.as_ref().to_lowercase();
     input_word.retain(|c| !c.is_whitespace());
@@ -267,5 +304,68 @@ fn parse_level<T: AsRef<str>>(from: &T) -> AlertLevel {
                 from.as_ref()
             );
         }
+    }
+}
+
+// AircraftState generator
+type Prng = rand_pcg::Mcg128Xsl64;
+struct AircraftStateGenerator(pub Prng);
+
+impl Default for AircraftStateGenerator {
+    fn default() -> Self {
+        Self(Prng::new(0xcafef00dd15ea5e5))
+    }
+}
+
+impl Iterator for AircraftStateGenerator {
+    type Item = AircraftState;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let bytes_needed = AircraftStateWrapper::size_hint(0).0;
+        let mut buf = Vec::with_capacity(bytes_needed);
+        while buf.len() < bytes_needed {
+            buf.extend(&self.0.next_u64().to_le_bytes());
+        }
+        let mut u = Unstructured::new(&mut buf);
+
+        Some(AircraftStateWrapper::arbitrary(&mut u).unwrap().0) // the unwrap is safe, we guarantee that enough bytes are available
+    }
+}
+
+// for the lack of a better word
+trait PressMould<T> {
+    fn at_least(&mut self, value: T, at_least: T) -> T;
+    fn at_most(&mut self, value: T, at_most: T) -> T;
+    fn in_range(&mut self, value: T, at_least: T, at_most: T) -> T;
+}
+
+// Stupid
+struct BouncingClamp();
+
+impl<T> PressMould<T> for BouncingClamp
+where
+    T: PartialOrd + Add<Output = T> + Rem<Output = T> + Sub<Output = T> + Signed,
+{
+    fn at_least(&mut self, value: T, at_least: T) -> T {
+        if value >= at_least {
+            value
+        } else {
+            at_least + (at_least - value)
+        }
+    }
+
+    fn at_most(&mut self, value: T, at_most: T) -> T {
+        if value <= at_most {
+            value
+        } else {
+            at_most - (value - at_most)
+        }
+    }
+
+    /// clamp 'n bounce
+    fn in_range(&mut self, value: T, at_least: T, at_most: T) -> T {
+        let span = at_most - at_least;
+        let bounced = ((value + span) % (span + span) - span).abs();
+        bounced + at_least
     }
 }
