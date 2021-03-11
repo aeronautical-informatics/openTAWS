@@ -1,18 +1,14 @@
-use std::sync::Arc;
 use std::{
     convert::Infallible,
     ops::{Add, Rem, Sub},
 };
 
 use async_trait::async_trait;
-use rand::{Rng, RngCore};
+use rand::RngCore;
 
 use uom::{
     num::Signed,
-    si::{
-        f64::*, information::byte, length::foot, ratio::ratio, time::second,
-        velocity::foot_per_minute,
-    },
+    si::{f64::*, length::foot, time::second, velocity::foot_per_minute},
 };
 
 use arbitrary::{Arbitrary, Unstructured};
@@ -102,11 +98,24 @@ pub fn steps() -> Steps<crate::MyWorld> {
             world
         })
         .when_regex(
-            r"^the rate of descent is at least (\d+) feet per minute$",
+            r"^the rate of descent is at (\w+) (\d+) feet per minute$",
             |mut world, matches, _step| {
-                let roc = Velocity::new::<foot_per_minute>(matches[1].parse().unwrap());
+                let rod = Velocity::new::<foot_per_minute>(matches[2].parse().unwrap());
                 let mut bouncer = BouncingClamp();
-                pipeline_extend!(world, move |a| bouncer.at_most(&mut a.climb_rate, -roc)); // TODO safe assumption?
+                // most and least are swapped here, as aircraft_state stores rate of climb, while
+                // the sentence give rate of descent 
+                // TODO validate that this is a safe assumption?
+                match matches[1].as_str() {
+                    "most" => {
+                        pipeline_extend!(world, move |a| bouncer.at_least(&mut a.climb_rate, -rod));
+                    }
+                    "least" => {
+                        pipeline_extend!(world, move |a| bouncer.at_most(&mut a.climb_rate, -rod));
+                    }
+                    _ => {
+                        panic!("unable to parse this sentence");
+                    }
+                }
                 world
             },
         )
@@ -151,15 +160,11 @@ pub fn steps() -> Steps<crate::MyWorld> {
                 }
 
                 for frame in aircraft_states {
-                    assert_eq!(
-                        world
-                            .taws
-                            .process(&frame)
-                            .iter()
-                            .filter(|((_, l))| *l == level)
-                            .count(),
-                        0
-                    );
+                    let alert_state = world.taws.process(&frame);
+                    if alert_state.iter().any(|(a, l)| Alert::Mode1 == a && l <= level)
+                    {
+                        panic!("Aicraft state that violated the scenario: {:#?}\nalerts emitted: {:#?}", frame, alert_state);
+                    }
                 }
                 world
             },
@@ -181,16 +186,20 @@ pub fn steps() -> Steps<crate::MyWorld> {
                 }
 
                 for frame in aircraft_states {
-                    // TODO what about the time constraint?
-                    if world
+                    let alert_state = world
                         .taws
-                        .process(&frame)
+                        .process(&frame);
+                    // TODO what about the time constraint?
+                    // Count all alerts that are from the functionality Mode1 and are of higher or
+                    // same priority as `level`. If the count is 0, the system did not alert
+                    // appropiately.
+                    if alert_state
                         .iter()
-                        .filter(|((_, l))| *l == level)
+                        .filter(|(a, l)| *a  == Alert::Mode1 && *l <= level)
                         .count()
                         == 0
                     {
-                        panic!("Aicraft state that violated the scenario: {:#?}", frame);
+                        panic!("Aicraft state that violated the scenario: {:#?}\nalerts emitted: {:#?}", frame, alert_state);
                     }
                 }
                 world
@@ -212,17 +221,17 @@ impl std::panic::UnwindSafe for MyWorld {} // This is a lie, but way they gonna 
 impl<'a> Arbitrary<'a> for AircraftStateWrapper {
     fn arbitrary(u: &mut Unstructured<'a>) -> arbitrary::Result<Self> {
         Ok(AircraftStateWrapper(AircraftState {
-            timestamp: Time::new::<second>(u.arbitrary()?),
-            altitude: Length::new::<foot>(u.arbitrary()?),
-            altitude_ground: Length::new::<foot>(u.arbitrary()?),
-            climb_rate: Velocity::new::<foot_per_minute>(u.arbitrary()?),
-            position_lat: Angle::new::<degree>(u.arbitrary()?),
-            position_lon: Angle::new::<degree>(u.arbitrary()?),
-            speed_ground: Velocity::new::<knot>(u.arbitrary()?),
-            speed_air: Velocity::new::<knot>(u.arbitrary()?),
-            heading: Angle::new::<degree>(u.arbitrary()?),
-            pitch: Angle::new::<degree>(u.arbitrary()?),
-            roll: Angle::new::<degree>(u.arbitrary()?),
+            timestamp: Time::new::<second>(<i32 as Arbitrary>::arbitrary(u)? as f64),
+            altitude: Length::new::<foot>(<i32 as Arbitrary>::arbitrary(u)? as f64),
+            altitude_ground: Length::new::<foot>(<i32 as Arbitrary>::arbitrary(u)? as f64),
+            climb_rate: Velocity::new::<foot_per_minute>(<i32 as Arbitrary>::arbitrary(u)? as f64),
+            position_lat: Angle::new::<degree>(<i32 as Arbitrary>::arbitrary(u)? as f64),
+            position_lon: Angle::new::<degree>(<i32 as Arbitrary>::arbitrary(u)? as f64),
+            speed_ground: Velocity::new::<knot>(<i32 as Arbitrary>::arbitrary(u)? as f64),
+            speed_air: Velocity::new::<knot>(<i32 as Arbitrary>::arbitrary(u)? as f64),
+            heading: Angle::new::<degree>(<i32 as Arbitrary>::arbitrary(u)? as f64),
+            pitch: Angle::new::<degree>(<i32 as Arbitrary>::arbitrary(u)? as f64),
+            roll: Angle::new::<degree>(<i32 as Arbitrary>::arbitrary(u)? as f64),
             steep_approach: u.arbitrary()?,
         }))
     }
@@ -308,30 +317,59 @@ struct BouncingClamp();
 
 impl<T> PressMould<T> for BouncingClamp
 where
-    T: Copy + Clone + PartialOrd + Add<Output = T> + Rem<Output = T> + Sub<Output = T> + Abs,
+    T: Copy
+        + Clone
+        + std::fmt::Debug
+        + PartialOrd
+        + Add<Output = T>
+        + Rem<Output = T>
+        + Sub<Output = T>
+        + Abs,
 {
     fn at_least(&mut self, value: &mut T, at_least: T) {
         if *value < at_least {
             *value = at_least + (at_least - *value)
         }
+        assert!(*value >= at_least);
     }
 
     fn at_most(&mut self, value: &mut T, at_most: T) {
         if *value > at_most {
             *value = at_most - (*value - at_most)
         }
+        assert!(*value <= at_most);
     }
 
     fn in_range(&mut self, value: &mut T, at_least: T, at_most: T) {
+        assert!(at_least <= at_most);
+
+        if at_least == at_most {
+            *value = at_least;
+            return;
+        }
+
+        let modulo = |a: T, b: T| ((a % b) + b) % b;
+
+        let value_before = *value;
         let span = at_most - at_least;
-        let bounced = ((*value + span) % (span + span) - span).abs();
-        *value = bounced + at_least
+        let bounced = (modulo(*value + span, span + span) - span).abs();
+        *value = bounced + at_least;
+
+        if !(at_least <= *value && *value <= at_most) {
+            panic!(
+                "v0 {:?}, v1 {:?}, al {:?}, am {:?}",
+                value_before, *value, at_least, at_most
+            );
+        }
+        assert!(at_least <= *value && *value <= at_most);
     }
 
     fn not_in_range(&mut self, value: &mut T, at_most: T, at_least: T) {
+        assert!(at_most <= at_least);
         if *value > at_most && *value < at_least {
             *value = *value + (at_least - at_most);
         }
+        assert!(*value < at_least || at_most < *value);
     }
 }
 

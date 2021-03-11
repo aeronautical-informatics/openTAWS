@@ -14,7 +14,7 @@ Feature: Mode 1: Excessive Rate of Descent
     Given the plane is flying
     Then Mode 1 shall be armed
 
-  #Rule: Standard Caution Envelope (MOPS_269, MOPS_270)
+    #Rule: Standard Caution Envelope (MOPS_269, MOPS_270)
 
     @MOPS_269
     Scenario Outline: Must Alert
@@ -29,22 +29,22 @@ Feature: Mode 1: Excessive Rate of Descent
         | rate of descent | height |
         | 1560            | 100    |
         | 2200            | 630    |
-        | 5700            | 100    |
+        | 5700            | 2200   |
 
     @MOPS_270
     Scenario: Must Not Alert when not Armed
       Given Mode 1 is not armed
-      Then a caution alert is not emitted at all
+      Then a Mode 1 caution alert is not emitted at all
 
     @MOPS_270
     Scenario: Must Not Alert when Inhibited
       Given Mode 1 is inhibited
-      Then a caution alert is not emitted at all
+      Then a Mode 1 caution alert is not emitted at all
 
     @MOPS_270
     Scenario Outline: Must Not Alert
       Given steep approach is not selected
-      When the rate of descent is at least <rate of descent> feet per minute
+      When the rate of descent is at most <rate of descent> feet per minute
       But the height above terrain is not between 10 and <height> feet
       Then a Mode 1 caution alert is not emitted at all
 
@@ -88,7 +88,7 @@ Feature: Mode 1: Excessive Rate of Descent
     @MOPS_272
     Scenario Outline: Must Not Alert
       Given steep approach is selected
-      When the rate of descent is at least <rate of descent> feet per minute
+      When the rate of descent is at most <rate of descent> feet per minute
       But the height above terrain is not between 10 and <height> feet
       Then a Mode 1 caution alert is not emitted at all
 
@@ -110,7 +110,7 @@ Feature: Mode 1: Excessive Rate of Descent
       And steep approach is not selected
       When the rate of descent is at least <rate of descent> feet per minute
       And the height above terrain is between 100 and <height> feet
-      Then a Mode 1 caution alert is emitted within 2 seconds
+      Then a Mode 1 warning alert is emitted within 2 seconds
 
       Examples:
         | rate of descent | height |
@@ -121,19 +121,19 @@ Feature: Mode 1: Excessive Rate of Descent
     @MOPS_274
     Scenario: Must Not Alert when not Armed
       Given Mode 1 is not armed
-      Then a Mode 1 caution alert is not emitted at all
+      Then a Mode 1 warning alert is not emitted at all
 
     @MOPS_274
     Scenario: Must Not Alert when Inhibited
       Given Mode 1 is inhibited
-      Then a Mode 1 caution alert is not emitted at all
+      Then a Mode 1 warning alert is not emitted at all
 
     @MOPS_274
     Scenario Outline: Must Not Alert
       Given steep approach is not selected
-      When the rate of descent is at least <rate of descent> feet per minute
+      When the rate of descent is at most <rate of descent> feet per minute
       But the height above terrain is not between 10 and <height> feet
-      Then a Mode 1 caution alert is not emitted at all
+      Then a Mode 1 warning alert is not emitted at all
 
       Examples:
         | rate of descent | height |
@@ -152,7 +152,7 @@ Feature: Mode 1: Excessive Rate of Descent
       And steep approach is selected
       When the rate of descent is at least <rate of descent> feet per minute
       And the height above terrain is between 150 and <height> feet
-      Then a Mode 1 caution alert is emitted within 2 seconds
+      Then a Mode 1 warning alert is emitted within 2 seconds
 
       Examples:
         | rate of descent | height |
@@ -163,19 +163,19 @@ Feature: Mode 1: Excessive Rate of Descent
     @MOPS_276
     Scenario: Must Not Alert when not Armed
       Given Mode 1 is not armed
-      Then a Mode 1 caution alert is not emitted at all
+      Then a Mode 1 warning alert is not emitted at all
 
     @MOPS_276
     Scenario: Must Not Alert when Inhibited
       Given Mode 1 is inhibited
-      Then a Mode 1 caution alert is not emitted at all
+      Then a Mode 1 warning alert is not emitted at all
 
     @MOPS_276
     Scenario Outline: Must Not Alert
       Given steep approach is selected
-      When the rate of descent is at least <rate of descent> feet per minute
+      When the rate of descent is at most <rate of descent> feet per minute
       But the height above terrain is not between 10 and <height> feet
-      Then a Mode 1 caution alert is not emitted at all
+      Then a Mode 1 warning alert is not emitted at all
 
       Examples:
         | rate of descent | height |
