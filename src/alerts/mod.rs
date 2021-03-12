@@ -1,6 +1,6 @@
-use std::collections::HashMap;
+use core::fmt;
 
-use crate::types::AircraftState;
+use crate::types::{AircraftState, TawsConfig};
 
 mod ffac;
 mod flta;
@@ -11,26 +11,31 @@ mod mode_4;
 mod mode_5;
 mod pda;
 
-pub use ffac::*;
-pub use flta::*;
-pub use mode_1::*;
-pub use mode_2::*;
-pub use mode_3::*;
-pub use mode_4::*;
-pub use mode_5::*;
-pub use pda::*;
+pub mod functionalities {
+    use super::*;
+
+    pub use ffac::*;
+    pub use flta::*;
+    pub use mode_1::*;
+    pub use mode_2::*;
+    pub use mode_3::*;
+    pub use mode_4::*;
+    pub use mode_5::*;
+    pub use pda::*;
+}
 
 /// Available alerts from the TAWS.
-#[derive(Clone, Copy, Debug, PartialEq, Hash, strum::EnumString)]
+#[derive(Clone, Copy, Debug, PartialEq, Hash)]
+#[cfg_attr(feature = "use-serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Alert {
     /// Forward Lookig Terrain Avoidance
-    FLTA,
+    Flta,
 
     /// Five Hundred foot altitude Callout
-    FFAC,
+    Ffac,
 
     /// Premature Descent Alerting
-    PDA,
+    Pda,
 
     /// Excessive Rate of Descent
     Mode1,
@@ -53,8 +58,8 @@ impl Eq for Alert {}
 /// Importance level of an alert
 ///
 /// Orderd by high priority to low priority (top to bottom)
-#[derive(Clone, Copy, Debug, PartialEq, Hash, strum::EnumString)]
-#[strum(serialize_all = "kebab_case")]
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Hash)]
+#[cfg_attr(feature = "use-serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum AlertLevel {
     /// The level or category of alert for conditions that require immediate flight crew awareness
     /// and immediate flight crew response.
@@ -70,44 +75,132 @@ pub enum AlertLevel {
 }
 impl Eq for AlertLevel {}
 
-/// Collection of a all alerts which are currently present in the TAWS
-#[derive(Debug, Default, PartialEq)]
-pub struct AlertState {
-    /// Alerts which are to be displayed to the crew
-    pub alerts: HashMap<Alert, AlertLevel>,
+/// Get the priority of a n (Alert, AlertLevel) tupel
+///
+/// A low value means a high priority.
+pub fn priority(alert: Alert, alert_level: AlertLevel) -> u8 {
+    use Alert::*;
+    use AlertLevel::*;
 
-    /// Alerts which are not to be disclosed to the crew to avoid nuisance
-    pub nuisance_alerts: HashMap<Alert, AlertLevel>,
+    match (alert, alert_level) {
+        (Mode1, Warning) => 2,
+        (Mode2, Warning) => 3,
+        (Flta, Warning) => 6,
+        (Mode2, Caution) => 9,
+        (Flta, Caution) => 11,
+        (Mode4, Caution) => 13, // Terrain caution
+        (Pda, Caution) => 14,
+        //(Mode4, Caution)=>16 // Gear caution
+        //(Mode4, Caution)=>17 // Flaps caution
+        (Mode1, Caution) => 18,
+        (Mode3, Caution) => 19,
+        (Mode5, Caution) => 20,
+        _ => u8::MAX, // TODO is this a safe assumption
+    }
+}
+
+/// This is the maximum number of different alerts in an alert_state
+const ALERT_STATE_SIZE: usize = 8;
+
+/// Collection of a all alerts which are currently present in the TAWS
+#[derive(Debug, PartialEq)]
+#[cfg_attr(feature = "use-serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct AlertState {
+    /// Alerts which are not to be disclosed to the crew to avoid nuisance, but still where triggered
+    all_alerts: [Option<(Alert, AlertLevel)>; ALERT_STATE_SIZE],
 }
 
 impl AlertState {
     pub fn alerts_total_count(&self) -> usize {
-        self.alerts.len() + self.nuisance_alerts.len()
+        self.all_alerts.iter().filter(|e| e.is_some()).count()
     }
 
-    pub fn alerts_count(&self, level: AlertLevel) -> usize {
-        self.alerts.values().filter(|v| **v == level).count()
+    pub fn priority_alert(&self) -> Option<(Alert, AlertLevel)> {
+        self.all_alerts
+            .iter()
+            .filter_map(|o| {
+                o.map(|(alert, alert_level)| (priority(alert, alert_level), (alert, alert_level)))
+            })
+            .min_by_key(|(p, _)| *p)
+            .map(|(_, alert_stuff)| alert_stuff)
     }
 
-    pub fn mode_alert_level(&self, alert_system: Alert) -> Option<AlertLevel> {
-        self.alerts.get(&alert_system).cloned()
+    /// Get an iterator to the alerts
+    pub fn iter(&self) -> impl Iterator<Item = (Alert, AlertLevel)> {
+        self.into_iter()
     }
 
     /// updates internal alerts with new alerts, removing all old alerts. Prioritizes as well.
-    pub(crate) fn insert(&mut self, alert: Alert, alert_level: AlertLevel) {
-        if let Some(old_alert_level) = self.alerts.get_mut(&alert) {
-            if (alert_level as isize) < (*old_alert_level as isize) {
-                self.nuisance_alerts.insert(alert, *old_alert_level);
-                *old_alert_level = alert_level;
+    pub(crate) fn insert(&mut self, new_alert: Alert, new_alert_level: AlertLevel) {
+        let mut already_present = false;
+
+        for (existing_alert, ref mut existing_alert_level) in
+            self.all_alerts.iter_mut().filter_map(|e| *e)
+        {
+            // check if alert is already present
+            if existing_alert == new_alert {
+                // promote alerts of lower priority to higher priority
+                if new_alert_level < *existing_alert_level {
+                    *existing_alert_level = new_alert_level;
+                }
+                already_present = true;
             }
-        } else {
-            self.alerts.insert(alert, alert_level);
+        }
+
+        // lets find a free spot
+        if !already_present {
+            if let Some(option) = self.all_alerts.iter_mut().find(|e| e.is_none()) {
+                *option = Some((new_alert, new_alert_level));
+            }
+        }
+    }
+}
+
+impl Default for AlertState {
+    fn default() -> Self {
+        Self {
+            all_alerts: [None; ALERT_STATE_SIZE],
+        }
+    }
+}
+
+/// An iterator over an `AlertState`
+pub struct AlertStateIter {
+    sorted_alerts: [Option<(Alert, AlertLevel)>; ALERT_STATE_SIZE],
+    index: usize,
+}
+
+impl Iterator for AlertStateIter {
+    type Item = (Alert, AlertLevel);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let maybe_item = self.sorted_alerts.get(self.index).cloned().flatten();
+        self.index += 1;
+        maybe_item
+    }
+}
+
+impl IntoIterator for &AlertState {
+    type Item = (Alert, AlertLevel);
+    type IntoIter = AlertStateIter;
+    fn into_iter(self) -> Self::IntoIter {
+        let mut alerts = self.all_alerts;
+        alerts.sort_by_key(|option| option.map(|(a, l)| priority(a, l)).unwrap_or(u8::MAX));
+
+        AlertStateIter {
+            sorted_alerts: alerts,
+            index: 0,
         }
     }
 }
 
 /// Trait which is to be fulfilled by all functionalities
-pub trait AlertSystem: std::fmt::Debug + Send {
+pub trait AlertSystem: fmt::Debug + Send {
+    /// Allows this system to be instantiated
+    fn new(config: &TawsConfig) -> Self
+    where
+        Self: Sized;
+
     /// Returns whether this alarm is armed.
     ///
     /// Arming refers to the automatic switching on of a function by
@@ -132,20 +225,10 @@ mod test {
     use super::*;
 
     #[test]
-    pub fn strum_test() {
-        let mut key = String::from("Mode 1");
-        key.retain(|c| !c.is_whitespace());
-
-        let _: Alert = key
-            .parse()
-            .expect(&format!("Unable to parse {} as Alert ", key));
-    }
-
-    #[test]
     pub fn alert_state_propagates_alerts() {
         let mut alert_state = AlertState::default();
-        let test_alerts = vec![(Alert::Mode3, AlertLevel::Caution)];
-        for (new_alert, new_alert_level) in test_alerts.iter() {
+        let test_alerts = [(Alert::Mode3, AlertLevel::Caution)];
+        for (new_alert, new_alert_level) in &test_alerts {
             alert_state.insert(*new_alert, *new_alert_level);
         }
 
@@ -156,18 +239,8 @@ mod test {
     pub fn alert_state_usage() {
         let alts = AlertState::default();
 
-        // using hashset contains
-        if alts.alerts.get(&Alert::Mode1) == Some(&AlertLevel::Caution) {
-            // do important stuff
-        }
-
-        // using hashset any
-        if alts.alerts.iter().any(|(_k, v)| *v == AlertLevel::Caution) {
-            // do important stuff
-        }
-
         // using match
-        for x in &alts.alerts {
+        for x in &alts {
             match x {
                 (Alert::Mode1, AlertLevel::Caution) if 1 > 0 => {}
 
@@ -178,7 +251,7 @@ mod test {
         }
 
         // using match lazily
-        for x in &alts.alerts {
+        for x in &alts {
             match x {
                 (_, AlertLevel::Caution) if 1 > 0 => {}
                 _ => {}

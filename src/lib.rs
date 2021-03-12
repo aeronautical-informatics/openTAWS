@@ -8,39 +8,75 @@
 //! and C ABI as addiotional targets, but this did not lead anywehre usable _so far_. We are very
 //! open to suggestions, so please open an issue if you have some feedback.
 
+#![no_std]
 #![deny(unsafe_code)]
 
+pub use alerts::{functionalities, Alert, AlertLevel, AlertState};
 use prelude::*;
-use std::collections::HashMap;
-use std::panic::UnwindSafe;
+pub use types::*;
 
 mod alerts;
 mod envelope;
 pub mod prelude;
 mod types;
 
-pub use alerts::{Alert, AlertLevel, AlertState};
-pub use types::*;
-
 /// Represents one instance of a TAWS
 #[derive(Debug)]
-pub struct TAWS {
+pub struct Taws {
     /// `true` if the TAWS is armed
     ///
     /// There is no specific condition for changing this to `false`.
     pub armed: bool,
-    functions: HashMap<Alert, Box<dyn AlertSystem + UnwindSafe>>,
-    config: TAWSConfig,
+    config: TawsConfig,
+    ffac: functionalities::Ffac,
+    flta: functionalities::Flta,
+    mode1: functionalities::Mode1,
+    mode2: functionalities::Mode2,
+    mode3: functionalities::Mode3,
+    mode4: functionalities::Mode4,
+    mode5: functionalities::Mode5,
+    pda: functionalities::Pda,
 }
 
-//impl Clone for TAWS {
-//    fn clone(&self) -> Self {
-//        todo!()
-//    }
-//}
+macro_rules! functionalities {
+    [$( $functionality_name:tt ),+] => {
+        ///
+        fn get_functionality(&self, alert_system: Alert) -> &dyn AlertSystem {
+            match alert_system {
+            $(
+                $crate::alerts::Alert::$functionality_name => casey::lower!(&self.$functionality_name),
+            )+
+            }
+        }
 
-impl TAWS {
-    /// Create a new instance of `TAWS`
+        fn get_mut_functionality(&mut self, alert_system: Alert) -> &mut dyn AlertSystem {
+            match alert_system {
+            $(
+                $crate::alerts::Alert::$functionality_name => casey::lower!(&mut self.$functionality_name),
+            )+
+            }
+        }
+
+        fn functionality_mut_array(&mut self)->[(Alert, &mut dyn AlertSystem); count!($($functionality_name)+)]{
+            [ $(
+                (
+                    $crate::alerts::Alert::$functionality_name,
+                    casey::lower!(&mut self.$functionality_name) as &mut dyn AlertSystem
+                ),
+            )+ ]
+        }
+    };
+}
+
+macro_rules! count {
+    () => (0usize);
+    ( $x:tt $($xs:tt)* ) => (1usize + count!($($xs)*));
+}
+
+impl Taws {
+    functionalities![Ffac, Flta, Mode1, Mode2, Mode3, Mode4, Mode5, Pda];
+
+    /// Create a new instance of `Taws`
     ///  
     /// # Arguments
     ///
@@ -51,28 +87,32 @@ impl TAWS {
     /// ```
     /// use opentaws::prelude::*;
     ///
-    /// let config = TAWSConfig::default();
-    /// let taws = TAWS::new(config);
+    /// let config = TawsConfig::default();
+    /// let taws = Taws::new(config);
     /// ```
-    pub fn new(config: TAWSConfig) -> Self {
+    pub fn new(config: TawsConfig) -> Self {
         use alerts::*;
 
-        let mut functions = HashMap::new();
-        let b: Box<dyn AlertSystem + UnwindSafe> = Box::new(Mode1::default());
-        functions.insert(Alert::Mode1, b);
-        functions.insert(Alert::FFAC, Box::new(FFAC::default()));
-
-        //functions.insert(Alert::Mode3, Box::new(Mode3()));
-        //functions.insert(Alert::Mode2, Box::new(Mode2()));
-        //functions.insert(Alert::Mode4, Box::new(Mode4()));
-        //functions.insert(Alert::Mode5, Box::new(Mode5()));
-        //functions.insert(Alert::FLTA, Box::new(FLTA()));
-        //functions.insert(Alert::PDA, Box::new(PDA()));
+        let ffac = functionalities::Ffac::new(&config);
+        let flta = functionalities::Flta::new(&config);
+        let mode1 = functionalities::Mode1::new(&config);
+        let mode2 = functionalities::Mode2::new(&config);
+        let mode3 = functionalities::Mode3::new(&config);
+        let mode4 = functionalities::Mode4::new(&config);
+        let mode5 = functionalities::Mode5::new(&config);
+        let pda = functionalities::Pda::new(&config);
 
         Self {
             armed: true,
-            functions,
             config,
+            ffac,
+            flta,
+            mode1,
+            mode2,
+            mode3,
+            mode4,
+            mode5,
+            pda,
         }
     }
 
@@ -86,14 +126,14 @@ impl TAWS {
     ///
     /// ```
     /// # use opentaws::prelude::*;
-    /// # let config = TAWSConfig::default();
-    /// # let taws = TAWS::new(config);
+    /// # let config = TawsConfig::default();
+    /// # let taws = Taws::new(config);
     /// if taws.is_armed(Alert::Mode1) {
     ///     // ...
     /// }
     /// ```
     pub fn is_armed(&self, alert_system: Alert) -> bool {
-        self.functions.get(&alert_system).unwrap().is_armed()
+        self.get_functionality(alert_system).is_armed()
     }
 
     /// Returns `true` if the alert system is inhibited
@@ -106,15 +146,14 @@ impl TAWS {
     ///
     /// ```
     /// # use opentaws::prelude::*;
-    /// # let config = TAWSConfig::default();
-    /// # let taws = TAWS::new(config);
+    /// # let config = TawsConfig::default();
+    /// # let taws = Taws::new(config);
     /// if taws.is_inhibited(Alert::Mode1) {
     ///     // ...
     /// }
     /// ```
-
     pub fn is_inhibited(&self, alert_system: Alert) -> bool {
-        self.functions.get(&alert_system).unwrap().is_inhibited()
+        self.get_functionality(alert_system).is_inhibited()
     }
 
     /// Inhibit a specific alert system
@@ -127,14 +166,14 @@ impl TAWS {
     ///
     /// ```
     /// # use opentaws::prelude::*;
-    /// # let config = TAWSConfig::default();
-    /// # let mut taws = TAWS::new(config);
+    /// # let config = TawsConfig::default();
+    /// # let mut taws = Taws::new(config);
     /// taws.inhibit(Alert::Mode1);
     ///
     /// assert!(taws.is_inhibited(Alert::Mode1));
     /// ```
     pub fn inhibit(&mut self, alert_system: Alert) {
-        self.functions.get_mut(&alert_system).unwrap().inhibit()
+        self.get_mut_functionality(alert_system).inhibit()
     }
 
     /// Uninhibit a specific alert system
@@ -147,14 +186,14 @@ impl TAWS {
     ///
     /// ```
     /// # use opentaws::prelude::*;
-    /// # let config = TAWSConfig::default();
-    /// # let mut taws = TAWS::new(config);
+    /// # let config = TawsConfig::default();
+    /// # let mut taws = Taws::new(config);
     /// taws.uninhibit(Alert::Mode1);
     ///
     /// assert_eq!(taws.is_inhibited(Alert::Mode1), false);
     /// ```
     pub fn uninhibit(&mut self, alert_system: Alert) {
-        self.functions.get_mut(&alert_system).unwrap().uninhibit()
+        self.get_mut_functionality(alert_system).uninhibit()
     }
 
     /// Process a new aircraft state
@@ -170,8 +209,8 @@ impl TAWS {
     ///
     /// ```
     /// # use opentaws::prelude::*;
-    /// # let config = TAWSConfig::default();
-    /// # let mut taws = TAWS::new(config);
+    /// # let config = TawsConfig::default();
+    /// # let mut taws = Taws::new(config);
     /// let aicraft_state = AircraftState::default();
     ///
     /// let alert_state = taws.process(&aicraft_state);
@@ -181,7 +220,7 @@ impl TAWS {
         let mut alert_state = alerts::AlertState::default();
 
         for (alert, alert_system) in self
-            .functions
+            .functionality_mut_array()
             .iter_mut()
             .filter(|(_, alert_system)| !alert_system.is_inhibited())
         {
@@ -201,14 +240,14 @@ mod test {
     #[ignore] // TODO enable this tests once all alert systems are implemented
     #[test]
     fn check_all_alert_systems() {
-        let taws = TAWS::new(Default::default());
-        let _ = taws.is_armed(Alert::FFAC);
-        let _ = taws.is_armed(Alert::FLTA);
+        let taws = Taws::new(Default::default());
+        let _ = taws.is_armed(Alert::Ffac);
+        let _ = taws.is_armed(Alert::Flta);
         let _ = taws.is_armed(Alert::Mode1);
         let _ = taws.is_armed(Alert::Mode2);
         let _ = taws.is_armed(Alert::Mode3);
         let _ = taws.is_armed(Alert::Mode4);
         let _ = taws.is_armed(Alert::Mode5);
-        let _ = taws.is_armed(Alert::PDA);
+        let _ = taws.is_armed(Alert::Pda);
     }
 }

@@ -1,23 +1,33 @@
 use super::*;
 
 #[derive(Debug)]
-pub struct Mode5();
+pub struct Mode5 {
+    armed: bool,
+    inhibited: bool,
+}
 
 impl AlertSystem for Mode5 {
+    fn new(_config: &TawsConfig) -> Self {
+        Self {
+            armed: false,
+            inhibited: false,
+        }
+    }
+
     fn is_armed(&self) -> bool {
         false
     }
 
     fn is_inhibited(&self) -> bool {
-        unimplemented!()
+        self.inhibited
     }
 
     fn inhibit(&mut self) {
-        unimplemented!()
+        self.inhibited = true;
     }
 
     fn uninhibit(&mut self) {
-        unimplemented!()
+        self.inhibited = false;
     }
 
     fn process(&mut self, _state: &AircraftState) -> Option<AlertLevel> {

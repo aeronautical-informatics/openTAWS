@@ -66,18 +66,17 @@ const USAGE: &'static str = "usage: <Flightgear base url>";
 fn main() -> Result<(), Box<dyn Error>> {
     smol::block_on(async {
         let args: Vec<String> = env::args().collect();
-        let base_url = args.get(1).expect(USAGE);
+        let base_uri = args.get(1).expect(USAGE);
 
-        let mut taws = TAWS::new(Default::default());
-        let mut fg_stream = new_flightgear_stream(base_url.as_str()).await?;
+        let mut taws = Taws::new(Default::default());
+        let mut fg_stream = new_flightgear_stream(base_uri.as_str()).await?;
         let mut frames: u128 = 0;
 
         let mut aircraft_state = AircraftState::default();
 
         loop {
-            let now = Instant::now();
-
             let leaf = fg_stream.next().await.unwrap()?;
+            let now = Instant::now();
             let ts = Time::new::<second>(leaf.ts);
 
             // Next frame begins
