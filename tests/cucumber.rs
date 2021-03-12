@@ -40,7 +40,7 @@ impl cucumber::World for MyWorld {
         Ok(Self {
             taws: Taws::new(Default::default()),
             mould_pipeline: Vec::new(),
-            test_length: 1000, // TODO is this a good number?
+            test_length: 10000, // TODO is this a good number?
         })
     }
 }
