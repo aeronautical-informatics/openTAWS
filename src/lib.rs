@@ -237,7 +237,6 @@ impl Taws {
 mod test {
     use super::*;
 
-    #[ignore] // TODO enable this tests once all alert systems are implemented
     #[test]
     fn check_all_alert_systems() {
         let taws = Taws::new(Default::default());

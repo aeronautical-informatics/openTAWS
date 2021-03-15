@@ -210,12 +210,12 @@ Feature: Mode 1: Excessive Rate of Descent
 
     @MOPS_281
     Scenario: Caution
-      Given a caution level Mode 1 alert is active
+      Given a Mode 1 caution alert is active
       Then the TAWS shall trigger a yellow or amber indicator
 
     @MOPS_282
     Scenario: Warning
-      Given a warning level Mode 1 alert is active
+      Given a Mode 1 warning alert is active
       Then the TAWS shall trigger a red indicator
 
 # vim: set ts=2 sw=2 expandtab: retab: expandtab #
