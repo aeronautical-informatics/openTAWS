@@ -1,4 +1,7 @@
-use core::fmt;
+use core::{
+    fmt,
+    ops::{Add, Rem},
+};
 
 use uom::{
     fmt::DisplayStyle::Abbreviation,
@@ -72,8 +75,38 @@ pub struct TawsConfig {
 impl AircraftState {
     /// Normalizes an `AircraftState`. Only normalized `AircraftStates` should be fed to the TAWS.
     pub(crate) fn normalize(&mut self) {
-        self.heading -= self.heading.floor::<revolution>();
-        // TODO normalize all angles
+        let one_revolution = Angle::new::<revolution>(1.0);
+        let half_revolution = Angle::new::<revolution>(0.5);
+        let quarter_revolution = Angle::new::<revolution>(0.25);
+
+        self.heading = Self::modulo(self.heading, one_revolution);
+
+        self.roll = Self::modulo(self.roll + half_revolution, one_revolution) - half_revolution;
+        self.pitch = Self::modulo(self.pitch + half_revolution, one_revolution) - half_revolution;
+
+        self.position_lat = Self::modulo(self.position_lat + quarter_revolution, half_revolution)
+            - quarter_revolution;
+        self.position_lon =
+            Self::modulo(self.position_lon + half_revolution, one_revolution) - half_revolution;
+    }
+
+    pub(crate) fn check(&self) {
+        let zero = Angle::new::<revolution>(0.0);
+        let one_revolution = Angle::new::<revolution>(1.0);
+        let half_revolution = Angle::new::<revolution>(0.5);
+        let quarter_revolution = Angle::new::<revolution>(0.25);
+
+        (zero..=one_revolution).contains(&self.heading);
+
+        (-half_revolution..=half_revolution).contains(&self.roll);
+        (-half_revolution..=half_revolution).contains(&self.pitch);
+
+        (-quarter_revolution..=quarter_revolution).contains(&self.position_lat);
+        (-half_revolution..=half_revolution).contains(&self.position_lon);
+    }
+
+    fn modulo<T: Copy + Add<Output = T> + Rem<Output = T>>(a: T, b: T) -> T {
+        ((a % b) + b) % b
     }
 }
 

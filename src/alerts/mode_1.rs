@@ -47,18 +47,7 @@ impl AlertSystem for Mode1 {
         }
     }
 
-    fn is_armed(&self) -> bool {
-        self.armed
-    }
-    fn is_inhibited(&self) -> bool {
-        self.inhibited
-    }
-    fn inhibit(&mut self) {
-        self.inhibited = true;
-    }
-    fn uninhibit(&mut self) {
-        self.inhibited = false;
-    }
+    arm_inhibit!();
 }
 
 lazy_static::lazy_static! {
