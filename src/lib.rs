@@ -15,6 +15,9 @@ pub use alerts::{functionalities, Alert, AlertLevel, AlertState};
 use prelude::*;
 pub use types::*;
 
+#[macro_use]
+mod macros;
+
 mod alerts;
 mod envelope;
 pub mod prelude;
@@ -36,41 +39,6 @@ pub struct Taws {
     mode4: functionalities::Mode4,
     mode5: functionalities::Mode5,
     pda: functionalities::Pda,
-}
-
-macro_rules! functionalities {
-    [$( $functionality_name:tt ),+] => {
-        ///
-        fn get_functionality(&self, alert_system: Alert) -> &dyn AlertSystem {
-            match alert_system {
-            $(
-                $crate::alerts::Alert::$functionality_name => casey::lower!(&self.$functionality_name),
-            )+
-            }
-        }
-
-        fn get_mut_functionality(&mut self, alert_system: Alert) -> &mut dyn AlertSystem {
-            match alert_system {
-            $(
-                $crate::alerts::Alert::$functionality_name => casey::lower!(&mut self.$functionality_name),
-            )+
-            }
-        }
-
-        fn functionality_mut_array(&mut self)->[(Alert, &mut dyn AlertSystem); count!($($functionality_name)+)]{
-            [ $(
-                (
-                    $crate::alerts::Alert::$functionality_name,
-                    casey::lower!(&mut self.$functionality_name) as &mut dyn AlertSystem
-                ),
-            )+ ]
-        }
-    };
-}
-
-macro_rules! count {
-    () => (0usize);
-    ( $x:tt $($xs:tt)* ) => (1usize + count!($($xs)*));
 }
 
 impl Taws {
@@ -134,6 +102,46 @@ impl Taws {
     /// ```
     pub fn is_armed(&self, alert_system: Alert) -> bool {
         self.get_functionality(alert_system).is_armed()
+    }
+
+    /// Arms a specific alert system
+    ///
+    /// # Arguments
+    ///
+    /// * `alert_system` - The alert system which shall be inhibited
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use opentaws::prelude::*;
+    /// # let config = TawsConfig::default();
+    /// # let mut taws = Taws::new(config);
+    /// taws.arm(Alert::Mode1);
+    ///
+    /// assert!(taws.is_armed(Alert::Mode1));
+    /// ```
+    pub fn arm(&mut self, alert_system: Alert) {
+        self.get_mut_functionality(alert_system).arm()
+    }
+
+    /// Disarms a specific alert system
+    ///
+    /// # Arguments
+    ///
+    /// * `alert_system` - The alert system which shall be inhibited
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use opentaws::prelude::*;
+    /// # let config = TawsConfig::default();
+    /// # let mut taws = Taws::new(config);
+    /// taws.disarm(Alert::Mode1);
+    ///
+    /// assert_eq!(taws.is_armed(Alert::Mode1), false);
+    /// ```
+    pub fn disarm(&mut self, alert_system: Alert) {
+        self.get_mut_functionality(alert_system).disarm()
     }
 
     /// Returns `true` if the alert system is inhibited

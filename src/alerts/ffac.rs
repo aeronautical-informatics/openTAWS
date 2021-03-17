@@ -3,6 +3,7 @@ use crate::prelude::*;
 
 #[derive(Debug)]
 pub struct Ffac {
+    armed: bool,
     inhibited: bool,
     last_height: Length,
 }
@@ -10,26 +11,13 @@ pub struct Ffac {
 impl AlertSystem for Ffac {
     fn new(_config: &TawsConfig) -> Self {
         Self {
+            armed: true,
             inhibited: false,
             last_height: Length::new::<foot>(0.0),
         }
     }
 
-    fn is_armed(&self) -> bool {
-        true
-    }
-
-    fn is_inhibited(&self) -> bool {
-        self.inhibited
-    }
-
-    fn inhibit(&mut self) {
-        self.inhibited = true;
-    }
-
-    fn uninhibit(&mut self) {
-        self.inhibited = false;
-    }
+    arm_inhibit!();
 
     fn process(&mut self, state: &AircraftState) -> Option<AlertLevel> {
         let fivehundred = Length::new::<foot>(500.0);

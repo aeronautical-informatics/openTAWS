@@ -207,6 +207,12 @@ pub trait AlertSystem: fmt::Debug + Send {
     /// the Equipment (DO-367 Chapter 1.9).
     fn is_armed(&self) -> bool;
 
+    /// Arm this alert
+    fn arm(&mut self);
+
+    /// Disarm this alert
+    fn disarm(&mut self);
+
     /// Dismiss this alert
     fn inhibit(&mut self);
 

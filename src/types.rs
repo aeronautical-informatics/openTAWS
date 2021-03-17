@@ -79,17 +79,18 @@ impl AircraftState {
         let half_revolution = Angle::new::<revolution>(0.5);
         let quarter_revolution = Angle::new::<revolution>(0.25);
 
-        self.heading = Self::modulo(self.heading,one_revolution );
+        self.heading = Self::modulo(self.heading, one_revolution);
 
-        self.roll = Self::modulo(self.roll+half_revolution, one_revolution)-half_revolution;
-        self.pitch = Self::modulo(self.pitch + half_revolution, one_revolution)-half_revolution;
+        self.roll = Self::modulo(self.roll + half_revolution, one_revolution) - half_revolution;
+        self.pitch = Self::modulo(self.pitch + half_revolution, one_revolution) - half_revolution;
 
-        self.position_lat = Self::modulo(self.position_lat + quarter_revolution, half_revolution) - quarter_revolution;
-        self.position_lon = Self::modulo(self.position_lon + half_revolution, one_revolution) - half_revolution;
+        self.position_lat = Self::modulo(self.position_lat + quarter_revolution, half_revolution)
+            - quarter_revolution;
+        self.position_lon =
+            Self::modulo(self.position_lon + half_revolution, one_revolution) - half_revolution;
     }
 
     pub(crate) fn check(&self) {
-
         let zero = Angle::new::<revolution>(0.0);
         let one_revolution = Angle::new::<revolution>(1.0);
         let half_revolution = Angle::new::<revolution>(0.5);
@@ -104,7 +105,7 @@ impl AircraftState {
         (-half_revolution..=half_revolution).contains(&self.position_lon);
     }
 
-    fn modulo<T:Copy +Add<Output =T> + Rem<Output=T>>(a:T, b:T)->T{
+    fn modulo<T: Copy + Add<Output = T> + Rem<Output = T>>(a: T, b: T) -> T {
         ((a % b) + b) % b
     }
 }
@@ -192,6 +193,4 @@ mod test {
         aircraft_state.normalize();
         assert!((aircraft_state.heading - Angle::new::<degree>(304.0)).get::<degree>() < EPS);
     }
-
-
 }
