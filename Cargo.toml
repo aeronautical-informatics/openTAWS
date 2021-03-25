@@ -15,6 +15,7 @@ repository = "https://github.com/aeronautical-informatics/openTAWS"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [badges]
+codecov = { repository = "aeronautical-informatics/openTAWS", branch = "main" }
 github = { repository = "aeronautical-informatics/openTAWS" }
 is-it-maintained-open-issues = { repository = "aeronautical-informatics/openTAWS" }
 maintenance = { status = "actively-developed" }
