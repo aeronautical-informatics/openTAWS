@@ -33,8 +33,7 @@ serde = { version = "1.0", default-features = false, features = ["derive"], opti
 
 [dev-dependencies]
 arbitrary = { version = "1", features = ["derive"] }
-async-trait = "0.1"
-cucumber = { package = "cucumber_rust", version = "0.8" }
+cucumber_rust = {version = "0.8", features = [ "macros" ] }
 futures = "0"
 rand = "*"
 rand_pcg = "*"

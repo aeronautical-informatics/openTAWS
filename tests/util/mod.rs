@@ -1,4 +1,7 @@
-use std::ops::{Add, Rem, Sub};
+use std::{
+    ops::{Add, Rem, Sub},
+    str::FromStr,
+};
 
 use arbitrary::{Arbitrary, Unstructured};
 use rand::RngCore;
@@ -37,46 +40,64 @@ impl<'a> Arbitrary<'a> for AircraftStateWrapper {
 }
 
 // Parser magic
-pub fn parse_alert<T: AsRef<str>>(from: &T) -> Alert {
-    let mut input_word = from.as_ref().to_lowercase();
-    input_word.retain(|c| !c.is_whitespace());
-    match input_word.as_str() {
-        "ffac" => Alert::Ffac,
-        "flta" => Alert::Flta,
-        "mode1" => Alert::Mode1,
-        "mode2" => Alert::Mode2,
-        "mode3" => Alert::Mode3,
-        "mode4" => Alert::Mode4,
-        "mode5" => Alert::Mode5,
-        "pda" => Alert::Pda,
-        _ => {
-            panic!(
-                "unable to convert {} into a variant of `Alert`",
-                from.as_ref()
-            );
-        }
+pub struct AlertWrapper(Alert);
+impl FromStr for AlertWrapper {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut input_word = s.to_lowercase();
+        input_word.retain(|c| !c.is_whitespace());
+        Ok(Self(match input_word.as_str() {
+            "ffac" => Alert::Ffac,
+            "flta" => Alert::Flta,
+            "mode1" => Alert::Mode1,
+            "mode2" => Alert::Mode2,
+            "mode3" => Alert::Mode3,
+            "mode4" => Alert::Mode4,
+            "mode5" => Alert::Mode5,
+            "pda" => Alert::Pda,
+            _ => {
+                panic!("unable to convert {} into a variant of `Alert`", s);
+            }
+        }))
+    }
+}
+impl Into<Alert> for AlertWrapper {
+    fn into(self) -> Alert {
+        self.0
     }
 }
 
-pub fn parse_level<T: AsRef<str>>(from: &T) -> AlertLevel {
-    let mut input_word = from.as_ref().to_lowercase();
-    input_word.retain(|c| !c.is_whitespace());
-    match input_word.as_str() {
-        "warning" => AlertLevel::Warning,
-        "caution" => AlertLevel::Caution,
-        "annunciation" => AlertLevel::Annunciation,
-        _ => {
-            panic!(
-                "unable to convert {} into a variant of `Alert`",
-                from.as_ref()
-            );
-        }
+pub struct AlertLevelWrapper(AlertLevel);
+impl FromStr for AlertLevelWrapper {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut input_word = s.to_string();
+        input_word.retain(|c| !c.is_whitespace());
+        Ok(Self(match input_word.as_str() {
+            "warning" => AlertLevel::Warning,
+            "caution" => AlertLevel::Caution,
+            "annunciation" => AlertLevel::Annunciation,
+            _ => {
+                panic!(r#"unable to convert "{}" into a variant of `Alert`"#, s);
+            }
+        }))
     }
 }
 
-pub fn parse_alert_level<T: AsRef<str>>(from: &T) -> (Alert, AlertLevel) {
-    let word_vec: Vec<_> = from.as_ref().rsplitn(2, ' ').collect();
-    (parse_alert(&word_vec[1]), parse_level(&word_vec[0]))
+pub struct AlertAndLevelWrapper(Alert, AlertLevel);
+impl FromStr for AlertAndLevelWrapper {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let word_vec: Vec<_> = s.rsplitn(2, ' ').collect();
+        let alert: AlertWrapper = word_vec[1].parse()?;
+        let level: AlertLevelWrapper = word_vec[0].parse()?;
+        Ok(Self(alert.0, level.0))
+    }
+}
+impl Into<(Alert, AlertLevel)> for AlertAndLevelWrapper {
+    fn into(self) -> (Alert, AlertLevel) {
+        (self.0, self.1)
+    }
 }
 
 // AircraftState generator
