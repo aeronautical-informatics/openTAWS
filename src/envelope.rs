@@ -103,8 +103,8 @@ mod test {
     use super::*;
 
     fn init_envelope() -> Envelope<4> {
-        let vec_points = [(1600, 100), (1850, 300), (10100, 1958), (10101, 1958)];
-        Envelope::new(vec_points).unwrap()
+        let points = [(1600, 100), (1850, 300), (10100, 1958), (10101, 1958)];
+        Envelope::new(points).unwrap()
     }
 
     #[test]
@@ -129,5 +129,11 @@ mod test {
     fn y_above_envelope() {
         let evp = init_envelope();
         assert!(!evp.contains(10100, 1959));
+    }
+
+    #[test]
+    #[should_panic(expected = "called `Option::unwrap()` on a `None` value")]
+    fn input_list_too_small() {
+        let evp = Envelope::<1>::new([(0, 0)]).unwrap();
     }
 }
