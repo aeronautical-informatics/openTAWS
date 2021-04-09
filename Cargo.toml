@@ -8,7 +8,8 @@ authors = [
 	]
 edition = "2018"
 license = "MIT OR Apache-2.0"
-description = "An async adapter for mavlink conections"
+description = "An open source TAWS"
+documentation = "https://aeronautical-informatics.github.io/openTAWS/"
 readme = "README.md"
 repository = "https://github.com/aeronautical-informatics/openTAWS"
 
