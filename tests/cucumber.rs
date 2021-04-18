@@ -23,27 +23,27 @@ pub struct MyWorld {
 #[given("the plane is flying")]
 fn is_flying(_world: &mut MyWorld) {}
 
-#[given(regex = r#"^(.+) is (.*)armed$"#)]
+#[given(regex = r#"^(.+) is ?(not)? armed$"#)]
 fn is_armed(world: &mut MyWorld, alert: AlertWrapper, maybe_not: String) {
-    if maybe_not.starts_with("not") {
+    if maybe_not == "not" {
         world.taws.disarm(alert.into());
     } else {
         world.taws.arm(alert.into());
     }
 }
 
-#[given(regex = "^(.+) is (.*)inhibited$")]
+#[given(regex = "^(.+) is ?(not)? inhibited$")]
 fn is_inhibited(world: &mut MyWorld, alert: AlertWrapper, maybe_not: String) {
-    if maybe_not.starts_with("not") {
+    if maybe_not == "not" {
         world.taws.uninhibit(alert.into());
     } else {
         world.taws.inhibit(alert.into());
     }
 }
 
-#[given(regex = r"^steep approach is (.*)selected$")]
+#[given(regex = r"^steep approach is ?(not)? selected$")]
 fn steep_approach(world: &mut MyWorld, maybe_not: String) {
-    if maybe_not.starts_with("not") {
+    if maybe_not == "not" {
         world.add_mould(|a| a.steep_approach = false);
     } else {
         world.add_mould(|a| a.steep_approach = true);
@@ -56,7 +56,7 @@ fn shall_be_armed(world: &mut MyWorld, alert: AlertWrapper) {
     assert!(world.taws.is_armed(alert.into()));
 }
 
-#[when(regex = r"^the rate of descent is at (\w+) (\d+) feet per minute$")]
+#[when(regex = r"^the rate of descent is at (most|least) (\d+) feet per minute$")]
 fn rate_of_descent(world: &mut MyWorld, most_or_least: String, rod: f64) {
     let rod = Velocity::new::<foot_per_minute>(rod);
     let mut bouncer = BouncingClamp();
@@ -76,14 +76,14 @@ fn rate_of_descent(world: &mut MyWorld, most_or_least: String, rod: f64) {
     }
 }
 
-#[when(regex = r"^the height above terrain is (.*)between (\d+) and (\d+) feet$")]
+#[when(regex = r"^the height above terrain is ?(not)? between (\d+) and (\d+) feet$")]
 fn height_above_terrain(world: &mut MyWorld, maybe_not: String, lower: f64, upper: f64) {
     let height_at_least = Length::new::<foot>(lower);
     let height_at_most = Length::new::<foot>(upper);
 
     let mut bouncer = BouncingClamp();
 
-    if maybe_not.starts_with("not") {
+    if maybe_not == "not" {
         world.add_mould(move |a| {
             bouncer.not_in_range(&mut a.altitude_ground, height_at_least, height_at_most)
         });
