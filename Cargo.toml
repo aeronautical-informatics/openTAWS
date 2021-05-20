@@ -23,32 +23,32 @@ maintenance = { status = "actively-developed" }
 
 [features]
 default = ["use-serde"]
-use-serde = ["serde", "uom/use_serde"]
+use-serde = ["uom/use_serde"]
 
 [dependencies]
 casey = "0.3"
-lazy_static = "1"
-uom = { version = "0", default-features = false, features = [ "f64", "si", "use_serde" ] }
+lazy_static = { version = "1", features = [ "spin_no_std" ] }
+uom = { version = "0", default-features = false, features = [ "f64", "si" ] }
 ringbuffer = "0.4"
-serde = { version = "1.0", default-features = false, features = ["derive"], optional = true }
+serde = { version = "1.0", default-features = false, features = [ "derive" ] }
 
-[dev-dependencies]
-arbitrary = { version = "1", features = ["derive"] }
-cucumber_rust = {version = "0.8", features = [ "macros" ] }
-futures = "0"
-rand = "*"
-rand_pcg = "*"
-uom = { version = "*", features = [ "f64", "si", "std", "use_serde" ] }
-
-# for examples/flightgear
-async-tungstenite = { version = "*", features = [ "async-std-runtime" ] }
-serde = { version = "^1.0", features = [ "derive" ] }
-serde_json = "1.0"
-smol = "^1.0"
-
+# testing ang examples
+arbitrary = { version = "1", features = ["derive"], optional = true }
+async-tungstenite = { version = "*", features = [ "async-std-runtime" ], optional = true }
+cucumber_rust = { version = "0.8", features = [ "macros" ], optional = true  }
+futures = { version = "0", optional = true }
+rand = { version = "*", optional = true }
+rand_pcg = { version = "*", optional = true }
+serde_json = { version = "1.0", optional = true }
+smol = { version = "1.0", optional = true }
 
 
 [[test]]
 name = "cucumber"
 harness = false # Allows Cucumber to print output instead of libtest
 path = "tests/cucumber.rs"
+required-features = [ "arbitrary", "cucumber_rust", "futures", "rand", "rand_pcg", "serde_json" ]
+
+[[example]]
+name = "flightgear"
+required-features = [ "async-tungstenite", "futures", "serde_json", "smol" ]
