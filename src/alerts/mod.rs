@@ -185,7 +185,9 @@ impl IntoIterator for &AlertState {
     type IntoIter = AlertStateIter;
     fn into_iter(self) -> Self::IntoIter {
         let mut alerts = self.all_alerts;
-        alerts.sort_by_key(|option| option.map(|(a, l)| priority(a, l)).unwrap_or(u8::MAX));
+        //alerts.sort_by_key(|option| option.map(|(a, l)| priority(a, l)).unwrap_or(u8::MAX));
+        // does not work on no_std.
+        // TODO implement a small sorting algorithm
 
         AlertStateIter {
             sorted_alerts: alerts,
