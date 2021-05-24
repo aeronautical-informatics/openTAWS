@@ -38,6 +38,9 @@ jobs:
           override: true
       - name: Run tests
         run: cargo test --verbose
+        with:
+          fail_ci_if_error:     true
+
 
   clippy_check:
     runs-on: ubuntu-latest

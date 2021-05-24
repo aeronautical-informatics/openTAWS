@@ -34,7 +34,7 @@ impl AlertSystem for Mode1 {
 
         match state.steep_approach {
             true if WARNING_ENVELOPE_STEEP_APPROACH.contains(rod, altitude) => {
-                Some(AlertLevel::Warning)
+                None
             }
             true if CAUTION_ENVELOPE_STEEP_APPROACH.contains(rod, altitude) => {
                 Some(AlertLevel::Caution)
