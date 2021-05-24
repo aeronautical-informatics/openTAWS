@@ -39,6 +39,7 @@ jobs:
       - name: Run tests
         run: cargo test --verbose
 
+
   clippy_check:
     runs-on: ubuntu-latest
     steps:
