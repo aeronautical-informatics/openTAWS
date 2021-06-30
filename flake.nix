@@ -26,6 +26,9 @@
     };
 
     # Hail to the Hydra
-    hydraJobs = packages;
+    hydraJobs.opentaws."system" = packages.opentaws // { meta = {
+      timeout = 86400;
+      maxSilent = 36000;
+    };};
   });
 }
