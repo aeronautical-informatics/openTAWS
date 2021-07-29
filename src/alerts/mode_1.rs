@@ -33,7 +33,9 @@ impl AlertSystem for Mode1 {
         let rod = -state.climb_rate.get::<foot_per_minute>();
 
         match state.steep_approach {
-            true if WARNING_ENVELOPE_STEEP_APPROACH.contains(rod, altitude) => None,
+            true if WARNING_ENVELOPE_STEEP_APPROACH.contains(rod, altitude) => {
+                Some(AlertLevel::Warning)
+            }
             true if CAUTION_ENVELOPE_STEEP_APPROACH.contains(rod, altitude) => {
                 Some(AlertLevel::Caution)
             }
