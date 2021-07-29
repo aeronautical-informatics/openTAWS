@@ -86,6 +86,8 @@
 <span id="83">83</span>
 <span id="84">84</span>
 <span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">uom::si</span>::{<span class="ident">length::foot</span>, <span class="ident">velocity::foot_per_minute</span>};
 
@@ -122,7 +124,9 @@
         <span class="kw">let</span> <span class="ident">rod</span> <span class="op">=</span> <span class="op">-</span><span class="ident">state</span>.<span class="ident">climb_rate</span>.<span class="ident">get</span>::<span class="op">&lt;</span><span class="ident">foot_per_minute</span><span class="op">&gt;</span>();
 
         <span class="kw">match</span> <span class="ident">state</span>.<span class="ident">steep_approach</span> {
-            <span class="bool-val">true</span> <span class="kw">if</span> <span class="ident">WARNING_ENVELOPE_STEEP_APPROACH</span>.<span class="ident">contains</span>(<span class="ident">rod</span>, <span class="ident">altitude</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="bool-val">true</span> <span class="kw">if</span> <span class="ident">WARNING_ENVELOPE_STEEP_APPROACH</span>.<span class="ident">contains</span>(<span class="ident">rod</span>, <span class="ident">altitude</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">AlertLevel::Warning</span>)
+            }
             <span class="bool-val">true</span> <span class="kw">if</span> <span class="ident">CAUTION_ENVELOPE_STEEP_APPROACH</span>.<span class="ident">contains</span>(<span class="ident">rod</span>, <span class="ident">altitude</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="prelude-val">Some</span>(<span class="ident">AlertLevel::Caution</span>)
             }
