@@ -29,13 +29,13 @@ use-serde = ["uom/use_serde"]
 casey = "0.3"
 lazy_static = { version = "1", features = [ "spin_no_std" ] }
 uom = { version = "0", default-features = false, features = [ "f64", "si" ] }
-ringbuffer = "0.4"
+ringbuffer = "0.8"
 serde = { version = "1.0", default-features = false, features = [ "derive" ] }
 
 # testing ang examples
 arbitrary = { version = "1", features = ["derive"], optional = true }
 async-tungstenite = { version = "*", features = [ "async-std-runtime" ], optional = true }
-cucumber_rust = { version = "0.8", features = [ "macros" ], optional = true  }
+cucumber_rust = { version = "0.9", features = [ "macros" ], optional = true  }
 futures = { version = "0", optional = true }
 rand = { version = "*", optional = true }
 rand_pcg = { version = "*", optional = true }
