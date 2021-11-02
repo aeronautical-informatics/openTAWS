@@ -1,0 +1,14 @@
+[package]
+name = "kd_tree_sort"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+kd_tree = { path = "../kd_tree" }
+rayon = "1.5"
+
+[dev-dependencies]
+rand = "0.8"
+rand_pcg = "*"

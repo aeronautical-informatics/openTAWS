@@ -11,3 +11,5 @@ target
 report/
 **/result
 **/result-doc
+
+aviation_database/airports.json
