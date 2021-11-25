@@ -28,7 +28,8 @@ use-serde = ["uom/use_serde"]
 [dependencies]
 aviation_database = { path = "../aviation_database"}
 lazy_static = { version = "1", features = [ "spin_no_std" ] }
-uom = { version = "0", default-features = false, features = [ "f64", "si" ] }
+num = { version = "0.4", default-features = false}
 ringbuffer = "0.8"
 serde = { version = "1.0", default-features = false, features = [ "derive" ] }
 serde_arrays = "0.1.0" # Serde const generic "workaround"
+uom = { version = "0", default-features = false, features = [ "f64", "si" ] }

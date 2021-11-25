@@ -50,24 +50,14 @@ impl<'a> AlertSystem<'a> for Mode3 {
     }
 }
 
-lazy_static::lazy_static! {
-    /// CAUTION Envelope for Methode 1
-    /// X-Axis is Rate of Decent in foot per minute
-    /// Y-Axis is Height above Terrain in foot
-    static ref CAUTION_ENVELOPE_METHODE_1: Envelope<3> = Envelope::new([
-        (125.0, 50.0),
-        (480.0, 680.0),
-        (481.0, 680.0),
-    ])
-    .unwrap();
+/// CAUTION Envelope for Methode 1
+/// X-Axis is Rate of Decent in foot per minute
+/// Y-Axis is Height above Terrain in foot
+const CAUTION_ENVELOPE_METHODE_1: Envelope<f64, f64, f64, 3> =
+    Envelope::new([(125.0, 50.0), (480.0, 680.0), (481.0, 680.0)]);
 
-    /// CAUTION Envelope for Methode 2
-    /// X-Axis is Altitude Loss in foot
-    /// Y-Axis is Height above Terrain in foot
-    static ref CAUTION_ENVELOPE_METHODE_2: Envelope<3> = Envelope::new([
-        (11.0, 35.0),
-        (104.0, 1100.0),
-        (104.0, 1100.0),
-    ])
-    .unwrap();
-}
+/// CAUTION Envelope for Methode 2
+/// X-Axis is Altitude Loss in foot
+/// Y-Axis is Height above Terrain in foot
+const CAUTION_ENVELOPE_METHODE_2: Envelope<f64, f64, f64, 3> =
+    Envelope::new([(11.0, 35.0), (104.0, 1100.0), (104.0, 1100.0)]);

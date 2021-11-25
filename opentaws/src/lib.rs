@@ -10,9 +10,11 @@
 
 #![no_std]
 #![deny(unsafe_code)]
+#![feature(const_fn_floating_point_arithmetic)]
+#![feature(const_fn_trait_bound)]
+#![feature(const_trait_impl)]
 
 pub use alerts::{functionalities, Alert, AlertLevel, AlertState};
-use prelude::*;
 pub use types::*;
 
 #[macro_use]

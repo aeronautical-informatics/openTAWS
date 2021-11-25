@@ -1087,6 +1087,7 @@ version = "0.1.0"
 dependencies = [
  "aviation_database",
  "lazy_static",
+ "num",
  "ringbuffer",
  "serde",
  "serde_arrays",

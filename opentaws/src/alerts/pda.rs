@@ -46,16 +46,13 @@ impl<'a> AlertSystem<'a> for Pda<'a> {
     }
 }
 
-lazy_static::lazy_static! {
-    /// CAUTION Envelope for PDA
-    /// X-Axis is Distance to Airport in nautical miles
-    /// Y-Axis is Height above Terrain in foot
-    static ref CAUTION_ENVELOPE: Envelope<5> = Envelope::new([
-        (0.9, 5.0),
-        (0.9, 85.0),
-        (1.8, 155.0),
-        (2.3, 175.0),
-        (2.4, 175.0),
-    ])
-    .unwrap();
-}
+/// CAUTION Envelope for PDA
+/// X-Axis is Distance to Airport in nautical miles
+/// Y-Axis is Height above Terrain in foot
+const CAUTION_ENVELOPE: Envelope<f64, f64, f64, 5> = Envelope::new([
+    (0.9, 5.0),
+    (0.9, 85.0),
+    (1.8, 155.0),
+    (2.3, 175.0),
+    (2.4, 175.0),
+]);

@@ -57,40 +57,34 @@ impl<'a> AlertSystem<'a> for Mode1 {
     arm_inhibit!();
 }
 
-lazy_static::lazy_static! {
-    static ref CAUTION_ENVELOPE: Envelope<5> = Envelope::new([
-        (1200.0, 11.0),
-        (2550.0, 1550.0),
-        (4800.0, 2900.0),
-        (10000.0, 4000.0),
-        (10001.0, 4000.0),
-    ])
-    .unwrap();
+const CAUTION_ENVELOPE: Envelope<f64, f64, f64, 5> = Envelope::new([
+    (1200.0, 11.0),
+    (2550.0, 1550.0),
+    (4800.0, 2900.0),
+    (10000.0, 4000.0),
+    (10001.0, 4000.0),
+]);
 
-        static ref CAUTION_ENVELOPE_STEEP_APPROACH: Envelope<5> = Envelope::new([
-        (1350.0, 11.0),
-        (2700.0, 1550.0),
-        (5300.0, 2900.0),
-        (10000.0, 4000.0),
-        (10001.0, 4000.0),
-    ])
-    .unwrap();
+const CAUTION_ENVELOPE_STEEP_APPROACH: Envelope<f64, f64, f64, 5> = Envelope::new([
+    (1350.0, 11.0),
+    (2700.0, 1550.0),
+    (5300.0, 2900.0),
+    (10000.0, 4000.0),
+    (10001.0, 4000.0),
+]);
 
-    static ref WARNING_ENVELOPE: Envelope<5> = Envelope::new([
-        (1400.0, 11.0),
-        (2500.0, 1300.0),
-        (7500.0, 2500.0),
-        (11000.0, 3000.0),
-        (11001.0, 3000.0),
-    ])
-    .unwrap();
+const WARNING_ENVELOPE: Envelope<f64, f64, f64, 5> = Envelope::new([
+    (1400.0, 11.0),
+    (2500.0, 1300.0),
+    (7500.0, 2500.0),
+    (11000.0, 3000.0),
+    (11001.0, 3000.0),
+]);
 
-    static ref WARNING_ENVELOPE_STEEP_APPROACH: Envelope<5> = Envelope::new([
-        (1550.0, 11.0),
-        (2650.0, 1300.0),
-        (8000.0, 2500.0),
-        (11000.0, 3000.0),
-        (11001.0, 3000.0),
-    ])
-    .unwrap();
-}
+const WARNING_ENVELOPE_STEEP_APPROACH: Envelope<f64, f64, f64, 5> = Envelope::new([
+    (1550.0, 11.0),
+    (2650.0, 1300.0),
+    (8000.0, 2500.0),
+    (11000.0, 3000.0),
+    (11001.0, 3000.0),
+]);

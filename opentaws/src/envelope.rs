@@ -1,10 +1,19 @@
+use core::ops::{Div, Mul};
+
+use num::Num;
+
 /// `Envelope` helps checking whether a 2D point is inside of a 2D Envelope - that is a polygon without vertical lines.
-pub struct Envelope<const N: usize> {
-    points: [(f64, f64); N],
-    derivatives: [f64; N], // TODO make this N-1
+pub struct Envelope<X, Y, D, const N: usize> {
+    points: [(X, Y); N],
+    derivatives: [D; N], // TODO make this N-1
 }
 
-impl<const N: usize> Envelope<N> {
+impl<X, Y, D, const N: usize> Envelope<X, Y, D, N>
+where
+    X: num::traits::Num + PartialOrd + Copy,
+    Y: num::traits::Num + Div<X, Output = D> + PartialOrd + Copy,
+    D: num::traits::Num + Mul<X, Output = Y> + PartialOrd + Copy,
+{
     /// Creates an envelope from point pairs
     ///
     /// The point pairs must be orderd by x values in ascending order. There must be no two points
@@ -23,57 +32,41 @@ impl<const N: usize> Envelope<N> {
     // let points = vec![(1908, 150), (2050, 300), (10300, 1958), (10301, 1958)];
     // let envelope = Envelope::new(&points).expect("invalid points given to envelope");
     // ```
-    pub fn new<T, U>(points: [(T, U); N]) -> Option<Self>
-    where
-        T: Into<f64> + Copy,
-        U: Into<f64> + Copy,
-    {
+    pub const fn new(points: [(X, Y); N]) -> Self {
         if N < 2 {
             // List is too small!
-            return None;
+            panic!("points does not contain at least 2 points");
         }
-        let points_raw = points;
 
-        let mut points: [(f64, f64); N] = [(points_raw[0].0.into(), points_raw[0].1.into()); N];
-        for i in 1..N {
-            points[i] = (points_raw[i].0.into(), points_raw[i].1.into());
-            if points[i - 1].0 >= points[i].0 {
-                // This means either the list is not sorted or two values are identical
-                return None;
+        let mut derivatives = [D::zero(); N];
+
+        let mut i = 0;
+        loop {
+            // only process N-1 elements (with i in 1..N)
+            i += 1;
+            if i >= N {
+                break;
             }
-        }
 
-        // TODO port this to iter code once libcore allows to collect into arrays
-        /*
-        let derivatives = (0..(N - 1))
-            .map(|i| {
-                let (x, y) = points[i];
-                let (x_, y_) = points[i + 1];
-                (y_ - y) / (x_ - x)
-            })
-            .collect();
-         */
+            let (x, y) = points[i - 1];
+            let (x_, y_) = points[i];
 
-        let mut derivatives = [0f64; N];
-        for i in 0..(N - 1) {
-            let (x, y) = points[i];
-            let (x_, y_) = points[i + 1];
+            // require monotic increase of first dimension
+            if x >= x_ {
+                panic!("points first dimension is not strictly monotonic");
+            }
+
             derivatives[i] = (y_ - y) / (x_ - x)
         }
 
-        Some(Self {
+        Self {
             points,
             derivatives,
-        })
+        }
     }
 
     /// Checks wether a point is in the envelope
-    pub fn contains<T, U>(&self, x: T, y: U) -> bool
-    where
-        T: Into<f64> + Copy,
-        U: Into<f64> + Copy,
-    {
-        let (x, y) = (x.into(), y.into());
+    pub fn contains(&self, x: X, y: Y) -> bool {
         let minimum = self.points[0];
         if x < minimum.0 || y < minimum.1 {
             return false;
