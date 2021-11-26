@@ -6,20 +6,21 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-uom = "0.31"
 ordered-float = { version = "2.0", default-features = false }
+uom = "0.31"
 kd_tree = { path = "../kd_tree" }
 
 
 [build-dependencies]
-kd_tree_sort = { path = "../kd_tree_sort" }
-uom = "0.31"
-uneval = "0.2"
+anyhow = "1.0"
+csv = "1.1"
+proc-macro2 = "1.0"
+quote = "1.0"
+rayon = "1.5"
+regex = "1.5"
 serde = {version = "1.0", features = ["derive"]}
 serde_json = "1.0"
-rayon = "1.5"
-quote = "1.0"
-proc-macro2 = "1.0"
-regex = "1.5"
-csv = "1.1"
-anyhow = "1.0"
+uneval = "0.2"
+uom = "0.31"
+ureq = "2"
+kd_tree_sort = { path = "../kd_tree_sort" }
