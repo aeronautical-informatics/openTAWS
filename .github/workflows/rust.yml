@@ -2,9 +2,9 @@ name: main
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, staging ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, staging ]
 
 jobs:
   format:
@@ -16,12 +16,17 @@ jobs:
             toolchain: stable
             components: rustfmt
             override: true
-      - uses: mbrobbel/rustfmt-check@0.2.0
+      - uses: actions-rs/toolchain@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          toolchain: stable 
+          target: x86_64-unknown-linux-gnu
+          override: true
+      - name: Run tests
+        run: cargo fmt -- --check
 
   test:
     runs-on: ubuntu-latest
+    continue-on-error: ${{ github.ref_type == 'branch' && github.ref_name == 'staging' }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -37,7 +42,7 @@ jobs:
           target: x86_64-unknown-linux-gnu
           override: true
       - name: Run tests
-        run: cargo test --verbose
+        run: cargo test --all-features --verbose 
 
   clippy_check:
     runs-on: ubuntu-latest
@@ -63,6 +68,7 @@ jobs:
   coverage:
     name: coverage
     runs-on: ubuntu-latest
+    continue-on-error: ${{ github.ref_type == 'branch' && github.ref_name == 'staging' }}
     container:
       image: xd009642/tarpaulin:latest
       options: --security-opt seccomp=unconfined
@@ -86,4 +92,4 @@ jobs:
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v1
         with:
-          fail_ci_if_error:     true
+          fail_ci_if_error: true
