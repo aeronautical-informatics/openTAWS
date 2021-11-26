@@ -2,14 +2,13 @@
 #![allow(clippy::too_many_arguments)]
 use core::cmp::Ordering;
 use core::fmt::Debug;
-use core::ops::{Add, Mul, Sub};
-use num::traits::Zero;
+use num::traits::Num;
 
-pub struct Tree<T: Sized, V: Sized, const SIZE: usize, const DIM: usize, const MAX_LEVEL: usize> {
+pub struct Tree<T, V, const SIZE: usize, const DIM: usize, const MAX_LEVEL: usize> {
     pub nodes: [Node<T, V, DIM>; SIZE],
 }
 
-impl<T: Sized, V: Sized, const SIZE: usize, const DIM: usize, const MAX_LEVEL: usize>
+impl<T, V, const SIZE: usize, const DIM: usize, const MAX_LEVEL: usize>
     Tree<T, V, SIZE, DIM, MAX_LEVEL>
 {
     pub const fn new(nodes: [Node<T, V, DIM>; SIZE]) -> Tree<T, V, SIZE, DIM, MAX_LEVEL> {
@@ -18,17 +17,8 @@ impl<T: Sized, V: Sized, const SIZE: usize, const DIM: usize, const MAX_LEVEL: u
 }
 
 impl<
-        T: Sized
-            + PartialOrd
-            + PartialEq
-            + Sub<Output = T>
-            + Add<Output = T>
-            + Mul<Output = T>
-            + Zero
-            + Copy
-            + Debug
-            + Default,
-        V: Sized,
+        T: PartialOrd + Num + Copy + Debug,
+        V,
         const SIZE: usize,
         const DIM: usize,
         const MAX_LEVEL: usize,
@@ -41,7 +31,8 @@ impl<
             .expect("This can not fail, expect if the Tree got no nodes: SIZE == 0");
         let mut index = 0usize;
         let mut level = 0usize;
-        // Store which child nodes where visited for the Node on the index/level and if it was already compared
+        // Store which child nodes where visited for the Node on the index/level and if it was
+        // already compared
         let mut visited: [(Visited, bool); MAX_LEVEL] = [(Visited::None, false); MAX_LEVEL];
         //Initialise best node/distance with root node
         let mut best_distance: T = euclid(&node.val, point);
@@ -52,7 +43,8 @@ impl<
             self.search_down(point, &mut node, &mut index, &mut level, &mut visited);
 
             // Go up until we either reach the top or we go down by one
-            // Should we go down by one, we will need to go to the best fit leaf of the current subtree
+            // Should we go down by one, we will need to go to the best fit leaf of the current
+            // subtree
             self.search_up(
                 point,
                 &mut node,
@@ -242,7 +234,7 @@ pub struct Node<T: Sized, V: Sized, const DIM: usize> {
     v: V,
 }
 
-impl<T: Sized, V: Sized, const DIM: usize> Node<T, V, DIM> {
+impl<T, V, const DIM: usize> Node<T, V, DIM> {
     pub fn val(&self) -> &[T; DIM] {
         &self.val
     }
@@ -258,7 +250,7 @@ impl<T: Sized, V: Sized, const DIM: usize> Node<T, V, DIM> {
 
 pub fn euclid<T, const SIZE: usize>(left: &[T; SIZE], right: &[T; SIZE]) -> T
 where
-    T: Default + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Zero + Copy + Debug,
+    T: Num + Copy + Debug,
 {
     left.iter()
         .zip(right.iter())
