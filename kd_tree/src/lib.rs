@@ -2,8 +2,7 @@
 #![allow(clippy::too_many_arguments)]
 use core::cmp::Ordering;
 use core::fmt::Debug;
-use core::ops::{Add, Mul, Sub};
-use num::traits::Zero;
+use num::traits::Num;
 
 pub struct Tree<T: Sized, V: Sized, const SIZE: usize, const DIM: usize, const MAX_LEVEL: usize> {
     pub nodes: [Node<T, V, DIM>; SIZE],
@@ -21,13 +20,9 @@ impl<
         T: Sized
             + PartialOrd
             + PartialEq
-            + Sub<Output = T>
-            + Add<Output = T>
-            + Mul<Output = T>
-            + Zero
+            + Num
             + Copy
-            + Debug
-            + Default,
+            + Debug,
         V: Sized,
         const SIZE: usize,
         const DIM: usize,
@@ -258,7 +253,7 @@ impl<T: Sized, V: Sized, const DIM: usize> Node<T, V, DIM> {
 
 pub fn euclid<T, const SIZE: usize>(left: &[T; SIZE], right: &[T; SIZE]) -> T
 where
-    T: Default + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Zero + Copy + Debug,
+    T: Num + Copy + Debug,
 {
     left.iter()
         .zip(right.iter())
