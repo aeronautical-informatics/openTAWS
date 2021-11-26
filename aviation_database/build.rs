@@ -4,6 +4,7 @@ use rayon::prelude::*;
 use serde::Deserialize;
 use std::env;
 use std::fs;
+use std::io::BufRead;
 use std::path::Path;
 use std::process::Command;
 
@@ -76,13 +77,28 @@ impl ToTokens for Airport {
 }
 
 fn main() {
-    // Downloaded directly from:
-    // https://datahub.io/core/airport-codes/r/airport-codes.json
-    //let airports = File::open("airports.json").unwrap();
-    //let mut reader = BufReader::new(airports);
+    let file_env = "AIRPORTS_JSON_FILE";
+    let url_env = "AIRPORTS_JSON_URL";
 
-    let read = std::fs::read_to_string("airports.json").expect("Download Airports json:\nhttps://datahub.io/core/airport-codes/r/airport-codes.json\nAnd place it next to build.rs");
-    let mut airports: Vec<Airport> = serde_json::from_str(&read).unwrap();
+    let reader: Box<dyn BufRead> = if let Ok(airports_file) = std::env::var(file_env) {
+        let f = std::fs::File::open(&airports_file)
+            .expect(&format!("file {} does not exist", airports_file));
+        Box::new(std::io::BufReader::new(f))
+    } else {
+        let airports_url = std::env::var(url_env)
+            .unwrap_or("https://datahub.io/core/airport-codes/r/airport-codes.json".into());
+        let r = ureq::get(&airports_url)
+            .call()
+            .expect(&format!(
+                "unable to automatically download from {}",
+                airports_url
+            ))
+            .into_reader();
+        Box::new(std::io::BufReader::new(r))
+    };
+
+    let mut airports: Vec<Airport> = serde_json::from_reader(reader).unwrap();
+
     let num_airports = airports.len();
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("airports.rs");
@@ -126,5 +142,11 @@ fn main() {
         eprintln!("{}", e)
     }
 
-    println!("cargo:rerun-if-changed=build.rs");
+    println!(
+        "cargo:rerun-if-changed=build.rs
+    cargo:rerun-if-env-changed={}
+    cargo:rerun-if-env-changed={}
+    ",
+        url_env, file_env
+    );
 }
