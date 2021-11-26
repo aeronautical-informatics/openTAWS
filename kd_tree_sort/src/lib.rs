@@ -110,11 +110,11 @@ mod tests {
         let nodes = sorted
             .iter()
             .map(|(p, v)| Node::new(*p, *v))
-            .collect::<Vec<_>>()
-            .try_into()
-            .unwrap();
+            .collect::<Vec<_>>();
         //T, V, SIZE, DIM, MAX_LEVEL
-        let tree = Tree::<i32, i32, 6, 2, 3>::new(nodes);
+        let tree = Tree::<i32, i32, 2, 3> {
+            nodes: nodes.as_slice(),
+        };
 
         assert_eq!(tree.search(&[5, 3]).val(), &[5, 4]);
         assert_eq!(tree.search(&[9, 7]).val(), &[9, 6]);
@@ -122,15 +122,18 @@ mod tests {
         assert_eq!(tree.search(&[3, 0]).val(), &[2, 3]);
     }
 
-    #[ignore]
     #[test]
     fn random_search() {
         let mut rng = Prng::new(0xcafef00dd15ea5e5);
+        let mut duration_linear_min = Duration::from_secs(9999);
         let mut duration_linear = Duration::from_secs(0);
+        let mut duration_linear_max = Duration::from_secs(0);
+        let mut duration_tree_min = Duration::from_secs(9999);
         let mut duration_tree = Duration::from_secs(0);
+        let mut duration_tree_max = Duration::from_secs(0);
 
         let (iterations, searches) = if cfg!(debug_assertions) {
-            (10, 50)
+            (10, 500)
         } else {
             (100, 500)
         };
@@ -151,9 +154,10 @@ mod tests {
                 .collect();
             let sorted = sort(values.clone());
             let nodes: Vec<_> = sorted.iter().map(|(p, v)| Node::new(*p, *v)).collect();
-            let tree: Box<Tree<f64, i32, TREE_SIZE, 3, MAX_LEVEL>> = Box::new(Tree {
-                nodes: nodes.try_into().unwrap(),
-            });
+            let tree = Tree::<f64, i32, 3, MAX_LEVEL> {
+                nodes: nodes.as_slice(),
+            };
+
             let search_points: Vec<[f64; 3]> =
                 std::iter::repeat_with(|| [rng.gen(), rng.gen(), rng.gen()])
                     .take(searches)
@@ -165,15 +169,37 @@ mod tests {
                     .map(|a| euclid(&point, &a.0))
                     .min_by(|a, b| a.partial_cmp(b).unwrap())
                     .unwrap();
-                duration_linear.add_assign(now.elapsed());
+                let lin_dur = now.elapsed();
                 let now = Instant::now();
                 let closest_node = tree.search(&point);
-                duration_tree.add_assign(now.elapsed());
+                let tree_dur = now.elapsed();
                 assert_eq!(closest, euclid(closest_node.val(), &point),);
+
+                duration_linear.add_assign(lin_dur);
+                if lin_dur < duration_linear_min {
+                    duration_linear_min = lin_dur
+                } else if lin_dur > duration_linear_max {
+                    duration_linear_max = lin_dur
+                }
+
+                duration_tree.add_assign(tree_dur);
+                if tree_dur < duration_tree_min {
+                    duration_tree_min = tree_dur
+                } else if tree_dur > duration_tree_max {
+                    duration_tree_max = tree_dur
+                }
             }
         }
 
         println!("Duration Linear Search: {:?}", duration_linear);
         println!("Duration KD Tree Search: {:?}", duration_tree);
+        println!(
+            "{:.2}x increase in performance",
+            duration_linear.as_micros() as f64 / duration_tree.as_micros() as f64
+        );
+        println!("\nFastest KD Tree Search: {:?}", duration_tree_min);
+        println!("Slowest KD Tree Search: {:?}", duration_tree_max);
+        println!("Fastest Linear Search: {:?}", duration_linear_min);
+        println!("Slowest Linear Search: {:?}", duration_linear_max);
     }
 }
