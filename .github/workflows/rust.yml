@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main staging ]
+    branches: [ main ]
 
 jobs:
   format:
@@ -22,8 +22,6 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    continue-on-error: true
-      if: ${{ if github.ref_type == "branch" && github.ref_name = "staging" }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -65,8 +63,6 @@ jobs:
   coverage:
     name: coverage
     runs-on: ubuntu-latest
-    continue-on-error: true
-      if: ${{ if github.ref_type == "branch" && github.ref_name = "staging" }}
     container:
       image: xd009642/tarpaulin:latest
       options: --security-opt seccomp=unconfined
