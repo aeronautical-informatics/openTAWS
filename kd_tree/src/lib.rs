@@ -4,25 +4,18 @@ use core::cmp::Ordering;
 use core::fmt::Debug;
 use num::traits::Num;
 
-pub struct Tree<T, V, const SIZE: usize, const DIM: usize, const MAX_LEVEL: usize> {
-    pub nodes: [Node<T, V, DIM>; SIZE],
+pub struct Tree<'a, T, V, const DIM: usize, const MAX_LEVEL: usize> {
+    pub nodes: &'a [Node<T, V, DIM>],
 }
 
-impl<T, V, const SIZE: usize, const DIM: usize, const MAX_LEVEL: usize>
-    Tree<T, V, SIZE, DIM, MAX_LEVEL>
-{
-    pub const fn new(nodes: [Node<T, V, DIM>; SIZE]) -> Tree<T, V, SIZE, DIM, MAX_LEVEL> {
+impl<T, V, const DIM: usize, const MAX_LEVEL: usize> Tree<'static, T, V, DIM, MAX_LEVEL> {
+    pub const fn new(nodes: &'static [Node<T, V, DIM>]) -> Tree<'static, T, V, DIM, MAX_LEVEL> {
         Tree { nodes }
     }
 }
 
-impl<
-        T: PartialOrd + Num + Copy + Debug,
-        V,
-        const SIZE: usize,
-        const DIM: usize,
-        const MAX_LEVEL: usize,
-    > Tree<T, V, SIZE, DIM, MAX_LEVEL>
+impl<'a, T: PartialOrd + Num + Copy + Debug, V, const DIM: usize, const MAX_LEVEL: usize>
+    Tree<'a, T, V, DIM, MAX_LEVEL>
 {
     pub fn search(&self, point: &[T; DIM]) -> &Node<T, V, DIM> {
         let mut node: &Node<T, V, DIM> = self
@@ -65,7 +58,7 @@ impl<
         best_node
     }
 
-    fn search_down<'a>(
+    fn search_down(
         &'a self,
         point: &[T; DIM],
         node: &mut &'a Node<T, V, DIM>,
@@ -81,7 +74,7 @@ impl<
             let dim = *level % DIM;
 
             //If the left node is not reachable we are at a leaf node
-            if left(index) >= SIZE {
+            if left(index) >= self.nodes.len() {
                 //Set visited for this level to ALL because there are no more child nodes
                 visited[*level].0 = Visited::All;
                 return;
@@ -95,7 +88,7 @@ impl<
 
             // If the index is to big we choose the right node
             // Make sure it exists, if not go to the left node instead
-            if *index >= SIZE {
+            if *index >= self.nodes.len() {
                 *index -= 1;
             }
 
@@ -107,7 +100,7 @@ impl<
         }
     }
 
-    fn search_up<'a>(
+    fn search_up(
         &'a self,
         point: &[T; DIM],
         node: &mut &'a Node<T, V, DIM>,
@@ -138,7 +131,7 @@ impl<
                     // and if its even possible for the right side to be nearer
                     let single_distance = point[dim] - node.val[dim];
                     let single_distance = single_distance * single_distance;
-                    if right(index) < SIZE && single_distance < *best_distance {
+                    if right(index) < self.nodes.len() && single_distance < *best_distance {
                         Direction::Right
                     } else {
                         Direction::Up
@@ -149,7 +142,7 @@ impl<
                     // and if its even possible for the left side to be nearer
                     let single_distance = point[dim] - node.val[dim];
                     let single_distance = single_distance * single_distance;
-                    if left(index) < SIZE && single_distance < *best_distance {
+                    if left(index) < self.nodes.len() && single_distance < *best_distance {
                         Direction::Left
                     } else {
                         Direction::Up

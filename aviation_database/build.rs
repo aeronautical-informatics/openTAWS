@@ -81,7 +81,7 @@ fn main() {
     //let airports = File::open("airports.json").unwrap();
     //let mut reader = BufReader::new(airports);
 
-    let read = std::fs::read_to_string("airports.json").unwrap();
+    let read = std::fs::read_to_string("airports.json").expect("Download Airports json:\nhttps://datahub.io/core/airport-codes/r/airport-codes.json\nAnd place it next to build.rs");
     let mut airports: Vec<Airport> = serde_json::from_str(&read).unwrap();
     let num_airports = airports.len();
     let out_dir = env::var_os("OUT_DIR").unwrap();
@@ -110,8 +110,9 @@ fn main() {
     fs::write(
         &dest_path,
         format!(
-            "pub const AIRPORTS: Tree::<f64, AirportEntry, {}, 3, {}> = Tree::new([ {} ]);",
-            num_airports, max_level, airports
+            "pub const NODES: [Node<f64, AirportEntry, 3>; {}] = [ {} ];\
+            pub const AIRPORTS: Tree::<f64, AirportEntry, 3, {}> = Tree::new( &NODES );",
+            num_airports, airports, max_level
         ),
     )
     .unwrap();
