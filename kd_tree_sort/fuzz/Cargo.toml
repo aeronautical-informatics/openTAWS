@@ -1,0 +1,28 @@
+[package]
+name = "kd_tree_sort-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2018"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+arbitrary = { version = "1", features = ["derive"] }
+rayon = "1.5"
+
+[dependencies.kd_tree_sort]
+path = ".."
+[dependencies.kd_tree]
+path = "../../kd_tree"
+
+# Prevent this from interfering with workspaces
+[workspace]
+members = ["."]
+
+[[bin]]
+name = "kd_tree_search"
+path = "fuzz_targets/kd_tree_search.rs"
+test = false
+doc = false
