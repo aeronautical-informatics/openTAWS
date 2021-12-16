@@ -3,6 +3,7 @@ members = [
 	"opentaws",
 	"taws_minimal",
 	"aviation_database",
+	"terrain_database",
 	"kd_tree",
 	"kd_tree_sort"
 ]
