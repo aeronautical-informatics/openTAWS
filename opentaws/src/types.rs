@@ -14,7 +14,8 @@ use uom::{
     },
 };
 
-use aviation_database::{AirportDatabase, Position, Runway};
+use aviation_database::{AirportDatabase, Runway};
+use taws_primitives::Position;
 
 /// Represents the current state of an aircraft
 #[derive(Clone, Debug, Default)]

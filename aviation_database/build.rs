@@ -82,17 +82,15 @@ fn main() {
 
     let reader: Box<dyn BufRead> = if let Ok(airports_file) = std::env::var(file_env) {
         let f = std::fs::File::open(&airports_file)
-            .expect(&format!("file {} does not exist", airports_file));
+            .unwrap_or_else(|_| panic!("file {} does not exist", airports_file));
         Box::new(std::io::BufReader::new(f))
     } else {
         let airports_url = std::env::var(url_env)
-            .unwrap_or("https://datahub.io/core/airport-codes/r/airport-codes.json".into());
+            .unwrap_or_else(|_| "https://datahub.io/core/airport-codes/r/airport-codes.json".into());
         let r = ureq::get(&airports_url)
             .call()
-            .expect(&format!(
-                "unable to automatically download from {}",
-                airports_url
-            ))
+            .unwrap_or_else(|_| panic!("unable to automatically download from {}",
+                airports_url))
             .into_reader();
         Box::new(std::io::BufReader::new(r))
     };
@@ -126,8 +124,8 @@ fn main() {
     fs::write(
         &dest_path,
         format!(
-            "pub const NODES: [Node<f64, AirportEntry, 3>; {}] = [ {} ];\
-            pub const AIRPORTS: Tree::<f64, AirportEntry, 3, {}> = Tree::new( &NODES );",
+            "pub static NODES: [Node<f64, AirportEntry, 3>; {}] = [ {} ];\
+            pub static AIRPORTS: Tree::<f64, AirportEntry, 3, {}> = Tree::new( &NODES );",
             num_airports, airports, max_level
         ),
     )

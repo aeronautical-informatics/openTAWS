@@ -2,6 +2,7 @@
 members = [
 	"opentaws",
 	"taws_minimal",
+	"taws_primitives",
 	"aviation_database",
 	"terrain_database",
 	"kd_tree",

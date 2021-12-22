@@ -27,6 +27,7 @@ use-serde = ["uom/use_serde"]
 
 [dependencies]
 aviation_database = { path = "../aviation_database"}
+taws_primitives = { path = "../taws_primitives" }
 lazy_static = { version = "1", features = [ "spin_no_std" ] }
 uom = { version = "0", default-features = false, features = [ "f64", "si" ] }
 ringbuffer = "0.8"
