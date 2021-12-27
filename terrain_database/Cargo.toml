@@ -8,5 +8,6 @@ edition = "2021"
 [dependencies]
 geo = "0.18"
 rayon = "1.5"
-uom = "0.31"
+uom = { version = "0.31", features = [ "std" ] }
 num-traits = "0.2"
+taws_primitives = { path = "../taws_primitives" }
