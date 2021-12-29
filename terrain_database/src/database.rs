@@ -30,6 +30,16 @@ pub struct SimpleTerrainDatabase<const SIZE_LONG: usize, const SIZE_LAT: usize> 
     step: Point<f64>,
 }
 
+impl<const SIZE_LONG: usize, const SIZE_LAT: usize> SimpleTerrainDatabase<SIZE_LONG, SIZE_LAT> {
+    pub const fn new(
+        data: [[u64; SIZE_LAT]; SIZE_LONG],
+        start: Point<f64>,
+        step: Point<f64>,
+    ) -> SimpleTerrainDatabase<SIZE_LONG, SIZE_LAT> {
+        SimpleTerrainDatabase { data, start, step }
+    }
+}
+
 impl<const SIZE_LONG: usize, const SIZE_LAT: usize> TerrainDatabase
     for SimpleTerrainDatabase<SIZE_LONG, SIZE_LAT>
 {
