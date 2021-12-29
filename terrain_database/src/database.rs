@@ -23,7 +23,7 @@ pub trait TerrainDatabase {
 
 pub struct SimpleTerrainDatabase<const SIZE_LONG: usize, const SIZE_LAT: usize> {
     /// 2D-Array for elevation data. Unit is foot
-    data: [[u64; SIZE_LAT]; SIZE_LONG],
+    data: &'static [[u64; SIZE_LAT]; SIZE_LONG],
     /// Start position of the database. Unit is Degree
     start: Point<f64>,
     /// Step in long/x and lat/y direction for each value in data. Unit is Degree
@@ -32,7 +32,7 @@ pub struct SimpleTerrainDatabase<const SIZE_LONG: usize, const SIZE_LAT: usize> 
 
 impl<const SIZE_LONG: usize, const SIZE_LAT: usize> SimpleTerrainDatabase<SIZE_LONG, SIZE_LAT> {
     pub const fn new(
-        data: [[u64; SIZE_LAT]; SIZE_LONG],
+        data: &'static [[u64; SIZE_LAT]; SIZE_LONG],
         start: Point<f64>,
         step: Point<f64>,
     ) -> SimpleTerrainDatabase<SIZE_LONG, SIZE_LAT> {
