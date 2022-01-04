@@ -85,7 +85,7 @@ impl<const SIZE_LONG: usize, const SIZE_LAT: usize> TerrainDatabase
         let points = start.haversine_intermediate_fill(&end, resolution.get::<meter>(), true);
         points
             //Iterate over all points in parallel
-            .par_iter()
+            .iter()
             // Map List other element but filter out "None" Values
             // "None" Values are only possible if our airplane exits the area covered by our terrain database
             .filter_map(|p| {
