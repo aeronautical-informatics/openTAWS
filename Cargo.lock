@@ -1897,7 +1897,7 @@ checksum = "a156c684c91ea7d62626509bce3cb4e1d9ed5c4d978f7b4352658f96a4c26b4a"
 [[package]]
 name = "uom"
 version = "0.32.0"
-source = "git+https://github.com/wucke13/uom.git?branch=fix-missing-libm#c5f2ba838907ce357859aacc1b628145d29b1e68"
+source = "git+https://github.com/wucke13/uom.git?branch=fix-missing-libm#f82bc456aa319892f4edad5d555a16fa7e35e6db"
 dependencies = [
  "num-traits",
  "serde",
