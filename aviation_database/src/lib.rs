@@ -126,11 +126,26 @@ impl Position {
     /// panic:
     ///
     /// ```
-    /// use crate::reference::PositionImpl;
-    /// let p1 = PositionImpl::new(54, 10, 0);
-    /// let p1 = PositionImpl::new(52, 8, 10);
+    /// use aviation_database::Position;
+    /// use uom::si::{
+    ///     f64::{Angle, Length},
+    ///     angle::degree,
+    ///     length::meter,
+    /// };
     ///
-    /// assert_eq!(p1.great_circle(p2), p2.great_circle(p1));
+    /// let p1 = Position{
+    ///     lat: Angle::new::<uom::si::angle::degree>(54.0),
+    ///     lon: Angle::new::<uom::si::angle::degree>(10.0),
+    ///     alt: Length::new::<uom::si::length::foot>(1000.0),
+    /// };
+    /// let p2 = Position{
+    ///     lat: Angle::new::<uom::si::angle::degree>(52.0),
+    ///     lon: Angle::new::<uom::si::angle::degree>(8.0),
+    ///     alt: Length::new::<uom::si::length::foot>(1000.0),
+    /// };
+    ///
+    /// let distance_delta = p1.great_circle(&p2) - p2.great_circle(&p1);
+    /// assert!(distance_delta.abs() < Length::new::<uom::si::length::millimeter>(1.0));
     /// ```
     #[allow(non_snake_case)]
     pub fn great_circle(&self, other: &Position) -> Length {

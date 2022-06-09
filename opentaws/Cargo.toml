@@ -33,4 +33,4 @@ lazy_static = { version = "1", features = [ "spin_no_std" ] }
 uom = { git = "https://github.com/wucke13/uom.git", branch = "fix-missing-libm", default-features = false, features = [ "f64", "si", "libm" ] }
 ringbuffer = "0.8"
 serde = { version = "1.0", default-features = false, features = [ "derive" ] }
-serde_arrays = "0.1.0" # Serde const generic "workaround"
+serde_arrays = "*" # Serde const generic "workaround"

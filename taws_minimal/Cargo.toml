@@ -31,18 +31,18 @@ uom = { git = "https://github.com/wucke13/uom.git", branch = "fix-missing-libm",
 casey = "0.3"
 serde = { version = "1.0", default-features = false, features = [ "derive" ] }
 
-# testing ang examples
+# testing and examples
 arbitrary = { version = "1", features = ["derive"], optional = true }
 async-tungstenite = { version = "*", features = [ "async-std-runtime" ], optional = true }
 async-trait = { version = "0.1", optional = true }
-cucumber = { version = "0.10", optional = true  }
+cucumber = { version = "0", optional = true  }
 futures = { version = "0", optional = true }
 lazy_static = { version = "1.4", optional = true }
 rand = { version = "*", optional = true }
 rand_pcg = { version = "*", optional = true }
 rayon = { version = "1.5", optional = true }
 serde_json = { version = "1.0", optional = true }
-smol = { version = "1.0", optional = true }
+smol = { version = "1", optional = true }
 
 
 [[test]]
