@@ -1,5 +1,6 @@
 use core::{
     fmt,
+    iter::Empty,
     ops::{Add, Rem},
 };
 
@@ -7,6 +8,7 @@ use uom::{
     fmt::DisplayStyle::Abbreviation,
     si::f64::*,
     si::{
+        acceleration::foot_per_second_squared,
         angle::{degree, revolution},
         length::foot,
         time::second,
@@ -14,7 +16,7 @@ use uom::{
     },
 };
 
-use aviation_database::{AirportDatabase, Position, Runway};
+use aviation_database::{reference::AirportDatabaseImpl, AirportDatabase, Position, Runway};
 
 /// Represents the current state of an aircraft
 #[derive(Clone, Debug, Default)]
@@ -169,17 +171,16 @@ impl fmt::Display for AircraftState {
     }
 }
 
-/*
 impl<'a> Default for TawsConfig<'a> {
     fn default() -> Self {
+        static AIRPORT_DATABASE: AirportDatabaseImpl = AirportDatabaseImpl {};
         Self {
-            terrain_server: &'static AirportDatabaseImpl,
+            terrain_server: &AIRPORT_DATABASE,
             max_climbrate: Velocity::new::<foot_per_minute>(700.0),
             max_climbrate_change: Acceleration::new::<foot_per_second_squared>(100.0),
         }
     }
 }
- */
 
 #[cfg(test)]
 mod test {
