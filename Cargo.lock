@@ -1818,6 +1818,7 @@ dependencies = [
  "rand",
  "rand_pcg",
  "rayon",
+ "regex",
  "serde",
  "serde_json",
  "smol",
