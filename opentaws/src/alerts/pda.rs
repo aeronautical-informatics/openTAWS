@@ -52,7 +52,7 @@ lazy_static::lazy_static! {
     /// Y-Axis is Height above Terrain in foot
     static ref CAUTION_ENVELOPE: Envelope<5> = Envelope::new([
         (0.9, 5.0),
-        (0.9, 85.0),
+        (0.90001, 85.0),
         (1.8, 155.0),
         (2.3, 175.0),
         (2.4, 175.0),
