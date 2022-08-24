@@ -85,8 +85,6 @@ fn given_height_above_terrain(world: &mut MyWorld, height_above_terrain: Constra
         Constraint::NotInRange(p, a, b) => Constraint::NotInRange(p, a * unit, b * unit),
     };
 
-    //let height_above_terrain = height_above_terrain * Length::new::<length::foot>(1.0);
-
     world.constraints[world.phase].add_altitude_ground_constraint(height_above_terrain);
 }
 
@@ -172,16 +170,7 @@ fn then_alert_emitted(
 
         let alert_state = world.taws.process(&frame);
         let emitted = alert_state.iter().any(|(a, l)| a == alert && l <= level);
-        //println!("{:#?}", alert_state);
         assert_eq!(emitted, should_emit);
-        //alert_state.iter().filter(|(a, l)| a == alert).
-        // Make sure we are in the last phase of this scenario with "c + 1 == world.constraints.len()"
-        /*if c + 1 == n_constraints && alert_state.iter().any(|(a, l)| a == alert && l <= level) {
-            panic!(
-                "Aicraft state that violated the scenario: {:#?}\nalerts emitted: {:#?}",
-                frame, alert_state
-            );
-        }*/
     }
 }
 
@@ -208,15 +197,6 @@ fn then_alert_emitted_within(
 
         let alert_state = world.taws.process(&frame);
         let emitted = alert_state.iter().any(|(a, l)| a == alert && l <= level);
-        //println!("{:#?}", alert_state);
         assert_eq!(emitted, should_emit);
-        //alert_state.iter().filter(|(a, l)| a == alert).
-        // Make sure we are in the last phase of this scenario with "c + 1 == world.constraints.len()"
-        /*if c + 1 == n_constraints && alert_state.iter().any(|(a, l)| a == alert && l <= level) {
-            panic!(
-                "Aicraft state that violated the scenario: {:#?}\nalerts emitted: {:#?}",
-                frame, alert_state
-            );
-        }*/
     }
 }
