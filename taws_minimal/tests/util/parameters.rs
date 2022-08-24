@@ -33,7 +33,7 @@ impl FromStr for MaybeParameter {
 
 impl Parameter for MaybeParameter {
     const NAME: &'static str = "maybe";
-    const REGEX: &'static str = "(?:is|should|shall)\\s*(?:not)?";
+    const REGEX: &'static str = r"(?:is|should|shall)\s*(?:not)?";
 }
 
 pub struct AlertParameter(Alert);
@@ -66,7 +66,7 @@ impl Into<Alert> for AlertParameter {
 
 impl Parameter for AlertParameter {
     const NAME: &'static str = "alert";
-    const REGEX: &'static str = "(?:[a-zA-Z]+\\s*[0-9]*)";
+    const REGEX: &'static str = r"(?:[a-zA-Z]+\s*[0-9]*)";
 }
 
 pub struct AlertLevelParameter(AlertLevel);
@@ -104,9 +104,9 @@ impl FromStr for ConstraintParameter {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         const PATTERN: &str = concat!(
-            "(?P<type>at least|at most|within|between|not between)",
-            "\\s*(?P<q1>[+-]?(?:[0-9]*[.])?[0-9]+)",
-            "(?:\\s*and\\s*(?P<q2>[+-]?(?:[0-9]*[.])?[0-9]+))?"
+            r"(?P<type>at least|at most|within|between|not between)",
+            r"\s*(?P<q1>[+-]?(?:[0-9]*[.])?[0-9]+)",
+            r"(?:\s*and\s*(?P<q2>[+-]?(?:[0-9]*[.])?[0-9]+))?"
         );
 
         lazy_static! {
@@ -161,8 +161,8 @@ impl Parameter for ConstraintParameter {
     const NAME: &'static str = "constraint";
 
     const REGEX: &'static str = concat!(
-        "(?:at least|at most|within|between|not between)",
-        "\\s*[+-]?(?:[0-9]*[.])?[0-9]+",
-        "(?:\\s*and\\s*[+-]?(?:[0-9]*[.])?[0-9]+)?"
+        r"(?:at least|at most|within|between|not between)\s*",
+        r"[+-]?(?:[0-9]*[.])?[0-9]+",
+        r"(?:\s*and\s*[+-]?(?:[0-9]*[.])?[0-9]+)?"
     );
 }
