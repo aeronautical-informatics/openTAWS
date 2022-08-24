@@ -9,12 +9,9 @@ pub enum Constraint<Q>
 where
     Q: Copy
         + PartialOrd
-        + PartialEq<Q>
-        + std::ops::Add
+        + PartialEq
         + std::ops::Add<Output = Q>
-        + std::ops::Rem
         + std::ops::Rem<Output = Q>
-        + std::ops::Sub
         + std::ops::Sub<Output = Q>
         + press_mould::Abs
         + std::fmt::Debug,
@@ -30,12 +27,9 @@ impl<Q> Constraint<Q>
 where
     Q: Copy
         + PartialOrd
-        + PartialEq<Q>
-        + std::ops::Add
+        + PartialEq
         + std::ops::Add<Output = Q>
-        + std::ops::Rem
         + std::ops::Rem<Output = Q>
-        + std::ops::Sub
         + std::ops::Sub<Output = Q>
         + press_mould::Abs
         + std::fmt::Debug,
