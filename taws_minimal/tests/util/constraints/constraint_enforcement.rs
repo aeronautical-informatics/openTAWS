@@ -3,7 +3,7 @@ use std::ops::{Add, Rem, Sub};
 use uom::num_traits::Signed;
 
 // for the lack of a better word
-pub trait PressMould<T> {
+pub trait ConstraintEnforcer<T> {
     fn at_least(&mut self, value: &mut T, at_least: T);
     fn at_most(&mut self, value: &mut T, at_most: T);
     fn in_range(&mut self, value: &mut T, at_least: T, at_most: T);
@@ -13,7 +13,7 @@ pub trait PressMould<T> {
 // Stupid
 pub struct BouncingClamp();
 
-impl<T> PressMould<T> for BouncingClamp
+impl<T> ConstraintEnforcer<T> for BouncingClamp
 where
     T: Copy
         + Clone

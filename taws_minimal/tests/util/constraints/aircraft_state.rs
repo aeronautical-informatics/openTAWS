@@ -1,4 +1,4 @@
-use super::{constraint::Constraint, press_mould};
+use super::{constraint::Constraint, constraint_enforcement};
 use opentaws::AircraftState;
 use uom::si::f64::{Angle, Length, Velocity};
 
@@ -31,7 +31,7 @@ impl AircraftStateConstraints {
             + std::ops::Rem<Output = Q>
             + std::ops::Sub
             + std::ops::Sub<Output = Q>
-            + press_mould::Abs
+            + constraint_enforcement::Abs
             + std::fmt::Debug,
     {
         let mut i = 0;
@@ -57,7 +57,7 @@ impl AircraftStateConstraints {
             + std::ops::Rem<Output = Q>
             + std::ops::Sub
             + std::ops::Sub<Output = Q>
-            + press_mould::Abs
+            + constraint_enforcement::Abs
             + std::fmt::Debug,
     {
         let mut cs = Vec::new();
@@ -127,7 +127,7 @@ impl AircraftStateConstraints {
             + std::ops::Rem<Output = Q>
             + std::ops::Sub
             + std::ops::Sub<Output = Q>
-            + press_mould::Abs
+            + constraint_enforcement::Abs
             + std::fmt::Debug,
     {
         let merged = Self::merge(constraints);

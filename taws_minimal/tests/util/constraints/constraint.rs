@@ -2,7 +2,7 @@ use std::any::Any;
 
 use uom::num_traits::{Signed, Zero};
 
-use super::press_mould::{self, PressMould};
+use super::constraint_enforcement::{self, ConstraintEnforcer};
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum Constraint<Q>
@@ -13,7 +13,7 @@ where
         + std::ops::Add<Output = Q>
         + std::ops::Rem<Output = Q>
         + std::ops::Sub<Output = Q>
-        + press_mould::Abs
+        + constraint_enforcement::Abs
         + std::fmt::Debug,
 {
     AtLeast(usize, Q),
@@ -31,7 +31,7 @@ where
         + std::ops::Add<Output = Q>
         + std::ops::Rem<Output = Q>
         + std::ops::Sub<Output = Q>
-        + press_mould::Abs
+        + constraint_enforcement::Abs
         + std::fmt::Debug,
 {
     pub fn phase(&self) -> usize {
@@ -45,7 +45,7 @@ where
     }
 
     pub fn apply_to(&self, quantity: &mut Q) {
-        let mut bouncer = press_mould::BouncingClamp();
+        let mut bouncer = constraint_enforcement::BouncingClamp();
 
         match self {
             Constraint::AtLeast(_, l) => bouncer.at_least(quantity, *l),
