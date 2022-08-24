@@ -120,29 +120,6 @@ fn when_height_above_terrain(world: &mut MyWorld, height_above_ground: Constrain
     world.constraints[world.phase].add_altitude_ground_constraint(height_above_ground);
 }
 
-#[given(expr = "the plane is {constraint} NM of an airport")]
-#[when(expr = "the distance to the nearest airport is {constraint} NM")]
-fn when_distance_to_airport(_world: &mut MyWorld, _distance: ConstraintParameter) {
-    todo!();
-}
-
-#[when(expr = "a failure is detected by the continuos monitoring")]
-#[when(expr = "the initiated self-test detects a failure")]
-fn when_failure_detected(world: &mut MyWorld) {
-    todo!();
-}
-
-#[given(expr = "the self-test is initiated")]
-#[when(expr = "the self-test is initiated")]
-fn when_self_test_initiated(_world: &mut MyWorld) {
-    todo!();
-}
-
-#[when(expr = "the rate of input data reduces or stagnates")]
-fn when_data_rate_reduces(_world: &mut MyWorld) {
-    todo!();
-}
-
 #[then(expr = "{alert} {maybe} be armed")]
 fn then_alert_armed(world: &mut MyWorld, alert: AlertParameter, maybe: MaybeParameter) {
     assert_eq!(world.taws.is_armed(alert.into()), maybe.into())
