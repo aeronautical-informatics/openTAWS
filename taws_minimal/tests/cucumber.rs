@@ -11,6 +11,8 @@ use util::constraints::Constraint;
 use util::parameters::*;
 use util::world::MyWorld;
 
+use crate::util::constraints::BouncingClamp;
+
 fn main() {
     smol::block_on(MyWorld::run("features"));
 }
@@ -133,7 +135,7 @@ fn then_alert_emitted(
         .enumerate()
         .map(|(c, f)| (c % n_constraints, f))
     {
-        world.constraints[c].apply_to(&mut frame);
+        world.constraints[c].apply_to::<BouncingClamp>(&mut frame);
 
         let alert_state = world.taws.process(&frame);
         let emitted = alert_state.iter().any(|(a, l)| a == alert && l <= level);
@@ -160,7 +162,7 @@ fn then_alert_emitted_within(
         .enumerate()
         .map(|(c, f)| (c % n_constraints, f))
     {
-        world.constraints[c].apply_to(&mut frame);
+        world.constraints[c].apply_to::<BouncingClamp>(&mut frame);
 
         let alert_state = world.taws.process(&frame);
         let emitted = alert_state.iter().any(|(a, l)| a == alert && l <= level);
