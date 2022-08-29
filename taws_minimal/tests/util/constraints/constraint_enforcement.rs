@@ -11,6 +11,7 @@ pub trait ConstraintEnforcer<T> {
 }
 
 // Stupid
+#[derive(Default)]
 pub struct BouncingClamp();
 
 impl<T> ConstraintEnforcer<T> for BouncingClamp

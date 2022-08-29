@@ -44,8 +44,11 @@ where
         }
     }
 
-    pub fn apply_to(&self, quantity: &mut Q) {
-        let mut bouncer = constraint_enforcement::BouncingClamp();
+    pub fn apply_to<TEnforcer>(&self, quantity: &mut Q)
+    where
+        TEnforcer: ConstraintEnforcer<Q> + Default,
+    {
+        let mut bouncer = TEnforcer::default();
 
         match self {
             Constraint::AtLeast(_, l) => bouncer.at_least(quantity, *l),

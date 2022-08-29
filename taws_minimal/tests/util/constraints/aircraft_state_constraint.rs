@@ -1,6 +1,7 @@
-use super::{constraint::Constraint, constraint_enforcement};
-use opentaws::AircraftState;
+use opentaws::prelude::*;
 use uom::si::f64::{Angle, Length, Velocity};
+
+use super::{constraint_enforcement, Constraint, ConstraintEnforcer};
 
 #[derive(Clone, Default, PartialEq)]
 pub struct AircraftStateConstraints {
@@ -25,11 +26,8 @@ impl AircraftStateConstraints {
         Q: Copy
             + PartialOrd
             + PartialEq<Q>
-            + std::ops::Add
             + std::ops::Add<Output = Q>
-            + std::ops::Rem
             + std::ops::Rem<Output = Q>
-            + std::ops::Sub
             + std::ops::Sub<Output = Q>
             + constraint_enforcement::Abs
             + std::fmt::Debug,
@@ -51,11 +49,8 @@ impl AircraftStateConstraints {
         Q: Copy
             + PartialOrd
             + PartialEq<Q>
-            + std::ops::Add
             + std::ops::Add<Output = Q>
-            + std::ops::Rem
             + std::ops::Rem<Output = Q>
-            + std::ops::Sub
             + std::ops::Sub<Output = Q>
             + constraint_enforcement::Abs
             + std::fmt::Debug,
@@ -116,37 +111,41 @@ impl AircraftStateConstraints {
         cs
     }
 
-    fn apply<Q>(constraints: &[Constraint<Q>], state: &mut Q)
+    fn apply<Q, TEnforcer>(constraints: &[Constraint<Q>], state: &mut Q)
     where
         Q: Copy
             + PartialOrd
             + PartialEq<Q>
-            + std::ops::Add
             + std::ops::Add<Output = Q>
-            + std::ops::Rem
             + std::ops::Rem<Output = Q>
-            + std::ops::Sub
             + std::ops::Sub<Output = Q>
             + constraint_enforcement::Abs
             + std::fmt::Debug,
+        TEnforcer: ConstraintEnforcer<Q> + Default,
     {
         let merged = Self::merge(constraints);
         for c in &merged {
-            c.apply_to(state)
+            c.apply_to::<TEnforcer>(state)
         }
         for c in constraints {
             c.check(*state)
         }
     }
 
-    pub fn apply_to(&self, state: &mut AircraftState) {
-        Self::apply(&self.altitude, &mut state.altitude);
-        Self::apply(&self.altitude_ground, &mut state.altitude_ground);
-        Self::apply(&self.climb_rate, &mut state.climb_rate);
-        Self::apply(&self.speed_air, &mut state.speed_air);
-        Self::apply(&self.heading, &mut state.heading);
-        Self::apply(&self.pitch, &mut state.pitch);
-        Self::apply(&self.roll, &mut state.roll);
+    pub fn apply_to<TEnforcer>(&self, state: &mut AircraftState)
+    where
+        TEnforcer: ConstraintEnforcer<Length>
+            + ConstraintEnforcer<Velocity>
+            + ConstraintEnforcer<Angle>
+            + Default,
+    {
+        Self::apply::<Length, TEnforcer>(&self.altitude, &mut state.altitude);
+        Self::apply::<Length, TEnforcer>(&self.altitude_ground, &mut state.altitude_ground);
+        Self::apply::<Velocity, TEnforcer>(&self.climb_rate, &mut state.climb_rate);
+        Self::apply::<Velocity, TEnforcer>(&self.speed_air, &mut state.speed_air);
+        Self::apply::<Angle, TEnforcer>(&self.heading, &mut state.heading);
+        Self::apply::<Angle, TEnforcer>(&self.pitch, &mut state.pitch);
+        Self::apply::<Angle, TEnforcer>(&self.roll, &mut state.roll);
 
         //TODO Change when bools get vec
         state.steep_approach = self.steep_approach;
