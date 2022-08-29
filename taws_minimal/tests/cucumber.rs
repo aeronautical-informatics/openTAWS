@@ -40,16 +40,6 @@ fn given_alert_inhibited(world: &mut MyWorld, alert: AlertParameter, maybe: Mayb
     }
 }
 
-#[given(expr = "a {alert} {alert_level} alert {maybe} active")]
-fn given_alert_level_active(
-    _world: &mut MyWorld,
-    _alert: AlertParameter,
-    _level: AlertLevelParameter,
-    _maybe: MaybeParameter,
-) {
-    todo!()
-}
-
 #[given(expr = "steep approach {maybe} selected")]
 fn given_steep_approach_selected(world: &mut MyWorld, maybe: MaybeParameter) {
     world.constraints[world.phase].add_steep_approach_constraint(maybe.into());
