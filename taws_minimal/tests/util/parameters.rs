@@ -130,20 +130,20 @@ impl FromStr for ConstraintParameter {
         match typ {
             "at least" => match q2 {
                 Some(_) => Err(format!("unexpected: {}", s)),
-                None => Ok(Self(Constraint::AtLeast(0, q1))),
+                None => Ok(Self(Constraint::AtLeast(q1))),
             },
             "at most" | "within" => match q2 {
                 Some(_) => Err(format!("unexpected: {}", s)),
-                None => Ok(Self(Constraint::AtMost(0, q1))),
+                None => Ok(Self(Constraint::AtMost(q1))),
             },
             "between" => match q2 {
-                Some(q2) if q1 <= q2 => Ok(Self(Constraint::InRange(0, q1, q2))),
-                Some(q2) => Ok(Self(Constraint::InRange(0, q2, q1))),
+                Some(q2) if q1 <= q2 => Ok(Self(Constraint::InRange(q1, q2))),
+                Some(q2) => Ok(Self(Constraint::InRange(q2, q1))),
                 None => Err(format!("missing second bound: {}", s)),
             },
             "not between" => match q2 {
-                Some(q2) if q1 <= q2 => Ok(Self(Constraint::NotInRange(0, q1, q2))),
-                Some(q2) => Ok(Self(Constraint::NotInRange(0, q2, q1))),
+                Some(q2) if q1 <= q2 => Ok(Self(Constraint::NotInRange(q1, q2))),
+                Some(q2) => Ok(Self(Constraint::NotInRange(q2, q1))),
                 None => Err(format!("missing second bound: {}", s)),
             },
             _ => Err(format!("invalid constraint type: {}", s)),
