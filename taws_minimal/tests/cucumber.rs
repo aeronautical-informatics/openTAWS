@@ -70,11 +70,11 @@ fn given_height_above_terrain(world: &mut MyWorld, height_above_terrain: Constra
 
     let unit = Length::new::<length::foot>(1.0);
     let height_above_terrain = match height_above_terrain {
-        Constraint::AtLeast(p, a) => Constraint::AtLeast(p, a * unit),
-        Constraint::AtMost(p, a) => Constraint::AtMost(p, a * unit),
-        Constraint::Equal(p, a) => Constraint::Equal(p, a * unit),
-        Constraint::InRange(p, a, b) => Constraint::InRange(p, a * unit, b * unit),
-        Constraint::NotInRange(p, a, b) => Constraint::NotInRange(p, a * unit, b * unit),
+        Constraint::AtLeast(a) => Constraint::AtLeast(a * unit),
+        Constraint::AtMost(a) => Constraint::AtMost(a * unit),
+        Constraint::Equal(a) => Constraint::Equal(a * unit),
+        Constraint::InRange(a, b) => Constraint::InRange(a * unit, b * unit),
+        Constraint::NotInRange(a, b) => Constraint::NotInRange(a * unit, b * unit),
     };
 
     world.constraints[world.phase].add_altitude_ground_constraint(height_above_terrain);
@@ -86,11 +86,11 @@ fn when_rate_of_descent(world: &mut MyWorld, rate_of_descent: ConstraintParamete
 
     let unit = Velocity::new::<velocity::foot_per_minute>(-1.0);
     let climb_rate = match rate_of_descent {
-        Constraint::AtLeast(p, a) => Constraint::AtMost(p, a * unit),
-        Constraint::AtMost(p, a) => Constraint::AtLeast(p, a * unit),
-        Constraint::Equal(p, a) => Constraint::Equal(p, a * unit),
-        Constraint::InRange(p, a, b) => Constraint::InRange(p, b * unit, a * unit),
-        Constraint::NotInRange(p, a, b) => Constraint::NotInRange(p, b * unit, a * unit),
+        Constraint::AtLeast(a) => Constraint::AtMost(a * unit),
+        Constraint::AtMost(a) => Constraint::AtLeast(a * unit),
+        Constraint::Equal(a) => Constraint::Equal(a * unit),
+        Constraint::InRange(a, b) => Constraint::InRange(b * unit, a * unit),
+        Constraint::NotInRange(a, b) => Constraint::NotInRange(b * unit, a * unit),
     };
 
     world.constraints[world.phase].add_climb_rate_constraint(climb_rate);
@@ -102,11 +102,11 @@ fn when_height_above_terrain(world: &mut MyWorld, height_above_ground: Constrain
 
     let unit = Length::new::<length::foot>(1.0);
     let height_above_ground = match height_above_ground {
-        Constraint::AtLeast(p, a) => Constraint::AtLeast(p, a * unit),
-        Constraint::AtMost(p, a) => Constraint::AtMost(p, a * unit),
-        Constraint::Equal(p, a) => Constraint::Equal(p, a * unit),
-        Constraint::InRange(p, a, b) => Constraint::InRange(p, a * unit, b * unit),
-        Constraint::NotInRange(p, a, b) => Constraint::NotInRange(p, a * unit, b * unit),
+        Constraint::AtLeast(a) => Constraint::AtLeast(a * unit),
+        Constraint::AtMost(a) => Constraint::AtMost(a * unit),
+        Constraint::Equal(a) => Constraint::Equal(a * unit),
+        Constraint::InRange(a, b) => Constraint::InRange(a * unit, b * unit),
+        Constraint::NotInRange(a, b) => Constraint::NotInRange(a * unit, b * unit),
     };
 
     world.constraints[world.phase].add_altitude_ground_constraint(height_above_ground);
