@@ -67,7 +67,7 @@ lazy_static::lazy_static! {
     static ref CAUTION_ENVELOPE_METHODE_2: Envelope<3> = Envelope::new([
         (11.0, 35.0),
         (104.0, 1100.0),
-        (104.0, 1100.0),
+        (104.0001, 1100.0),
     ])
     .unwrap();
 }
