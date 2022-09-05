@@ -20,7 +20,7 @@ lazy_static::lazy_static! {
 #[derive(WorldInit)]
 pub struct MyWorld {
     pub taws: MinimalTaws<'static>,
-    pub constraints: Vec<AircraftStateConstraints>,
+    pub phases: Vec<AircraftStateConstraints>,
     pub test_length: usize,
     pub phase: usize,
 }
@@ -32,8 +32,8 @@ impl cucumber::World for MyWorld {
     async fn new() -> Result<Self, Infallible> {
         Ok(Self {
             taws: MinimalTaws::new(&TAWS_CONFIG),
-            constraints: vec![AircraftStateConstraints::default()],
-            test_length: 10,
+            phases: vec![AircraftStateConstraints::default()],
+            test_length: 1,
             phase: 0,
         })
     }
@@ -42,6 +42,13 @@ impl cucumber::World for MyWorld {
 impl std::fmt::Debug for MyWorld {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("MyWorld").finish()
+    }
+}
+
+impl MyWorld {
+    pub fn next_phase(&mut self) {
+        self.phases.push(AircraftStateConstraints::default());
+        self.phase += 1;
     }
 }
 
