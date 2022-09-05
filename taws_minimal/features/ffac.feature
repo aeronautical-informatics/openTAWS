@@ -15,6 +15,7 @@ Each of these additional categories of callouts is not required.
     And FFAC is not inhibited
     And non-precision approach is selected
     And the height above terrain is at least 500 foot
+    Given in the next phase
     When the height above terrain is at most 500 foot
     Then a FFAC annunciation alert is emitted within 1.3 seconds
 
@@ -24,5 +25,6 @@ Each of these additional categories of callouts is not required.
     And FFAC is not inhibited
     And non-precision approach is selected
     And the nearest runway elevation is at least 500 foot
+    Given in the next phase
     When the nearest runway elevation is at most 500 foot
     Then a FFAC annunciation alert is emitted within 1.3 seconds
