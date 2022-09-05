@@ -13,10 +13,10 @@ pub struct AircraftStateConstraints {
     pitch: Option<Constraint<Angle>>,
     roll: Option<Constraint<Angle>>,
 
-    steep_approach: bool,
-    precision_approach: bool,
-    go_around: bool,
-    take_off: bool,
+    steep_approach: Option<bool>,
+    precision_approach: Option<bool>,
+    go_around: Option<bool>,
+    take_off: Option<bool>,
 }
 
 impl AircraftStateConstraints {
@@ -53,10 +53,10 @@ impl AircraftStateConstraints {
         Self::apply::<Angle, TEnforcer>(&self.pitch, &mut state.pitch);
         Self::apply::<Angle, TEnforcer>(&self.roll, &mut state.roll);
 
-        state.steep_approach = self.steep_approach;
-        state.precision_approach = self.precision_approach;
-        state.go_around = self.go_around;
-        state.take_off = self.take_off;
+        state.steep_approach = self.steep_approach.unwrap_or(state.steep_approach);
+        state.precision_approach = self.precision_approach.unwrap_or(state.precision_approach);
+        state.go_around = self.go_around.unwrap_or(state.go_around);
+        state.take_off = self.take_off.unwrap_or(state.take_off);
     }
 
     pub fn add_altitude_constraint(&mut self, c: Constraint<Length>) {
@@ -109,18 +109,18 @@ impl AircraftStateConstraints {
     }
 
     pub fn add_steep_approach_constraint(&mut self, c: bool) {
-        self.steep_approach = c;
+        self.steep_approach = Some(c);
     }
 
     pub fn add_precision_approach_constraint(&mut self, c: bool) {
-        self.precision_approach = c;
+        self.precision_approach = Some(c);
     }
 
     pub fn add_go_around_constraint(&mut self, c: bool) {
-        self.go_around = c;
+        self.go_around = Some(c);
     }
 
     pub fn add_take_off_constraint(&mut self, c: bool) {
-        self.take_off = c;
+        self.take_off = Some(c);
     }
 }
