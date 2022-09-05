@@ -119,7 +119,14 @@ fn when_height_above_terrain(world: &mut MyWorld, height_above_ground: Constrain
 
 #[then(expr = "{alert} {maybe} be armed")]
 fn then_alert_armed(world: &mut MyWorld, alert: AlertParameter, maybe: MaybeParameter) {
-    assert_eq!(world.taws.is_armed(alert.into()), maybe.into())
+    let mut state = AircraftStateGenerator::default().next().unwrap();
+    for phase in world.phases.iter() {
+        phase.apply_to::<BouncingClamp>(&mut state);
+        let _alerts = world.taws.process(&state);
+    }
+
+    let is_armed = world.taws.is_armed(alert.into());
+    assert_eq!(is_armed, maybe.into())
 }
 
 #[then(expr = "a {alert} {alert_level} alert {maybe} emitted {constraint} seconds")]
