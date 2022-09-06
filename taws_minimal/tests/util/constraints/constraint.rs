@@ -1,10 +1,6 @@
-use std::any::Any;
-
-use uom::num_traits::{Signed, Zero};
-
 use super::constraint_enforcement::{self, ConstraintEnforcer};
 
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub enum Constraint<Q>
 where
     Q: Copy
@@ -66,25 +62,25 @@ where
 
             (Constraint::AtLeast(l), Constraint::AtMost(r))
             | (Constraint::AtMost(r), Constraint::AtLeast(l)) => match (l, r) {
-                (l, r) if l > r => Err(format!("unsatisfiable")),
+                (l, r) if l > r => Err("unsatisfiable".to_string()),
                 (l, r) => Ok(Constraint::InRange(l, r)),
             },
 
             (Constraint::Equal(x), Constraint::AtLeast(l))
             | (Constraint::AtLeast(l), Constraint::Equal(x)) => match (x, l) {
                 (x, l) if x >= l => Ok(Constraint::Equal(x)),
-                _ => Err(format!("unsatisfiable")),
+                _ => Err("unsatisfiable".to_string()),
             },
 
             (Constraint::Equal(x), Constraint::AtMost(r))
             | (Constraint::AtMost(r), Constraint::Equal(x)) => match (x, r) {
                 (x, r) if x <= r => Ok(Constraint::Equal(x)),
-                _ => Err(format!("unsatisfiable")),
+                _ => Err("unsatisfiable".to_string()),
             },
 
             (Constraint::Equal(x), Constraint::Equal(y)) => match (x, y) {
                 (x, y) if x == y => Ok(Constraint::Equal(x)),
-                _ => Err(format!("unsatisfiable")),
+                _ => Err("unsatisfiable".to_string()),
             },
 
             (Constraint::AtLeast(l1), Constraint::InRange(l, r))
@@ -120,7 +116,9 @@ where
                 at_least.merge(&at_most)
             }
 
-            _ => Err(format!("not supported")),
+            // Merging NotInRange could lead to non convex constraints or constraints containing `Greater Than` or `Less Than` comparisons.
+            // Could be implemented, but maybe not worth it.
+            _ => Err("not supported".to_string()),
         }
     }
 
