@@ -4,16 +4,14 @@ use cucumber::Parameter;
 use lazy_static::lazy_static;
 use opentaws::{Alert, AlertLevel};
 use regex::Regex;
-use uom::si::f64::Length;
-use uom::si::length;
 
 use super::constraints::Constraint;
 
 pub struct MaybeParameter(bool);
 
-impl Into<bool> for MaybeParameter {
-    fn into(self) -> bool {
-        self.0
+impl From<MaybeParameter> for bool {
+    fn from(maybe_param: MaybeParameter) -> Self {
+        maybe_param.0
     }
 }
 
@@ -58,9 +56,9 @@ impl FromStr for AlertParameter {
     }
 }
 
-impl Into<Alert> for AlertParameter {
-    fn into(self) -> Alert {
-        self.0
+impl From<AlertParameter> for Alert {
+    fn from(alert_param: AlertParameter) -> Self {
+        alert_param.0
     }
 }
 
@@ -71,9 +69,9 @@ impl Parameter for AlertParameter {
 
 pub struct AlertLevelParameter(AlertLevel);
 
-impl Into<AlertLevel> for AlertLevelParameter {
-    fn into(self) -> AlertLevel {
-        self.0
+impl From<AlertLevelParameter> for AlertLevel {
+    fn from(alert_level_param: AlertLevelParameter) -> Self {
+        alert_level_param.0
     }
 }
 
@@ -151,9 +149,9 @@ impl FromStr for ConstraintParameter {
     }
 }
 
-impl Into<Constraint<f64>> for ConstraintParameter {
-    fn into(self) -> Constraint<f64> {
-        self.0
+impl From<ConstraintParameter> for Constraint<f64> {
+    fn from(constraint_param: ConstraintParameter) -> Self {
+        constraint_param.0
     }
 }
 

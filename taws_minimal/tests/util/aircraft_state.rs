@@ -50,7 +50,7 @@ impl Iterator for AircraftStateGenerator {
         while buf.len() < bytes_needed {
             buf.extend_from_slice(&self.0.next_u64().to_le_bytes());
         }
-        let mut u = Unstructured::new(&mut buf);
+        let mut u = Unstructured::new(&buf);
 
         Some(AircraftStateWrapper::arbitrary(&mut u).unwrap().0) // the unwrap is safe, we guarantee that enough bytes are available
     }
