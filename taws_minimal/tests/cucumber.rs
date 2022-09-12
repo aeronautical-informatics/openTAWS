@@ -155,8 +155,8 @@ fn then_alert_emitted(
         .take(world.test_length)
         .collect();
 
-    for (i, phase) in world.phases.iter().enumerate() {
-        for state in aircraft_states.iter_mut() {
+    for state in aircraft_states.iter_mut() {
+        for (i, phase) in world.phases.iter().enumerate() {
             phase.apply_to::<BouncingClamp>(state);
             let alert_state = world.taws.process(state);
 
