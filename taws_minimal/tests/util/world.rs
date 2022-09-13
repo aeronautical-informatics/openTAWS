@@ -33,7 +33,7 @@ impl cucumber::World for MyWorld {
         Ok(Self {
             taws: MinimalTaws::new(&TAWS_CONFIG),
             phases: vec![AircraftStateConstraints::default()],
-            test_length: 1,
+            test_length: 10,
             phase: 0,
         })
     }
