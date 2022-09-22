@@ -28,6 +28,7 @@ Feature: Excessive Rate of Descent (Mode 1)
 
     @ALERT_CRITERIA @CAUTION @MOPS_270
     Scenario: Class C Equipment shall not provide a Mode 1 caution alert when ... Mode 1 is not armed.
+      Given not implemented
 
     @ALERT_CRITERIA @CAUTION @MOPS_270
     Scenario: Class C Equipment shall not provide a Mode 1 caution alert when ... Mode 1 is inhibited.
@@ -73,6 +74,7 @@ Feature: Excessive Rate of Descent (Mode 1)
 
     @ALERT_CRITERIA @CAUTION @MOPS_272
     Scenario: Class C Equipment shall not provide a Mode 1 caution alert when ... Mode 1 is not armed.
+      Given not implemented
 
     @ALERT_CRITERIA @CAUTION @MOPS_272
     Scenario: Class C Equipment shall not provide a Mode 1 caution alert when ... Mode 1 is inhibited.
@@ -117,6 +119,7 @@ Feature: Excessive Rate of Descent (Mode 1)
 
     @ALERT_CRITERIA @WARNING @MOPS_274
     Scenario: Class C Equipment shall not provide a Mode 1 warning alert when ... Mode 1 is not armed.
+      Given not implemented
 
     @ALERT_CRITERIA @WARNING @MOPS_274
     Scenario: Class C Equipment shall not provide a Mode 1 warning alert when ... Mode 1 is inhibited.
@@ -160,6 +163,7 @@ Feature: Excessive Rate of Descent (Mode 1)
 
     @ALERT_CRITERIA @WARNING @MOPS_276
     Scenario: Class C Equipment shall not provide a Mode 1 warning alert when ... Mode 1 is not armed.
+      Given not implemented
 
     @ALERT_CRITERIA @WARNING @MOPS_276
     Scenario: Class C Equipment shall not provide a Mode 1 warning alert when ... Mode 1 is inhibited.
@@ -187,18 +191,24 @@ Feature: Excessive Rate of Descent (Mode 1)
 
     @AURAL_ALERT @CAUTION @MOPS_277
     Scenario: Class C Equipment shall be capable of generating or triggering an aural message of “Sink Rate”.
+      Given not implemented
 
     @AURAL_ALERT @WARNING @MOPS_278
     Scenario: Class C Equipment shall be capable of generating or triggering an aural message of “Pull up”.
+      Given not implemented
 
     @AURAL_ALERT @WARNING @MOPS_279
     Scenario: Class C Equipment shall repeat the aural message periodically for the duration of the Mode 1 warning alert condition, or until silenced by the pilot or a higher priority alert.
+      Given not implemented
 
     @AURAL_ALERT @WARNING @MOPS_280
     Scenario: Class C Equipment shall generate a tone sweep ...
+      Given not implemented
 
     @VISUAL_ALERT @CAUTION @MOPS_281
     Scenario: Class C Equipment shall be capable of providing an output to trigger a yellow or amber indication.
+      Given not implemented
 
     @VISUAL_ALERT @WARNING @MOPS_282
     Scenario: Class C Equipment shall be capable of providing an output to trigger a red indication.
+      Given not implemented
