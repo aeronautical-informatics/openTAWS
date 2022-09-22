@@ -69,6 +69,8 @@ Feature: Premature Descent Alerting (PDA)
 
     @AURAL_ALERT @CAUTION @MOPS_266
     Scenario: Class C Equipment shall be capable of generating or triggering an aural message of at least one of “Too Low” and “Too Low Terrain”.
+      Given not implemented
 
     @VISUAL_ALERT @CAUTION @MOPS_267
     Scenario: Class C Equipment shall be capable of providing an output to trigger a yellow or amber indication.
+      Given not implemented
