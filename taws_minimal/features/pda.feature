@@ -6,7 +6,7 @@ Feature: Premature Descent Alerting (PDA)
 	height above terrain/obstacles and distance to runway.
 
   Background:
-    Given the aircraft is in the landing flight segment
+    Given the aircraft is in a landing situation
 
   @ARMING_DISARMING @MOPS_263
   Scenario: Class C Equipment shall arm PDA within 5 NM of an airport.
