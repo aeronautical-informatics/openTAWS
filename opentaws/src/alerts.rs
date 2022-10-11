@@ -1,3 +1,8 @@
+pub mod ffac;
+pub mod mode1;
+pub mod mode3;
+pub mod pda;
+
 use crate::{TawsAlert, TawsAlerts};
 use enum_map::{Enum, EnumMap};
 
@@ -56,6 +61,12 @@ pub struct Alert {
     pub level: AlertLevel,
 }
 
+impl Alert {
+    pub fn new(source: AlertSource, level: AlertLevel) -> Self {
+        Alert { source, level }
+    }
+}
+
 impl TawsAlert for Alert {
     fn source(&self) -> AlertSource {
         self.source
@@ -68,10 +79,7 @@ impl TawsAlert for Alert {
 
 impl From<(AlertSource, AlertLevel)> for Alert {
     fn from(alert: (AlertSource, AlertLevel)) -> Self {
-        Alert {
-            source: alert.0,
-            level: alert.1,
-        }
+        Self::new(alert.0, alert.1)
     }
 }
 

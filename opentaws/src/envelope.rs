@@ -1,53 +1,52 @@
 type Vector2 = nalgebra::Vector2<f64>;
 
+pub const INVALID_ENVELOPE: &str = "Invalid Envelope!";
+
 /// Represents a TAWS Envelope which defines under what conditions an alert should and should not be emitted.
 pub struct Envelope<const N: usize> {
-    /// Defines the operating limits of this envelope. <br/>
+    /*/// Defines the operating limits of this envelope. <br/>
     /// For states outside these limits the envelope is not defined.
-    limits: Rect,
-    /// Defines the conditions under which an alert should or should not be emitted. <br/>
-    /// The start and end point must coincide with the envelope limits.
-    /// The other points must be inside of the envelope limits.
+    limits: Rect, */
+    /// Defines the conditions under which an alert should or should not be emitted.
     polygon: Polygon<N>,
 }
 
 impl<const N: usize> Envelope<N> {
     /// Creates a new Envelope from the given envelope limits and polygon points.
     /// # Arguments
-    /// * `limits` - the limits of the envelope in which the envelope is defined. Must be finite.
     /// * `points` - the polygon points which define the envelope. At least 3 points are nessecary. All points must be finite.
     /// ToDO (maybe): Augment the polygon to the envelope limits by adding a new start point and new end points to close the polygon with the envelope limits.
-    pub fn try_new(limits: Rect, points: [Vector2; N]) -> Result<Self, ()> {
-        if !Self::are_valid_limits(&limits) {
+    pub fn try_new(/* limits: Rect, */ points: [Vector2; N]) -> Result<Self, ()> {
+        /*if !Self::are_valid_limits(&limits) {
             return Err(());
-        }
+        }*/
 
-        if !Self::are_points_valid(&limits, &points) {
+        if !Self::are_points_valid(/* &limits, */ &points) {
             return Err(());
         }
 
         Ok(Self {
-            limits,
+            //limits,
             polygon: Polygon::try_new(points)?,
         })
     }
 
-    /// checks wether the given limits are sufficent for an envelope.
+    /* /// checks wether the given limits are sufficent for an envelope.
     fn are_valid_limits(limits: &Rect) -> bool {
         limits.min.x.is_finite()
             && limits.min.y.is_finite()
             && limits.max.x.is_finite()
             && limits.max.y.is_finite()
-    }
+    } */
 
     /// checks whether the given polygon points are sufficent for an envelope.
     /// the polygon must start and end on the envelope limits. all in-between points must be within the envelope limit.
-    fn are_points_valid(limits: &Rect, points: &[Vector2; N]) -> bool {
+    fn are_points_valid(/* limits: &Rect, */ _points: &[Vector2; N]) -> bool {
         if N < 3 {
             return false;
         }
 
-        let first_point = points.first().unwrap();
+        /* let first_point = points.first().unwrap();
         let last_point = points.last().unwrap();
         if !limits.is_point_on_boundary(*first_point) || !limits.is_point_on_boundary(*last_point) {
             return false;
@@ -56,32 +55,32 @@ impl<const N: usize> Envelope<N> {
         let mid_points = &points[1..N - 1];
         if !mid_points.iter().all(|point| limits.contains(*point)) {
             return false;
-        }
+        } */
 
         true
     }
 
-    /// Returns whether the envelope is defined for the specified point.
+    /* /// Returns whether the envelope is defined for the specified point.
     /// # Arguments
     /// * `point` - The point which is tested
     /// # Returns
     /// * `true` if the given point is within the envelope limits; otherwise `false`.
     pub fn is_within_limits(&self, point: Vector2) -> bool {
         self.limits.contains(point)
-    }
+    } */
 
-    /// Determines whether the specified state is within the envelope.
+    /// Determines whether the specified (x, y) state is within the envelope.
     /// # Arguments
-    /// * `point` - The state which is tested against the envelope.
+    /// * `x` - The first state component.
+    /// * `y` - The second state compoenent.
     /// # Returns
-    /// * `Ok(bool)` - Indicates whether the given point is within the envelope.
-    /// * `Err()` - The given point is not within the envelope limits.
-    pub fn contains(&self, point: Vector2) -> Result<bool, ()> {
-        if !self.is_within_limits(point) {
+    /// * `Ok(bool)` - Indicates whether the given state is within the envelope.
+    pub fn contains(&self, x: f64, y: f64) -> Result<bool, ()> {
+        /* if !self.is_within_limits(point) {
             return Err(());
-        }
+        } */
 
-        Ok(self.polygon.contains(point))
+        Ok(self.polygon.contains(Vector2::new(x, y)))
     }
 }
 
@@ -119,7 +118,7 @@ impl<const N: usize> Polygon<N> {
         &self.points
     }
 
-    /// returns the axis-aligned bounding-box for the polygon.
+    /* /// returns the axis-aligned bounding-box for the polygon.
     fn bounding_box(&self) -> Rect {
         let mut min = Vector2::new(f64::INFINITY, f64::INFINITY);
         let mut max = Vector2::new(f64::NEG_INFINITY, f64::NEG_INFINITY);
@@ -139,7 +138,7 @@ impl<const N: usize> Polygon<N> {
         }
 
         Rect::new(min, max)
-    }
+    } */
 
     /// returns an iterator over
     fn segments(&self) -> impl Iterator<Item = LineSegment> + '_ {
@@ -188,9 +187,9 @@ impl<const N: usize> Polygon<N> {
     }
 }
 
-/// Represents an axis-aligned rectangle.
+/* /// Represents an axis-aligned rectangle.
 #[derive(Copy, Clone, Default, Debug, PartialEq)]
-pub struct Rect {
+struct Rect {
     /// lower left corner
     min: Vector2,
     /// upper right corner
@@ -235,7 +234,7 @@ impl Rect {
             || point.y == self.min.y
             || point.y == self.max.y
     }
-}
+} */
 
 /// Represents a line segment.
 #[derive(Copy, Clone, Default, Debug, PartialEq)]
@@ -248,7 +247,7 @@ pub struct LineSegment {
 
 impl LineSegment {
     /// Create a new line segment.
-    fn new(p1: Vector2, p2: Vector2) -> Self {
+    pub fn new(p1: Vector2, p2: Vector2) -> Self {
         Self {
             point1: p1,
             point2: p2,
@@ -256,12 +255,12 @@ impl LineSegment {
     }
 
     /// Returns the mid point of the line segment.
-    fn mid(&self) -> Vector2 {
+    pub fn mid(&self) -> Vector2 {
         self.point1 + 0.5 * (self.point2 - self.point1)
     }
 
     /// Determines whether the specified point is on the line segment.
-    fn contains(&self, point: Vector2) -> bool {
+    pub fn contains(&self, point: Vector2) -> bool {
         let ab = self.point2 - self.point1;
         let ac = point - self.point1;
 
@@ -292,7 +291,7 @@ impl LineSegment {
     }
 
     /// Translates the line segment by the specified offset.
-    fn translate(&self, offset: Vector2) -> LineSegment {
+    pub fn translate(&self, offset: Vector2) -> LineSegment {
         (self.point1 + offset, self.point2 + offset).into()
     }
 }
@@ -389,10 +388,10 @@ mod tests {
 
     #[test]
     fn test_envelope() {
-        let limits = Rect {
+        /* let limits = Rect {
             min: Vector2::zeros(),
             max: Vector2::new(100.0, 100.0),
-        };
+        }; */
 
         let points = [
             Vector2::new(10.0, 0.0),
@@ -400,17 +399,17 @@ mod tests {
             Vector2::new(100.0, 75.0),
         ];
 
-        let envelope = Envelope::try_new(limits, points).unwrap();
+        let envelope = Envelope::try_new(/* limits, */ points).unwrap();
 
-        assert!(envelope.is_within_limits(Vector2::zeros()));
+        /* assert!(envelope.is_within_limits(Vector2::zeros()));
         assert!(envelope.is_within_limits(Vector2::new(100.0, 100.0)));
         assert!(envelope.is_within_limits(Vector2::new(0.0, 100.0)));
         assert!(envelope.is_within_limits(Vector2::new(100.0, 0.0)));
-        assert!(!envelope.is_within_limits(Vector2::new(150.0, 150.0)));
+        assert!(!envelope.is_within_limits(Vector2::new(150.0, 150.0))); */
 
-        assert!(!envelope.contains(Vector2::zeros()).unwrap());
-        assert!(!envelope.contains(Vector2::new(100.0, 100.0)).unwrap());
-        assert!(envelope.contains(Vector2::new(50.0, 50.0)).unwrap());
-        assert!(envelope.contains(Vector2::new(150.0, 150.0)) == Err(()));
+        assert!(!envelope.contains(0.0, 0.0).unwrap());
+        assert!(!envelope.contains(100.0, 100.0).unwrap());
+        assert!(envelope.contains(50.0, 50.0).unwrap());
+        assert!(envelope.contains(150.0, 150.0) == Err(()));
     }
 }

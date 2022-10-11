@@ -20,20 +20,25 @@ extern crate std;
 
 pub mod aircraft_state;
 pub mod alerts;
-mod envelope;
+pub(crate) mod envelope;
 
 pub use aircraft_state::{AircraftState, NormalizedAircraftState};
 pub use alerts::{Alert, AlertLevel, AlertSource};
 
 /// Abstraction for a TAWS system
 pub trait Taws {
+    type Alert: TawsAlert + Sized;
     /// Alert set type
-    type Alerts: TawsAlerts + Default;
+    type Alerts: TawsAlerts<Alert = Self::Alert> + Default;
 
     //fn arm(&mut self, alert_src: AlertSource);
     //fn disarm(&mut self, alert_src: AlertSource);
 
-    /// Returns whether the specified alert source (TAWS functionallity) is currently armed.
+    // ToDo:
+    //fn functionality(&self) -> Option<dyn TawsFunctionallity>;
+    //fn functionalities(&self) -> iterator, array, slice ???;
+
+    /// Returns whether the specified alert source (TAWS functionality) is currently armed.
     /// # Arguments
     /// * `alert_src` - The alert source of which the armed state is returned.
     fn is_armed(&self, alert_src: AlertSource) -> bool;
@@ -53,11 +58,37 @@ pub trait Taws {
     /// * `alert_src` - The alert source of which the inhibit state is returned.
     fn is_inhibited(&self, alert_src: AlertSource) -> bool;
 
-    /// Processes an normalized [AircraftState] and
-    /// returns an alert for each alert source if the related conditions for this TAWS functionallity are given.
+    /// Processes a normalized [AircraftState] and
+    /// returns an alert for each alert source if the related conditions for this TAWS functionality are given.
     /// # Arguments
     /// * `state` - The normalized [AircraftState] to process.
-    fn process(&mut self, state: NormalizedAircraftState) -> Self::Alerts;
+    fn process(&mut self, state: NormalizedAircraftState) -> Self::Alerts; //ToDo: Result ?
+}
+
+/// Represents a TAWS functionality
+pub trait TawsFunctionality {
+    /// Alert type
+    type Alert: TawsAlert;
+
+    /// Returns the alert source which is controlled by this functionality.
+    fn alert_source(&self) -> AlertSource;
+
+    /// Returns whether the functionality is armed.
+    fn is_armed(&self) -> bool;
+
+    /// Inhibits the functionality.
+    fn inhibit(&mut self);
+
+    /// Un-inhibits the functionality.
+    fn uninhibit(&mut self);
+
+    /// Returns whether the functionality is currently inhibited.
+    fn is_inhibited(&self) -> bool;
+
+    /// Processes a normalized [AircraftState] and returns an alert result or an error.
+    /// # Arguments
+    /// * `state` - The normalized [AircraftState] to process.
+    fn process(&mut self, state: NormalizedAircraftState) -> Result<Option<Self::Alert>, ()>; // Todo Error type? anyhow, thiserror, snafu, ...?; Return multiple alerts?
 }
 
 /// Abstraction for a TAWS alert
