@@ -62,7 +62,7 @@ Feature: Premature Descent Alerting (PDA)
     Scenario: Class C Equipment shall not provide a PDA caution alert when ... PDA is inhibited.
       Given PDA is inhibited
       When the distance to runway is 1.0 NM
-      And the height above terrain is 10.0 feet
+      And the height above terrain is equal 10.0 feet
       Then a PDA caution is no emitted
 
   Rule: PDA is armed and not-inhibited and an alert is active

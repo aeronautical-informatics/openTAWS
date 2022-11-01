@@ -36,7 +36,7 @@ Each of these additional categories of callouts is not required.
     Then FFAC shall be armed
 
   @AURAL_ALERT @ANNUNCIATION @MOPS_293
-  Scenario: Class C Equipment shall (TAWS_MOPS_293) be capable of providing or triggering a voice callout of “five hundred” ...
+  Scenario: Class C Equipment shall be capable of providing or triggering a voice callout of “five hundred” ...
     Given not implemented
 
   Rule: Five Hundred Foot Altitude Callout above terrain

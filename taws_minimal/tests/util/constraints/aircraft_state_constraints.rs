@@ -10,13 +10,9 @@ pub struct AircraftStateConstraints {
     climb_rate: Option<Constraint<Velocity>>,
     speed_air: Option<Constraint<Velocity>>,
     heading: Option<Constraint<Angle>>,
-    pitch: Option<Constraint<Angle>>,
-    roll: Option<Constraint<Angle>>,
+    track: Option<Constraint<Angle>>,
 
-    steep_approach: Option<bool>,
-    precision_approach: Option<bool>,
-    go_around: Option<bool>,
-    take_off: Option<bool>,
+    situation: Option<FlightSegment>,
 }
 
 impl AircraftStateConstraints {
@@ -45,18 +41,14 @@ impl AircraftStateConstraints {
             + ConstraintEnforcer<Angle>
             + Default,
     {
-        Self::apply::<Length, TEnforcer>(&self.altitude, &mut state.altitude);
-        Self::apply::<Length, TEnforcer>(&self.altitude_ground, &mut state.altitude_ground);
-        Self::apply::<Velocity, TEnforcer>(&self.climb_rate, &mut state.climb_rate);
-        Self::apply::<Velocity, TEnforcer>(&self.speed_air, &mut state.speed_air);
-        Self::apply::<Angle, TEnforcer>(&self.heading, &mut state.heading);
-        Self::apply::<Angle, TEnforcer>(&self.pitch, &mut state.pitch);
-        Self::apply::<Angle, TEnforcer>(&self.roll, &mut state.roll);
+        Self::apply::<Length, TEnforcer>(&self.altitude, state.altitude_mut());
+        Self::apply::<Length, TEnforcer>(&self.altitude_ground, state.altitude_ground_mut());
+        Self::apply::<Velocity, TEnforcer>(&self.climb_rate, state.climb_rate_mut());
+        Self::apply::<Velocity, TEnforcer>(&self.speed_air, state.speed_air_mut());
+        Self::apply::<Angle, TEnforcer>(&self.heading, state.heading_mut());
+        Self::apply::<Angle, TEnforcer>(&self.track, state.track_mut());
 
-        state.steep_approach = self.steep_approach.unwrap_or(state.steep_approach);
-        state.precision_approach = self.precision_approach.unwrap_or(state.precision_approach);
-        state.go_around = self.go_around.unwrap_or(state.go_around);
-        state.take_off = self.take_off.unwrap_or(state.take_off);
+        *state.situation_mut() = self.situation.or(*state.situation());
     }
 
     pub fn add_altitude_constraint(&mut self, c: Constraint<Length>) {
@@ -94,33 +86,25 @@ impl AircraftStateConstraints {
         }
     }
 
-    pub fn add_pitch_constraint(&mut self, c: Constraint<Angle>) {
-        self.pitch = match &self.pitch {
-            Some(pitch) => Some(pitch.merge(&c).unwrap()),
-            None => Some(c),
-        }
+    pub fn add_situation_constraint(&mut self, situation: FlightSegment) {
+        self.situation = Some(situation);
     }
 
-    pub fn add_roll_constraint(&mut self, c: Constraint<Angle>) {
-        self.roll = match &self.roll {
-            Some(roll) => Some(roll.merge(&c).unwrap()),
-            None => Some(c),
-        }
-    }
+	pub fn add_steep_approach_constraint(&mut self, is_steep: bool) {
+		if let Some(FlightSegment::Landing { ref mut steep_approach, .. }) = self.situation {
+			*steep_approach = is_steep;
+		}
+	}
 
-    pub fn add_steep_approach_constraint(&mut self, c: bool) {
-        self.steep_approach = Some(c);
-    }
+	pub fn add_precision_approach_constraint(&mut self, is_precision: bool) {
+		if let Some(FlightSegment::Landing { ref mut precision_approach, .. }) = self.situation {
+			*precision_approach = is_precision;
+		}
+	}
 
-    pub fn add_precision_approach_constraint(&mut self, c: bool) {
-        self.precision_approach = Some(c);
-    }
-
-    pub fn add_go_around_constraint(&mut self, c: bool) {
-        self.go_around = Some(c);
-    }
-
-    pub fn add_take_off_constraint(&mut self, c: bool) {
-        self.take_off = Some(c);
-    }
+	pub fn add_circling_approach_constraint(&mut self, is_circling: bool) {
+		if let Some(FlightSegment::Landing { ref mut circling_approach, .. }) = self.situation {
+			*circling_approach = is_circling;
+		}
+	}
 }
