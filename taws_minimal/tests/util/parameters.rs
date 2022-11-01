@@ -1,9 +1,11 @@
 use std::str::FromStr;
 
-use cucumber::Parameter;
+use cucumber::{Parameter};
 use lazy_static::lazy_static;
-use opentaws::{Alert, AlertLevel};
 use regex::Regex;
+
+use opentaws::prelude::*;
+use taws_minimal::AlertSource;
 
 use super::constraints::Constraint;
 
@@ -34,35 +36,32 @@ impl Parameter for MaybeParameter {
     const REGEX: &'static str = r"(?:is|should|shall)\s*(?:not)?";
 }
 
-pub struct AlertParameter(Alert);
+pub struct AlertSourceParameter(AlertSource);
 
-impl FromStr for AlertParameter {
+impl FromStr for AlertSourceParameter {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut alert = s.trim().to_lowercase();
         alert.retain(|c| !c.is_whitespace());
         match alert.as_str() {
-            "ffac" => Ok(Self(Alert::Ffac)),
-            "flta" => Ok(Self(Alert::Flta)),
-            "mode1" => Ok(Self(Alert::Mode1)),
-            "mode2" => Ok(Self(Alert::Mode2)),
-            "mode3" => Ok(Self(Alert::Mode3)),
-            "mode4" => Ok(Self(Alert::Mode4)),
-            "mode5" => Ok(Self(Alert::Mode5)),
-            "pda" => Ok(Self(Alert::Pda)),
+            "ffac" => Ok(Self(AlertSource::Ffac)),
+            //"flta" => Ok(Self(Alert::Flta)),
+            "mode1" => Ok(Self(AlertSource::Mode1)),
+            "mode3" => Ok(Self(AlertSource::Mode3)),
+            "pda" => Ok(Self(AlertSource::Pda)),
             _ => Err(format!("unknown alert: {s}")),
         }
     }
 }
 
-impl From<AlertParameter> for Alert {
-    fn from(alert_param: AlertParameter) -> Self {
+impl From<AlertSourceParameter> for AlertSource {
+    fn from(alert_param: AlertSourceParameter) -> Self {
         alert_param.0
     }
 }
 
-impl Parameter for AlertParameter {
+impl Parameter for AlertSourceParameter {
     const NAME: &'static str = "alert";
     const REGEX: &'static str = r"(?:[a-zA-Z]+\s*[0-9]*)";
 }
@@ -102,7 +101,7 @@ impl FromStr for ConstraintParameter {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         const PATTERN: &str = concat!(
-            r"(?P<type>at least|at most|within|between|not between)",
+            r"(?P<type>equal|at least|at most|within|between|not between)",
             r"\s*(?P<q1>[+-]?(?:[0-9]*[.])?[0-9]+)",
             r"(?:\s*and\s*(?P<q2>[+-]?(?:[0-9]*[.])?[0-9]+))?"
         );
@@ -126,6 +125,10 @@ impl FromStr for ConstraintParameter {
             .map_err(|_| "invalid quantity format")?;
 
         match typ {
+			"equal" => match q2 {
+				Some(_) => Err(format!("unexpected: {}", s)),
+				None => Ok(Self(Constraint::Equal(q1)))
+			},
             "at least" => match q2 {
                 Some(_) => Err(format!("unexpected: {}", s)),
                 None => Ok(Self(Constraint::AtLeast(q1))),
@@ -159,8 +162,38 @@ impl Parameter for ConstraintParameter {
     const NAME: &'static str = "constraint";
 
     const REGEX: &'static str = concat!(
-        r"(?:at least|at most|within|between|not between)\s*",
+        r"(?:equal|at least|at most|within|between|not between)\s*",
         r"[+-]?(?:[0-9]*[.])?[0-9]+",
         r"(?:\s*and\s*[+-]?(?:[0-9]*[.])?[0-9]+)?"
     );
+}
+
+pub struct FlightSegmentParameter(FlightSegment);
+
+impl From<FlightSegmentParameter> for FlightSegment {
+    fn from(segment: FlightSegmentParameter) -> Self {
+		segment.0
+    }
+}
+
+impl FromStr for FlightSegmentParameter {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+		let mut segment = s.trim().to_lowercase();
+        segment.retain(|c| !c.is_whitespace());
+        match segment.as_str() {
+			"cruise" => Ok(Self(FlightSegment::Cruise)),
+			"take-off" => Ok(Self(FlightSegment::TakeOff)),
+			"approach" | "landing" => Ok(Self(FlightSegment::Landing { circling_approach: false, precision_approach: false, steep_approach: false })),
+			"go-around" => Ok(Self(FlightSegment::GoAround)),
+			_ => Err(format!("invalid flight segment: {}", s)),
+		}
+    }
+}
+
+impl Parameter for FlightSegmentParameter {
+	const NAME: &'static str = "flight-segment";
+
+    const REGEX: &'static str = r"(?:cruise|take-off|landing|go-around|approach)";
 }

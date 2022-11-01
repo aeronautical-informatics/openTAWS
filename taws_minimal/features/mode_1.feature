@@ -33,8 +33,8 @@ Feature: Excessive Rate of Descent (Mode 1)
     @ALERT_CRITERIA @CAUTION @MOPS_270
     Scenario: Class C Equipment shall not provide a Mode 1 caution alert when ... Mode 1 is inhibited.
       Given Mode 1 is inhibited
-      When the rate of descent is 1560.0 feet per minute
-      When the height above terrain is 100.0 feet
+      When the rate of descent is equal 1560.0 feet per minute
+      When the height above terrain is equal 100.0 feet
       Then a Mode 1 caution shall not be emitted
 
     @ALERT_CRITERIA @CAUTION @MOPS_270
@@ -79,8 +79,8 @@ Feature: Excessive Rate of Descent (Mode 1)
     @ALERT_CRITERIA @CAUTION @MOPS_272
     Scenario: Class C Equipment shall not provide a Mode 1 caution alert when ... Mode 1 is inhibited.
       Given Mode 1 is inhibited
-      When the rate of descent is 1798.0 feet per minute
-      When the height above terrain 150.0 feet
+      When the rate of descent is equal 1798.0 feet per minute
+      When the height above terrain is equal 150.0 feet
       Then a Mode 1 caution shall not be emitted
 
     @ALERT_CRITERIA @CAUTION @MOPS_272
@@ -124,8 +124,8 @@ Feature: Excessive Rate of Descent (Mode 1)
     @ALERT_CRITERIA @WARNING @MOPS_274
     Scenario: Class C Equipment shall not provide a Mode 1 warning alert when ... Mode 1 is inhibited.
       Given Mode 1 is inhibited
-      When the rate of descent is 1600.0 feet per minute
-      When the height above terrain is 100.0 feet
+      When the rate of descent is equal 1600.0 feet per minute
+      When the height above terrain is equal 100.0 feet
       Then a Mode 1 warning shall not be emitted
 
     @ALERT_CRITERIA @WARNING @MOPS_274
@@ -168,8 +168,8 @@ Feature: Excessive Rate of Descent (Mode 1)
     @ALERT_CRITERIA @WARNING @MOPS_276
     Scenario: Class C Equipment shall not provide a Mode 1 warning alert when ... Mode 1 is inhibited.
       Given Mode 1 is inhibited
-      When the rate of descent is 1908.0 feet per minute
-      When the height above terrain is 150.0 feet
+      When the rate of descent is equal 1908.0 feet per minute
+      When the height above terrain is equal 150.0 feet
       Then a Mode 1 warning shall not be emitted
 
     @ALERT_CRITERIA @WARNING @MOPS_276

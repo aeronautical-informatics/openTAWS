@@ -49,7 +49,7 @@ Feature: Negative Climb Rate or Altitude Loss (Mode 3)
       Given the aircraft is not on a take-off segment
       Given Mode 3 is not inhibited
       When the rate of descent is at least 207.0 feet per minute
-      When the height above terrain is 60.0 feet
+      When the height above terrain is equal 60.0 feet
       Then Mode 3 is not armed
       Then a Mode 3 caution shall not be emitted
 
@@ -58,7 +58,7 @@ Feature: Negative Climb Rate or Altitude Loss (Mode 3)
       Given the aircraft is on a take-off segment
       Given Mode 3 is inhibited
       When the rate of descent is at least 207.0 feet per minute
-      When the height above terrain is 60.0 feet
+      When the height above terrain is equal 60.0 feet
       Then Mode 3 is armed
       Then a Mode 3 caution shall not be emitted
 
@@ -83,24 +83,24 @@ Feature: Negative Climb Rate or Altitude Loss (Mode 3)
     Scenario Outline: Class C Equipment shall provide a caution alert when ...
       Given the aircraft is on a take-off segment
       Given Mode 3 is not inhibited
-      When the height above terrain is between 60.0 <init_max_height_terrain> feet
+      When the height above terrain is between 86.0 and <init_max_height_terrain> feet
       Given in the next phase
-      When the height above terrain is at most <next_max_height_terrain> feet
+      When the height above terrain is between 60.0 and <next_max_height_terrain> feet
       Then Mode 3 is armed
       Then a Mode 3 caution shall be emitted
 
       Examples:
         | init_max_height_terrain | next_max_height_terrain |
-        |                    60.0 |                    34.0 |
+        |                    86.0 |                    60.0 |
         |                   600.0 |                   520.0 |
 
     @ALERT_CRITERIA @CAUTION @MOPS_289
     Scenario: Class C Equipment shall not provide a Mode 3 caution alert when ... Mode 3 is not armed.
       Given the aircraft is not on a take-off segment
       Given Mode 3 is not inhibited
-      When the height above terrain is 60.0 feet
+      When the height above terrain is equal 60.0 feet
       Given in the next phase
-      When the height above terrain is at 34.0 feet
+      When the height above terrain is equal 34.0 feet
       Then Mode 3 is not armed
       Then a Mode 3 caution shall not be emitted
 
@@ -108,9 +108,9 @@ Feature: Negative Climb Rate or Altitude Loss (Mode 3)
     Scenario: Class C Equipment shall not provide a Mode 3 caution alert when ... Mode 3 is inhibited.
       Given the aircraft is on a take-off segment
       Given Mode 3 is inhibited
-      When the height above terrain is 60.0 feet
+      When the height above terrain is equal 60.0 feet
       Given in the next phase
-      When the height above terrain is at 34.0 feet
+      When the height above terrain is equal 34.0 feet
       Then Mode 3 is armed
       Then a Mode 3 caution shall not be emitted
 

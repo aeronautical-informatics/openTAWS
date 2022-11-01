@@ -28,7 +28,8 @@ use-serde = ["uom/use_serde"]
 [dependencies]
 aviation_database = { path = "../aviation_database" }
 lazy_static = { version = "1", features = ["spin_no_std"] }
-enum-map = "2.4.1"
+heapless = "0.7.16"
+hash32 = "0.2.1"
 nalgebra = { version = "0.31.1", features = ["libm"] }
 
 # TODO jump to normal uom once https://github.com/iliekturtles/uom/pull/309 lands

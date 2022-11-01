@@ -1,41 +1,44 @@
-use std::convert::Infallible;
-
-use async_trait::async_trait;
-use cucumber::WorldInit;
+use cucumber::World;
 use opentaws::prelude::*;
 use taws_minimal::MinimalTaws;
 
-use super::constraints::{AircraftStateConstraints, ConstraintAirportDatabase};
+use super::{aircraft_state::AircraftStateGenerator, constraints::AircraftStateConstraints};
 
-static AIRPORT_DATABASE: ConstraintAirportDatabase = ConstraintAirportDatabase {};
-
-lazy_static::lazy_static! {
-    static ref TAWS_CONFIG: TawsConfig<'static> = TawsConfig{
-            terrain_server: &AIRPORT_DATABASE,
-            max_climbrate: Velocity::new::<foot_per_minute>(700.0),
-            max_climbrate_change: Acceleration::new::<foot_per_second_squared>(100.0),
-    };
-}
-
-#[derive(WorldInit)]
+#[derive(World)]
 pub struct MyWorld {
-    pub taws: MinimalTaws<'static>,
+    pub taws: MinimalTaws,
     pub phases: Vec<AircraftStateConstraints>,
     pub test_length: usize,
     pub phase: usize,
+
+	pub taws_constraints: AircraftStateConstraints,
+    pub state_gen: AircraftStateGenerator,
 }
 
-#[async_trait(?Send)]
-impl cucumber::World for MyWorld {
-    type Error = Infallible;
+impl Default for MyWorld {
+    fn default() -> Self {
+        let mut taws_constraints = AircraftStateConstraints::default();
 
-    async fn new() -> Result<Self, Infallible> {
-        Ok(Self {
-            taws: MinimalTaws::new(&TAWS_CONFIG),
-            phases: vec![AircraftStateConstraints::default()],
-            test_length: 10,
+        let max_altitude_gnd = Length::new::<foot>(330_000.0);
+        taws_constraints.add_altitude_ground_constraint(super::constraints::Constraint::InRange(
+            Length::new::<foot>(0.0),
+            max_altitude_gnd,
+        ));
+
+        let min_max_climb_rate = Velocity::new::<foot_per_minute>(680_000.0);
+        taws_constraints.add_climb_rate_constraint(super::constraints::Constraint::InRange(
+            -min_max_climb_rate,
+            min_max_climb_rate,
+        ));
+
+       Self {
+            taws: MinimalTaws::new(),
+            phases: vec![taws_constraints.clone()],
+            test_length: 100,
             phase: 0,
-        })
+			taws_constraints: taws_constraints.clone(),
+            state_gen: AircraftStateGenerator::default(),
+        }
     }
 }
 
@@ -47,9 +50,15 @@ impl std::fmt::Debug for MyWorld {
 
 impl MyWorld {
     pub fn next_phase(&mut self) {
-        self.phases.push(AircraftStateConstraints::default());
+        self.phases.push(self.taws_constraints.clone());
         self.phase += 1;
     }
-}
 
-impl std::panic::UnwindSafe for MyWorld {} // This is a lie, but what they gonna do, panic?
+    pub fn next_aircraft_state(&mut self) -> AircraftState {
+        self.state_gen.next().unwrap()
+    }
+
+    pub fn next_aircraft_states(&mut self, n: usize) -> Vec<AircraftState> {
+        (0..n).map(|_| self.next_aircraft_state()).collect()
+    }
+}

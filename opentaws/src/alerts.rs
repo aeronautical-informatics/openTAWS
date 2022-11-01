@@ -1,39 +1,7 @@
-pub mod ffac;
-pub mod mode1;
-pub mod mode3;
-pub mod pda;
+use crate::prelude::*;
 
-use crate::{TawsAlert, TawsAlerts};
-use enum_map::{Enum, EnumMap};
-
-/// Alert Source (TAWS functionallities)
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Enum)]
-pub enum AlertSource {
-    /// Forward Lookig Terrain Avoidance
-    Flta,
-
-    /// Five Hundred foot altitude Callout
-    Ffac,
-
-    /// Premature Descent Alerting
-    Pda,
-
-    /// Excessive Rate of Descent
-    Mode1,
-
-    /// Excessive ClosureRate to Terrain
-    Mode2,
-
-    /// Negative Climb Rate or Altitude Loss after Take-off or Go Around
-    Mode3,
-
-    /// Flight Near Terrain when Not in Landing Configuration
-    Mode4,
-
-    /// Excessive Downward Deviation from an ILS Glideslope or LPV/GLS Glidepath
-    Mode5,
-    // TODO add more
-}
+pub use hash32::{Hash, Hasher};
+use heapless::FnvIndexMap;
 
 /// TAWS Alert levels
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -53,7 +21,7 @@ pub enum AlertLevel {
 
 /// Represents a TAWS alert
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub struct Alert {
+pub struct Alert<AlertSource: TawsAlertSource> {
     /// The source resp. the TAWS functionallity which emitted this alert
     pub source: AlertSource,
 
@@ -61,13 +29,19 @@ pub struct Alert {
     pub level: AlertLevel,
 }
 
-impl Alert {
-    pub fn new(source: AlertSource, level: AlertLevel) -> Self {
+impl<AlertSource: TawsAlertSource> Alert<AlertSource> {
+    /// Creates a new alert with the specified source and level.
+    /// # Arguments
+    /// `source` - The source of the alert.
+    /// `level` - The level of the alert.
+    pub const fn new(source: AlertSource, level: AlertLevel) -> Self {
         Alert { source, level }
     }
 }
 
-impl TawsAlert for Alert {
+impl<AlertSource: TawsAlertSource> TawsAlert for Alert<AlertSource> {
+    type AlertSource = AlertSource;
+
     fn source(&self) -> AlertSource {
         self.source
     }
@@ -77,184 +51,188 @@ impl TawsAlert for Alert {
     }
 }
 
-impl From<(AlertSource, AlertLevel)> for Alert {
+impl<AlertSource: TawsAlertSource> From<(AlertSource, AlertLevel)> for Alert<AlertSource> {
     fn from(alert: (AlertSource, AlertLevel)) -> Self {
         Self::new(alert.0, alert.1)
     }
 }
 
-impl From<Alert> for (AlertSource, AlertLevel) {
-    fn from(alert: Alert) -> Self {
+impl<AlertSource: TawsAlertSource> From<Alert<AlertSource>> for (AlertSource, AlertLevel) {
+    fn from(alert: Alert<AlertSource>) -> Self {
         (alert.source, alert.level)
     }
 }
 
-/// Represents a set of [Alerts](Alert)
-#[derive(Default, Debug)]
-pub struct Alerts {
-    alerts: EnumMap<AlertSource, Option<Alert>>,
+/// Represents a set of [Alerts](Alert) by their [AlertSource](Alert::AlertSource)
+#[derive(Debug)]
+pub struct Alerts<Alert: TawsAlert>
+where
+    Alert::AlertSource: Hash,
+{
+    alerts: FnvIndexMap<
+        Alert::AlertSource,
+        Alert,
+        64, /*ToDo: use <Alert::AlertSource>::NUM_ALERT_SOURCES or count the available alert sources with a macro*/
+    >,
 }
 
-impl Alerts {
-    /// Inserts the specified alert into the set.
-    /// Already existing alerts are replaced if the [new_alert] has a higher alert level.
-    /// # Arguments
-    /// * `new_alert` - the new alert which is added to the set of alerts
-    ///
-    /// # Examples
-    /// ```
-    ///
-    /// use opentaws::{*, alerts::*};
-    /// let mut alerts = Alerts::default();
-    /// alerts.insert((AlertSource::Mode1, AlertLevel::Caution).into());
-    /// assert!(alerts.is_alert_active(AlertSource::Mode1, AlertLevel::Annunciation));
-    /// assert!(alerts.is_alert_active(AlertSource::Mode1, AlertLevel::Caution));
-    ///
-    /// ```
-    pub fn insert(&mut self, new_alert: Alert) {
-        let current_alert = &self.alerts[new_alert.source];
-
-        if current_alert
-            .as_ref()
-            .map_or(true, |alert| new_alert.level < alert.level)
-        {
-            self.alerts[new_alert.source].replace(new_alert);
+impl<Alert: TawsAlert> Default for Alerts<Alert>
+where
+    Alert::AlertSource: Hash,
+{
+    fn default() -> Self {
+        Self {
+            alerts: Default::default(),
         }
     }
 }
 
-impl TawsAlerts for Alerts {
+impl<Alert: TawsAlert> Alerts<Alert>
+where
+    Alert::AlertSource: Hash,
+{
+    /// Returns an iterator over all active alerts.
+    pub fn alerts(&self) -> impl Iterator<Item = &Alert> + '_ {
+        self.alerts.values()
+    }
+}
+
+impl<Alert: TawsAlert> TawsAlerts for Alerts<Alert>
+where
+    Alert::AlertSource: Hash,
+{
     type Alert = Alert;
+    type AlertSource = Alert::AlertSource;
 
-    fn is_alert_active(&self, alert_src: AlertSource, min_level: AlertLevel) -> bool {
-        let current_alert = &self.alerts[alert_src];
+    fn insert(&mut self, new_alert: Alert) {
+        let current_alert = self.alerts.get(&new_alert.source());
 
-        match current_alert {
-            Some(alert) => alert.level <= min_level,
+        if current_alert.map_or(true, |alert| new_alert.level() < alert.level()) {
+            self.alerts
+                .insert(new_alert.source(), new_alert)
+                .map_err(|_| ())
+                .unwrap(); //ToDo
+        }
+    }
+
+    fn is_alert_active(&self, alert_src: Self::AlertSource, min_level: AlertLevel) -> bool {
+        self.alerts.contains_key(&alert_src);
+
+        match self.alerts.get(&alert_src) {
+            Some(alert) => alert.level() <= min_level,
             None => false,
         }
     }
 }
 
-impl<'a> IntoIterator for &'a Alerts {
-    type Item = &'a Alert;
-    type IntoIter = AlertsIter<'a>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        AlertsIter {
-            alerts: self.alerts.as_slice(),
-            index: 0,
-        }
-    }
-}
-
-/// Represents an iterator over all possible [Alerts](Alert) from all [AlertSources](AlertSource).
-pub struct AlertsIter<'a> {
-    alerts: &'a [Option<Alert>],
-    index: usize,
-}
-
-impl<'a> Iterator for AlertsIter<'a> {
-    type Item = &'a Alert;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            if self.index >= self.alerts.len() {
-                return None;
-            }
-
-            let alert = &self.alerts[self.index];
-            self.index += 1;
-
-            if alert.is_none() {
-                continue;
-            }
-
-            return alert.as_ref();
-        }
-    }
-}
-
+#[cfg(test)]
 mod tests {
-    #![allow(unused_imports)] //ToDo: just to satisfy clippy
+    use core::slice::Iter;
+
     use super::*;
+    use hash32::{Hash, Hasher};
 
-    #[test]
-    fn alert_source_equality() {
-        let a = AlertSource::Mode1;
-        let b = AlertSource::Mode1;
-        let c = AlertSource::Mode2;
-
-        assert!(a == b);
-        assert!(a != c);
+    #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+    enum TestClass {
+        A,
+        B,
+        C,
     }
 
+    impl TawsAlertSource for TestClass {
+        const NUM_ALERT_SOURCES: usize = 3;
+        const ALERT_SOURCES: &'static [Self] = &[];
+    }
+
+    impl IntoIterator for TestClass {
+        type Item = &'static TestClass;
+
+        type IntoIter = Iter<'static, TestClass>;
+
+        fn into_iter(self) -> Self::IntoIter {
+            [Self::A, Self::B, Self::C].iter()
+        }
+    }
+
+    impl Hash for TestClass {
+        fn hash<H>(&self, state: &mut H)
+        where
+            H: Hasher,
+        {
+            state.write(&(*self as usize).to_le_bytes());
+        }
+    }
+
+    type TestAlert = Alert<TestClass>;
+    type TestAlerts = Alerts<TestAlert>;
+
     #[test]
-    fn alert_level_ord() {
+    fn alert_level_eq() {
+        assert!(AlertLevel::Warning == AlertLevel::Warning);
+        assert!(AlertLevel::Warning != AlertLevel::Caution);
         assert!(AlertLevel::Warning < AlertLevel::Caution);
         assert!(AlertLevel::Caution < AlertLevel::Annunciation);
     }
 
     #[test]
-    fn alert_from_tuple() {
-        let alert: Alert = (AlertSource::Mode1, AlertLevel::Warning).into();
-        assert!(alert.source == AlertSource::Mode1);
-        assert!(alert.level == AlertLevel::Warning);
-    }
-
-    #[test]
-    fn alert_to_tuple() {
-        let alert_tuple = (AlertSource::Mode1, AlertLevel::Warning);
-        let alert: Alert = alert_tuple.into();
-        assert!(<Alert as Into<(AlertSource, AlertLevel)>>::into(alert) == alert_tuple);
-    }
-
-    #[test]
-    fn alert_source() {
-        let a: Alert = (AlertSource::Mode1, AlertLevel::Warning).into();
-        assert!(a.source() == AlertSource::Mode1);
-    }
-
-    #[test]
-    fn alert_level() {
-        let a: Alert = (AlertSource::Mode1, AlertLevel::Warning).into();
-        assert!(a.level() == AlertLevel::Warning);
-    }
-
-    #[test]
     fn alert_eq() {
-        let a: Alert = (AlertSource::Mode1, AlertLevel::Warning).into();
-        let b: Alert = (AlertSource::Mode1, AlertLevel::Warning).into();
-        let c: Alert = (AlertSource::Mode3, AlertLevel::Warning).into();
-        let d: Alert = (AlertSource::Mode1, AlertLevel::Caution).into();
+        let alert1: TestAlert = (TestClass::A, AlertLevel::Warning).into();
+        let alert2: TestAlert = (TestClass::A, AlertLevel::Warning).into();
+        let alert3: TestAlert = (TestClass::B, AlertLevel::Warning).into();
+        let alert4: TestAlert = (TestClass::A, AlertLevel::Annunciation).into();
 
-        assert!(a == b);
-        assert!(a != c);
-        assert!(a != d);
-        assert!(c != d);
-    }
-
-    #[test]
-    fn alerts_default() {
-        let alerts: Alerts = Alerts::default();
-        assert!(alerts.alerts[AlertSource::Mode1] == None)
+        assert!(alert1 == alert1);
+        assert!(alert1 == alert2);
+        assert!(alert1 != alert3);
+        assert!(alert1 != alert4);
     }
 
     #[test]
     fn alerts_insert() {
-        let mut alerts: Alerts = Alerts::default();
-        let alert: Alert = (AlertSource::Mode1, AlertLevel::Caution).into();
-        alerts.insert(alert);
-        assert!(alerts.alerts[AlertSource::Mode1] == Some(alert));
+        let mut alerts = TestAlerts::default();
+        assert!(!alerts.alerts.contains_key(&TestClass::A));
+
+        let alert1: TestAlert = (TestClass::A, AlertLevel::Warning).into();
+        let alert2: TestAlert = (TestClass::A, AlertLevel::Caution).into();
+
+        alerts.insert(alert1);
+        assert!(alerts.alerts.contains_key(&TestClass::A));
+
+        alerts.insert(alert2);
+        assert!(alerts.alerts.contains_key(&TestClass::A));
     }
 
     #[test]
     fn alerts_is_active() {
-        let mut alerts: Alerts = Alerts::default();
-        let alert: Alert = (AlertSource::Mode1, AlertLevel::Caution).into();
-        alerts.insert(alert);
-        assert!(alerts.is_alert_active(AlertSource::Mode1, AlertLevel::Annunciation));
-        assert!(alerts.is_alert_active(AlertSource::Mode1, AlertLevel::Caution));
-        assert!(!alerts.is_alert_active(AlertSource::Mode1, AlertLevel::Warning));
+        let mut alerts = TestAlerts::default();
+        let alert1: TestAlert = (TestClass::A, AlertLevel::Caution).into();
+
+        alerts.insert(alert1);
+
+        assert!(alerts.is_alert_active(TestClass::A, AlertLevel::Annunciation));
+        assert!(alerts.is_alert_active(TestClass::A, AlertLevel::Caution));
+        assert!(!alerts.is_alert_active(TestClass::A, AlertLevel::Warning));
+
+        let alert2: TestAlert = (TestClass::A, AlertLevel::Annunciation).into();
+        alerts.insert(alert2);
+        assert!(alerts.is_alert_active(TestClass::A, AlertLevel::Caution));
+
+        let alert3: TestAlert = (TestClass::A, AlertLevel::Warning).into();
+        alerts.insert(alert3);
+        assert!(alerts.is_alert_active(TestClass::A, AlertLevel::Warning));
+    }
+
+    #[test]
+    fn alerts_get() {
+        let mut alerts = TestAlerts::default();
+        let alert1: TestAlert = (TestClass::A, AlertLevel::Annunciation).into();
+        let alert2: TestAlert = (TestClass::B, AlertLevel::Caution).into();
+        let alert3: TestAlert = (TestClass::C, AlertLevel::Warning).into();
+
+        alerts.insert(alert1);
+        alerts.insert(alert2);
+        alerts.insert(alert3);
+
+        assert!(alerts.alerts().count() == 3)
     }
 }
