@@ -5,17 +5,10 @@ use core::{
 };
 
 use lazy_static::lazy_static;
-use uom::{
-    fmt::DisplayStyle,
-    si::{
-        angle::{degree, revolution},
-        f64::*,
-        length::foot,
-        ratio::ratio,
-        time::second,
-        velocity::{foot_per_minute, knot},
-    },
-};
+
+use crate::prelude::*;
+use ::uom::fmt::DisplayStyle;
+use ::uom::si::ratio::ratio;
 
 // ToDo: turn into consts when uom supports const new
 lazy_static! {
@@ -215,12 +208,12 @@ impl<T> AircraftState<T> {
         self.yaw
     } */
 
-    pub fn situation(&self) -> Option<&FlightSegment> {
-        self.situation.as_ref()
+    pub fn situation(&self) -> &Option<FlightSegment> {
+        &self.situation
     }
 
     /// Normalizes the [AircraftState] into a [NormalizedAircraftState]
-    pub(crate) fn normalize(&self) -> NormalizedAircraftState {
+    pub fn normalize(&self) -> NormalizedAircraftState {
         let (lat, lon) = Self::wrap_position(self.position_lat, self.position_lon);
 
         NormalizedAircraftState {
@@ -309,7 +302,7 @@ impl From<NormalizedAircraftState> for AircraftState {
 
 impl<T> Display for AircraftState<T> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let s = Time::format_args(second, DisplayStyle::Abbreviation);
+        let s = Time::format_args(time_second, DisplayStyle::Abbreviation);
         let ft = Length::format_args(foot, DisplayStyle::Abbreviation);
         let deg = Angle::format_args(degree, DisplayStyle::Abbreviation);
         let fpm = Velocity::format_args(foot_per_minute, DisplayStyle::Abbreviation);
@@ -343,7 +336,7 @@ AircrafState: {{
 }
 
 /// Represents a flight segment
-#[derive(Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "use-serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum FlightSegment {
     /// The aircraft is in cruise flight situation
