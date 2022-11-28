@@ -29,8 +29,7 @@ use-serde = ["uom/use_serde"]
 aviation_database = { path = "../aviation_database"}
 lazy_static = { version = "1", features = [ "spin_no_std" ] }
 
-# TODO jump to normal uom once https://github.com/iliekturtles/uom/pull/309 lands
-uom = { git = "https://github.com/wucke13/uom.git", branch = "fix-missing-libm", default-features = false, features = [ "f64", "si", "libm" ] }
+uom = { version = "0", default-features = false, features = ["f64", "si", "libm"] }
 ringbuffer = "0.8"
 serde = { version = "1.0", default-features = false, features = [ "derive" ] }
 serde_arrays = "*" # Serde const generic "workaround"

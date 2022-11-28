@@ -26,12 +26,8 @@ opentaws = { path = "../opentaws" }
 aviation_database = { path = "../aviation_database" }
 
 
-# TODO jump to normal uom once https://github.com/iliekturtles/uom/pull/309 lands
-uom = { git = "https://github.com/wucke13/uom.git", branch = "fix-missing-libm", default-features = false, features = [
-	"f64",
-	"si",
-	"libm",
-] }
+
+uom = { version = "0", default-features = false, features = ["f64", "si", "libm"] }
 casey = "0.3"
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 
