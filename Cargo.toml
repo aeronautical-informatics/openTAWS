@@ -6,7 +6,7 @@ authors = [
 	"Janick Beck <janick.beck@tu-clausthal.de>",
 	"Umut Durak <umut.durak@tu-clausthal.de>",
 	]
-edition = "2021"
+edition = "2018"
 license = "MIT OR Apache-2.0"
 description = "An open source TAWS"
 documentation = "https://aeronautical-informatics.github.io/openTAWS/"
@@ -29,12 +29,12 @@ use-serde = ["serde", "uom/use_serde"]
 casey = "0.3"
 lazy_static = "1"
 uom = { version = "0", default-features = false, features = [ "f64", "si", "use_serde" ] }
-ringbuffer = "0"
+ringbuffer = "0.4"
 serde = { version = "1.0", default-features = false, features = ["derive"], optional = true }
 
 [dev-dependencies]
 arbitrary = { version = "1", features = ["derive"] }
-cucumber_rust = {version = "0", features = [ "macros" ] }
+cucumber_rust = {version = "0.8", features = [ "macros" ] }
 futures = "0"
 rand = "*"
 rand_pcg = "*"
@@ -44,7 +44,7 @@ uom = { version = "*", features = [ "f64", "si", "std", "use_serde" ] }
 async-tungstenite = { version = "*", features = [ "async-std-runtime" ] }
 serde = { version = "^1.0", features = [ "derive" ] }
 serde_json = "1.0"
-smol = "^1"
+smol = "^1.0"
 
 
 
