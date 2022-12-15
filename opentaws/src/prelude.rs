@@ -9,7 +9,6 @@ pub use crate::{
     Taws,
 };
 
-#[macro_use]
 pub use crate::macros::*;
 
 pub use uom::si::{

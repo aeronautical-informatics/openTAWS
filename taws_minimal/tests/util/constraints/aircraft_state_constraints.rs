@@ -19,6 +19,7 @@ pub struct AircraftStateConstraints {
     take_off: Option<bool>,
 }
 
+#[allow(unused)]
 impl AircraftStateConstraints {
     fn apply<Q, TEnforcer>(constraint: &Option<Constraint<Q>>, state: &mut Q)
     where

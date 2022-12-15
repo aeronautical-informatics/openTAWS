@@ -1,6 +1,5 @@
 use core::{
     fmt,
-    iter::Empty,
     ops::{Add, Rem},
 };
 
@@ -89,6 +88,7 @@ pub struct TawsConfig<'a> {
 }
 
 impl AircraftState {
+    #[allow(unused)]
     /// Normalizes an `AircraftState`. Only normalized `AircraftStates` should be fed to the TAWS.
     pub(crate) fn normalize(&mut self) {
         let one_revolution = Angle::new::<revolution>(1.0);
@@ -106,6 +106,7 @@ impl AircraftState {
             Self::modulo(self.position_lon + half_revolution, one_revolution) - half_revolution;
     }
 
+    #[allow(unused)]
     pub(crate) fn check(&self) {
         let zero = Angle::new::<revolution>(0.0);
         let one_revolution = Angle::new::<revolution>(1.0);
@@ -121,7 +122,7 @@ impl AircraftState {
         (-half_revolution..=half_revolution).contains(&self.position_lon);
     }
 
-    fn modulo<T: Copy + Add<Output = T> + Rem<Output = T>>(a: T, b: T) -> T {
+    pub fn modulo<T: Copy + Add<Output = T> + Rem<Output = T>>(a: T, b: T) -> T {
         ((a % b) + b) % b
     }
 

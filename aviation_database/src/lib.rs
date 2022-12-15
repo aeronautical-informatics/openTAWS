@@ -57,7 +57,8 @@ pub trait AirportDatabase: Send + Sync + Debug {
         Airport::from(AIRPORTS.search(&position.cartesian_f64()).payload())
     }
 
-    fn runways(&self, airport: &Airport) -> Self::RunwayIterator {
+    /// Just a mockup, never returns anything
+    fn runways(&self, _airport: &Airport) -> Self::RunwayIterator {
         iter::empty().into()
     }
     /*
@@ -84,7 +85,7 @@ impl Position {
     const MEAN_EARTH_RADIUS_KILOMETER: f64 = 6371.001;
     /// Converts the `Position` to cartesian coordinates. Nothing orientation is guaranteed, thus
     /// this may only be used for relative distances etc.
-    fn cartesian(&self) -> [Length; 3] {
+    pub fn cartesian(&self) -> [Length; 3] {
         let x = self.alt * self.lat.cos() * self.lon.cos();
         let y = self.alt * self.lat.cos() * self.lon.sin();
         let z = self.alt * self.lat.sin();
@@ -93,7 +94,7 @@ impl Position {
 
     /// Converts the `Position` to cartesian coordinates. Nothing orientation is guaranteed, thus
     /// this may only be used for relative distances etc.
-    fn cartesian_f64(&self) -> [f64; 3] {
+    pub fn cartesian_f64(&self) -> [f64; 3] {
         let x = self.alt.get::<foot>()
             * self.lat.get::<degree>().cos()
             * self.lon.get::<degree>().cos();
@@ -107,7 +108,7 @@ impl Position {
     /// Get the relative distance of two points
     ///
     /// This can be used for comparing distances
-    fn relative_distance(&self, other: &Position) -> RelativeDistance {
+    pub fn relative_distance(&self, other: &Position) -> RelativeDistance {
         RelativeDistance(
             self.cartesian()
                 .iter()

@@ -13,7 +13,7 @@ pub struct MinimalTaws<'a> {
     ///
     /// There is no specific condition for changing this to `false`.
     pub armed: bool,
-    config: &'a TawsConfig<'a>,
+    _config: &'a TawsConfig<'a>,
     ffac: functionalities::Ffac,
     flta: functionalities::Flta,
     mode1: functionalities::Mode1,
@@ -54,7 +54,7 @@ impl<'a> MinimalTaws<'a> {
 
         Self {
             armed: true,
-            config,
+            _config: config,
             ffac,
             flta,
             mode1,
