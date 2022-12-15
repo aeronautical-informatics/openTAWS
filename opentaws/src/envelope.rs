@@ -134,6 +134,6 @@ mod test {
     #[test]
     #[should_panic(expected = "called `Option::unwrap()` on a `None` value")]
     fn input_list_too_small() {
-        let evp = Envelope::<1>::new([(0, 0)]).unwrap();
+        let _evp = Envelope::<1>::new([(0, 0)]).unwrap();
     }
 }

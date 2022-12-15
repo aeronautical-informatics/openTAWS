@@ -12,7 +12,6 @@
 #![deny(unsafe_code)]
 
 pub use alerts::{functionalities, Alert, AlertLevel, AlertState};
-use prelude::*;
 pub use types::*;
 
 #[macro_use]

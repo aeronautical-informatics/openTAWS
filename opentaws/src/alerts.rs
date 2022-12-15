@@ -2,6 +2,8 @@ use core::fmt;
 
 use crate::types::{AircraftState, TawsConfig};
 
+use heapless::Vec;
+
 mod ffac;
 mod flta;
 mod mode_1;
@@ -107,21 +109,18 @@ pub struct AlertState<const N: usize> {
     /// Alerts which are not to be disclosed to the crew to avoid nuisance, but still where triggered
     // Workaround until generic arrays are allowed in serde
     // https://github.com/serde-rs/serde/issues/1937
-    #[serde(with = "serde_arrays")]
-    all_alerts: [Option<(Alert, AlertLevel)>; N],
+    all_alerts: Vec<(Alert, AlertLevel), N>,
 }
 
 impl<const N: usize> AlertState<N> {
     pub fn alerts_total_count(&self) -> usize {
-        self.all_alerts.iter().filter(|e| e.is_some()).count()
+        self.all_alerts.len()
     }
 
     pub fn priority_alert(&self) -> Option<(Alert, AlertLevel)> {
         self.all_alerts
             .iter()
-            .filter_map(|o| {
-                o.map(|(alert, alert_level)| (priority(alert, alert_level), (alert, alert_level)))
-            })
+            .map(|(alert, alert_level)| (priority(*alert, *alert_level), (*alert, *alert_level)))
             .min_by_key(|(p, _)| *p)
             .map(|(_, alert_stuff)| alert_stuff)
     }
@@ -135,11 +134,9 @@ impl<const N: usize> AlertState<N> {
     pub fn insert(&mut self, new_alert: Alert, new_alert_level: AlertLevel) {
         let mut already_present = false;
 
-        for (existing_alert, ref mut existing_alert_level) in
-            self.all_alerts.iter_mut().filter_map(|e| *e)
-        {
+        for (existing_alert, ref mut existing_alert_level) in &mut self.all_alerts {
             // check if alert is already present
-            if existing_alert == new_alert {
+            if *existing_alert == new_alert {
                 // promote alerts of lower priority to higher priority
                 if new_alert_level < *existing_alert_level {
                     *existing_alert_level = new_alert_level;
@@ -150,9 +147,9 @@ impl<const N: usize> AlertState<N> {
 
         // lets find a free spot
         if !already_present {
-            if let Some(option) = self.all_alerts.iter_mut().find(|e| e.is_none()) {
-                *option = Some((new_alert, new_alert_level));
-            }
+            self.all_alerts.push((new_alert, new_alert_level)).expect(
+                "failed to push new alert to alerts vector, this should be impossible to fail",
+            );
         }
     }
 }
@@ -160,14 +157,14 @@ impl<const N: usize> AlertState<N> {
 impl<const N: usize> Default for AlertState<N> {
     fn default() -> Self {
         Self {
-            all_alerts: [None; N],
+            all_alerts: Vec::new(),
         }
     }
 }
 
 /// An iterator over an `AlertState`
 pub struct AlertStateIter<const N: usize> {
-    sorted_alerts: [Option<(Alert, AlertLevel)>; N],
+    sorted_alerts: Vec<(Alert, AlertLevel), N>,
     index: usize,
 }
 
@@ -175,9 +172,12 @@ impl<const N: usize> Iterator for AlertStateIter<N> {
     type Item = (Alert, AlertLevel);
 
     fn next(&mut self) -> Option<Self::Item> {
-        let maybe_item = self.sorted_alerts.get(self.index).cloned().flatten();
-        self.index += 1;
-        maybe_item
+        let maybe_item = self.sorted_alerts.get(self.index);
+        if maybe_item.is_some() {
+            self.index += 1;
+        }
+
+        maybe_item.copied()
     }
 }
 
@@ -185,12 +185,9 @@ impl<const N: usize> IntoIterator for &AlertState<N> {
     type Item = (Alert, AlertLevel);
     type IntoIter = AlertStateIter<N>;
     fn into_iter(self) -> Self::IntoIter {
-        let mut alerts = self.all_alerts;
-        //TODO where do we do prioritisation
-        //alerts.sort_by_key(|option| option.map(|(a, l)| priority(a, l)).unwrap_or(u8::MAX));
-        // does not work on no_std.
-        // TODO implement a small sorting algorithm
+        let mut alerts = self.all_alerts.clone();
 
+        alerts.sort_by_key(|(a, l)| priority(*a, *l));
         AlertStateIter {
             sorted_alerts: alerts,
             index: 0,

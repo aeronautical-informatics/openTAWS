@@ -29,6 +29,7 @@ use-serde = ["uom/use_serde"]
 aviation_database = { path = "../aviation_database"}
 lazy_static = { version = "1", features = [ "spin_no_std" ] }
 
+heapless = { version = "0.7", features = ["serde"] }
 uom = { version = "0", default-features = false, features = ["f64", "si", "libm"] }
 ringbuffer = "0.8"
 serde = { version = "1.0", default-features = false, features = [ "derive" ] }
