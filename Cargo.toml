@@ -1,13 +1,2 @@
 [workspace]
-members = [
-	"opentaws",
-	"taws_minimal",
-	"aviation_database",
-	"kd_tree",
-	"kd_tree_sort",
-]
-
-
-[patch.crates-io]
-# TODO jump to normal uom once https://github.com/iliekturtles/uom/pull/309 lands
-uom = { git = "https://github.com/wucke13/uom", branch = "fix-missing-libm" }
+members = ["opentaws", "taws_minimal"]

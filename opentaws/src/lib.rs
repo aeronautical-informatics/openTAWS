@@ -8,7 +8,6 @@
 //! and C ABI as addiotional targets, but this did not lead anywehre usable _so far_. We are very
 //! open to suggestions, so please open an issue if you have some feedback.
 
-//#![feature(return_position_impl_trait_in_trait)]
 #![no_std]
 #![deny(unsafe_code)]
 #![allow(dead_code)]
@@ -23,9 +22,9 @@ pub mod class_c;
 pub mod envelope;
 pub mod prelude;
 
-use prelude::*;
-
 use core::fmt::Display;
+
+use crate::prelude::*;
 
 /// Abstraction for a TAWS system
 pub trait Taws {

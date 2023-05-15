@@ -1,3 +1,9 @@
+#![no_std]
+
+#[cfg(test)]
+#[macro_use]
+extern crate std;
+
 use opentaws::class_c::*;
 use opentaws::prelude::*;
 

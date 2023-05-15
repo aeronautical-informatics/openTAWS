@@ -1,4 +1,5 @@
-use crate::{alerts::*, envelope::*, prelude::*};
+use crate::prelude::*;
+use crate::{alerts::*, envelope::*};
 
 use super::ClassC_Source;
 
@@ -44,7 +45,7 @@ impl TawsFunctionality for Pda {
         &mut self,
         state: &NormalizedAircraftState,
     ) -> Result<Option<Alert<ClassC_Source>>, &'static dyn TawsError> {
-        let altitude_gnd_foot = state.altitude_ground().get::<foot>();
+        let altitude_gnd_foot = state.altitude_ground().get::<length::foot>();
         let distance_to_nearest_airport_nm = 3.0; //ToDo
 
         self.armed = distance_to_nearest_airport_nm <= 5.0;
@@ -72,7 +73,7 @@ lazy_static! {
         Vector2::new(11_000.0, 330_000.0)
     );
 
-	// Envelopes enlarged by d=0.1, to prevent floating pointing problems.
+    // Envelopes enlarged by d=0.1, to prevent floating pointing problems.
     static ref CAUTION_ENVELOPE: Envelope::<6> = Envelope::new(
         *LIMITS,
         &[

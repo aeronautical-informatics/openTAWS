@@ -1,9 +1,10 @@
-use crate::{alerts::*, envelope::*, prelude::*};
+use crate::prelude::*;
+use crate::{alerts::*, envelope::*};
 
 use super::ClassC_Source;
 
 use lazy_static::lazy_static;
-use nalgebra::{Vector, Vector2};
+use nalgebra::Vector2;
 
 #[derive(Clone, Debug)]
 pub struct Mode1 {
@@ -57,8 +58,8 @@ impl TawsFunctionality for Mode1 {
         &mut self,
         state: &NormalizedAircraftState,
     ) -> Result<Option<Self::Alert>, &'static dyn TawsError> {
-        let rod = -state.climb_rate().get::<foot_per_minute>();
-        let altitude_gnd = state.altitude_ground().get::<foot>();
+        let rod = -state.climb_rate().get::<velocity::foot_per_minute>();
+        let altitude_gnd = state.altitude_ground().get::<length::foot>();
 
         if !LIMITS.contains(Vector2::new(rod, altitude_gnd)) {
             let _x = 437;

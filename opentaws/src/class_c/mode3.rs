@@ -1,12 +1,10 @@
-use crate::{alerts::*, envelope::*, prelude::*};
-
-use super::ClassC_Source;
-
-use ::uom::num_traits::Zero;
 use lazy_static::lazy_static;
 use nalgebra::Vector2;
 
-use super::ClassCError;
+use crate::prelude::{num_traits::Zero, *};
+use crate::{alerts::*, envelope::*};
+
+use super::{ClassCError, ClassC_Source};
 
 #[derive(Clone, Debug)]
 pub struct Mode3 {
@@ -77,9 +75,10 @@ impl TawsFunctionality for Mode3 {
 
         self.max_altitude_ground = Length::max(self.max_altitude_ground, state.altitude_ground());
 
-        let altitude_loss = (self.max_altitude_ground - state.altitude_ground()).get::<foot>();
-        let rod = -state.climb_rate().get::<foot_per_minute>();
-        let altitude_gnd = state.altitude_ground().get::<foot>();
+        let altitude_loss =
+            (self.max_altitude_ground - state.altitude_ground()).get::<length::foot>();
+        let rod = -state.climb_rate().get::<velocity::foot_per_minute>();
+        let altitude_gnd = state.altitude_ground().get::<length::foot>();
 
         let method1_res = METHODE_1_CAUTION_ENVELOPE.contains(rod, altitude_gnd)?;
         let method2_res = METHODE_2_CAUTION_ENVELOPE.contains(altitude_loss, altitude_gnd)?;
@@ -108,7 +107,7 @@ lazy_static! {
         Vector2::new(330_000.0, 330_000.0)
     );
 
-	// Envelopes enlarged by d=10, to prevent floating pointing problems.
+    // Envelopes enlarged by d=10, to prevent floating pointing problems.
     static ref METHODE_1_CAUTION_ENVELOPE: Envelope::<4> = Envelope::new(
         *METHOD1_LIMITS,
         &[

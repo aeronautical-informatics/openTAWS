@@ -1,5 +1,4 @@
 use opentaws::prelude::*;
-use uom::si::f64::{Angle, Length, Velocity};
 
 use super::{constraint_enforcement, Constraint, ConstraintEnforcer};
 
@@ -90,21 +89,33 @@ impl AircraftStateConstraints {
         self.situation = Some(situation);
     }
 
-	pub fn add_steep_approach_constraint(&mut self, is_steep: bool) {
-		if let Some(FlightSegment::Landing { ref mut steep_approach, .. }) = self.situation {
-			*steep_approach = is_steep;
-		}
-	}
+    pub fn add_steep_approach_constraint(&mut self, is_steep: bool) {
+        if let Some(FlightSegment::Landing {
+            ref mut steep_approach,
+            ..
+        }) = self.situation
+        {
+            *steep_approach = is_steep;
+        }
+    }
 
-	pub fn add_precision_approach_constraint(&mut self, is_precision: bool) {
-		if let Some(FlightSegment::Landing { ref mut precision_approach, .. }) = self.situation {
-			*precision_approach = is_precision;
-		}
-	}
+    pub fn add_precision_approach_constraint(&mut self, is_precision: bool) {
+        if let Some(FlightSegment::Landing {
+            ref mut precision_approach,
+            ..
+        }) = self.situation
+        {
+            *precision_approach = is_precision;
+        }
+    }
 
-	pub fn add_circling_approach_constraint(&mut self, is_circling: bool) {
-		if let Some(FlightSegment::Landing { ref mut circling_approach, .. }) = self.situation {
-			*circling_approach = is_circling;
-		}
-	}
+    pub fn add_circling_approach_constraint(&mut self, is_circling: bool) {
+        if let Some(FlightSegment::Landing {
+            ref mut circling_approach,
+            ..
+        }) = self.situation
+        {
+            *circling_approach = is_circling;
+        }
+    }
 }

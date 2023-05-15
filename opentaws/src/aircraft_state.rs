@@ -6,17 +6,15 @@ use core::{
 
 use lazy_static::lazy_static;
 
-use crate::prelude::*;
-use ::uom::fmt::DisplayStyle;
-use ::uom::si::ratio::ratio;
+use crate::prelude::{uom::fmt::DisplayStyle, *};
 
 // ToDo: turn into consts when uom supports const new
 lazy_static! {
-    static ref ZERO_REVOLUTION: Angle = Angle::new::<revolution>(0.0);
-    static ref QUARTER_REVOLUTION: Angle = Angle::new::<revolution>(0.25);
-    static ref HALF_REVOLUTION: Angle = Angle::new::<revolution>(0.5);
-    static ref ONE_REVOLUTION: Angle = Angle::new::<revolution>(1.0);
-    static ref ZERO_LENGTH: Length = Length::new::<foot>(0.0);
+    static ref ZERO_REVOLUTION: Angle = Angle::new::<angle::revolution>(0.0);
+    static ref QUARTER_REVOLUTION: Angle = Angle::new::<angle::revolution>(0.25);
+    static ref HALF_REVOLUTION: Angle = Angle::new::<angle::revolution>(0.5);
+    static ref ONE_REVOLUTION: Angle = Angle::new::<angle::revolution>(1.0);
+    static ref ZERO_LENGTH: Length = Length::new::<length::foot>(0.0);
 }
 
 /// Marker for normalized AircraftStates
@@ -33,7 +31,6 @@ pub type NormalizedAircraftState = AircraftState<Normalized>;
 
 /// Represents the current state of an aircraft
 #[derive(Clone, Debug, Default)]
-#[cfg_attr(feature = "use-serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AircraftState<T = ()> {
     /// Time when this aircraft state was emitted
     timestamp: Time,
@@ -243,7 +240,11 @@ impl<T> AircraftState<T> {
     }
 
     fn wrap_position(lat: Angle, lon: Angle) -> (Angle, Angle) {
-        let quadrant = ((lat.abs() / *QUARTER_REVOLUTION).get::<ratio>().floor() as i64) % 4;
+        use ::uom::num_traits::Float;
+        let quadrant = ((lat.abs() / *QUARTER_REVOLUTION)
+            .get::<ratio::ratio>()
+            .floor() as i64)
+            % 4;
 
         let pole = if lat > *ZERO_REVOLUTION {
             *QUARTER_REVOLUTION
@@ -302,11 +303,11 @@ impl From<NormalizedAircraftState> for AircraftState {
 
 impl<T> Display for AircraftState<T> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let s = Time::format_args(time_second, DisplayStyle::Abbreviation);
-        let ft = Length::format_args(foot, DisplayStyle::Abbreviation);
-        let deg = Angle::format_args(degree, DisplayStyle::Abbreviation);
-        let fpm = Velocity::format_args(foot_per_minute, DisplayStyle::Abbreviation);
-        let kt = Velocity::format_args(knot, DisplayStyle::Abbreviation);
+        let s = Time::format_args(time::second, DisplayStyle::Abbreviation);
+        let ft = Length::format_args(length::foot, DisplayStyle::Abbreviation);
+        let deg = Angle::format_args(angle::degree, DisplayStyle::Abbreviation);
+        let fpm = Velocity::format_args(velocity::foot_per_minute, DisplayStyle::Abbreviation);
+        let kt = Velocity::format_args(velocity::knot, DisplayStyle::Abbreviation);
 
         write!(
             f,
@@ -337,7 +338,6 @@ AircrafState: {{
 
 /// Represents a flight segment
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-#[cfg_attr(feature = "use-serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum FlightSegment {
     /// The aircraft is in cruise flight situation
     Cruise,
@@ -387,13 +387,13 @@ mod test {
             #[test]
             fn $name() {
                 let mut state = AircraftState::new();
-                *state.position_latitude_mut() = Angle::new::<degree>($pos.0);
-                *state.position_longitude_mut() = Angle::new::<degree>($pos.1);
+                *state.position_latitude_mut() = Angle::new::<angle::degree>($pos.0);
+                *state.position_longitude_mut() = Angle::new::<angle::degree>($pos.1);
 
                 let norm_state = state.normalize();
 
-				assert!(angle_approx_eq(norm_state.position_latitude(), Angle::new::<degree>($expected.0)));
-				assert!(angle_approx_eq(norm_state.position_longitude(), Angle::new::<degree>($expected.1)));
+				assert!(angle_approx_eq(norm_state.position_latitude(), Angle::new::<angle::degree>($expected.0)));
+				assert!(angle_approx_eq(norm_state.position_longitude(), Angle::new::<angle::degree>($expected.1)));
             })*
         };
     }
@@ -434,26 +434,26 @@ mod test {
     #[test]
     fn test_clamp_pos_alt_gnd() {
         let mut state = AircraftState::new();
-        *state.altitude_ground_mut() = Length::new::<foot>(1000.0);
+        *state.altitude_ground_mut() = Length::new::<length::foot>(1000.0);
 
         let norm_state = state.normalize();
 
         assert!(length_approx_eq(
             norm_state.altitude_ground(),
-            Length::new::<foot>(1000.0)
+            Length::new::<length::foot>(1000.0)
         ))
     }
 
     #[test]
     fn test_clamp_neg_alt_gnd() {
         let mut state = AircraftState::new();
-        *state.altitude_ground_mut() = Length::new::<foot>(-1000.0);
+        *state.altitude_ground_mut() = Length::new::<length::foot>(-1000.0);
 
         let norm_state = state.normalize();
 
         assert!(length_approx_eq(
             norm_state.altitude_ground(),
-            Length::new::<foot>(0.0)
+            Length::new::<length::foot>(0.0)
         ))
     }
 
@@ -462,11 +462,11 @@ mod test {
             #[test]
             fn $name() {
                 let mut state = AircraftState::new();
-                *state.heading_mut() = Angle::new::<degree>($hdg);
+                *state.heading_mut() = Angle::new::<angle::degree>($hdg);
 
                 let norm_state = state.normalize();
 
-				assert!(angle_approx_eq(norm_state.heading(), Angle::new::<degree>($expected)));
+				assert!(angle_approx_eq(norm_state.heading(), Angle::new::<angle::degree>($expected)));
             })*
         };
     }
@@ -491,11 +491,11 @@ mod test {
             #[test]
             fn $name() {
                 let mut state = AircraftState::new();
-                *state.track_mut() = Angle::new::<degree>($trk);
+                *state.track_mut() = Angle::new::<angle::degree>($trk);
 
                 let norm_state = state.normalize();
 
-				assert!(angle_approx_eq(norm_state.track(), Angle::new::<degree>($expected)));
+				assert!(angle_approx_eq(norm_state.track(), Angle::new::<angle::degree>($expected)));
             })*
         };
     }
@@ -516,10 +516,10 @@ mod test {
     }
 
     fn angle_approx_eq(value: Angle, target: Angle) -> bool {
-        (target - value).abs() < Angle::new::<degree>(EPS)
+        (target - value).abs() < Angle::new::<angle::degree>(EPS)
     }
 
     fn length_approx_eq(value: Length, target: Length) -> bool {
-        (target - value).abs() < Length::new::<foot>(EPS)
+        (target - value).abs() < Length::new::<length::foot>(EPS)
     }
 }

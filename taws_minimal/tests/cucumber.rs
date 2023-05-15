@@ -4,10 +4,8 @@ mod util;
 use cucumber::{given, then, when, World};
 
 use opentaws::prelude::*;
-use taws_minimal::{Alert, AlertSource};
-use uom::si::f64::{Length, Velocity};
-use uom::si::{length, velocity};
-use util::aircraft_state::AircraftStateGenerator;
+use taws_minimal::AlertSource;
+
 use util::constraints::Constraint;
 use util::parameters::*;
 use util::world::MyWorld;
