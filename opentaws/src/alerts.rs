@@ -1,7 +1,7 @@
-use crate::prelude::*;
-
-pub use hash32::{Hash, Hasher};
+use hash32::Hash;
 use heapless::FnvIndexMap;
+
+use crate::prelude::*;
 
 /// TAWS Alert levels
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]

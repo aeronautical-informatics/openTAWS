@@ -1,9 +1,9 @@
-use crate::{alerts::*, prelude::*};
+use lazy_static::lazy_static;
+
+use crate::alerts::*;
+use crate::prelude::{num_traits::Zero, *};
 
 use super::{ClassCError, ClassC_Source};
-
-use ::uom::num_traits::Zero;
-use lazy_static::lazy_static;
 
 #[derive(Clone, Debug)]
 pub struct Ffac {
@@ -83,5 +83,5 @@ impl TawsFunctionality for Ffac {
 }
 
 lazy_static! {
-    static ref FIVE_HUNDRED: Length = Length::new::<foot>(500.0); //ToDo make const
+    static ref FIVE_HUNDRED: Length = Length::new::<length::foot>(500.0); //ToDo make const
 }

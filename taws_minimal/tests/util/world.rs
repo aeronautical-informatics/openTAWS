@@ -11,7 +11,7 @@ pub struct MyWorld {
     pub test_length: usize,
     pub phase: usize,
 
-	pub taws_constraints: AircraftStateConstraints,
+    pub taws_constraints: AircraftStateConstraints,
     pub state_gen: AircraftStateGenerator,
 }
 
@@ -19,24 +19,24 @@ impl Default for MyWorld {
     fn default() -> Self {
         let mut taws_constraints = AircraftStateConstraints::default();
 
-        let max_altitude_gnd = Length::new::<foot>(330_000.0);
+        let max_altitude_gnd = Length::new::<length::foot>(330_000.0);
         taws_constraints.add_altitude_ground_constraint(super::constraints::Constraint::InRange(
-            Length::new::<foot>(0.0),
+            Length::new::<length::foot>(0.0),
             max_altitude_gnd,
         ));
 
-        let min_max_climb_rate = Velocity::new::<foot_per_minute>(680_000.0);
+        let min_max_climb_rate = Velocity::new::<velocity::foot_per_minute>(680_000.0);
         taws_constraints.add_climb_rate_constraint(super::constraints::Constraint::InRange(
             -min_max_climb_rate,
             min_max_climb_rate,
         ));
 
-       Self {
+        Self {
             taws: MinimalTaws::new(),
             phases: vec![taws_constraints.clone()],
             test_length: 100,
             phase: 0,
-			taws_constraints: taws_constraints.clone(),
+            taws_constraints: taws_constraints.clone(),
             state_gen: AircraftStateGenerator::default(),
         }
     }

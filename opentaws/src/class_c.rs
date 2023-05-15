@@ -8,8 +8,8 @@ use core::{fmt::Display, slice::Iter};
 use hash32::{Hash, Hasher};
 
 use crate::alerts::Alert;
-use crate::prelude::*;
 
+use crate::prelude::*;
 pub use {ffac::*, /*flta::*,*/ mode1::*, mode3::*, pda::*};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -38,7 +38,7 @@ impl TawsAlertSource for ClassC_Source {
     const NUM_ALERT_SOURCES: usize = 5;
     const ALERT_SOURCES: &'static [Self] = &[
         ClassC_Source::Ffac,
-		//ClassC_Source::Flta,
+        //ClassC_Source::Flta,
         ClassC_Source::Mode1,
         ClassC_Source::Mode3,
         ClassC_Source::Pda,
@@ -94,7 +94,7 @@ impl TawsFunctionalities for ClassC {
     ) -> &dyn TawsFunctionality<AlertSource = Self::AlertSource, Alert = Self::Alert> {
         match alert_src {
             ClassC_Source::Ffac => &self.ffac,
-			//ClassC_Source::Flta => &self.flta,
+            //ClassC_Source::Flta => &self.flta,
             ClassC_Source::Mode1 => &self.mode1,
             ClassC_Source::Mode3 => &self.mode3,
             ClassC_Source::Pda => &self.pda,
@@ -107,7 +107,7 @@ impl TawsFunctionalities for ClassC {
     ) -> &mut dyn TawsFunctionality<AlertSource = Self::AlertSource, Alert = Self::Alert> {
         match alert_src {
             ClassC_Source::Ffac => &mut self.ffac,
-			//ClassC_Source::Flta => &mut self.flta,
+            //ClassC_Source::Flta => &mut self.flta,
             ClassC_Source::Mode1 => &mut self.mode1,
             ClassC_Source::Mode3 => &mut self.mode3,
             ClassC_Source::Pda => &mut self.pda,
@@ -139,7 +139,6 @@ impl TawsError for ClassCError {}
 impl From<ClassCError> for &dyn TawsError {
     fn from(err: ClassCError) -> Self {
         match err {
-
             ClassCError::InvalidAircraftState => &ClassCError::InvalidAircraftState,
         }
     }
