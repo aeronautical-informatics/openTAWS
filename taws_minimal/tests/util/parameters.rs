@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use cucumber::{Parameter};
+use cucumber::Parameter;
 use lazy_static::lazy_static;
 use regex::Regex;
 
@@ -125,10 +125,10 @@ impl FromStr for ConstraintParameter {
             .map_err(|_| "invalid quantity format")?;
 
         match typ {
-			"equal" => match q2 {
-				Some(_) => Err(format!("unexpected: {}", s)),
-				None => Ok(Self(Constraint::Equal(q1)))
-			},
+            "equal" => match q2 {
+                Some(_) => Err(format!("unexpected: {}", s)),
+                None => Ok(Self(Constraint::Equal(q1))),
+            },
             "at least" => match q2 {
                 Some(_) => Err(format!("unexpected: {}", s)),
                 None => Ok(Self(Constraint::AtLeast(q1))),
@@ -172,7 +172,7 @@ pub struct FlightSegmentParameter(FlightSegment);
 
 impl From<FlightSegmentParameter> for FlightSegment {
     fn from(segment: FlightSegmentParameter) -> Self {
-		segment.0
+        segment.0
     }
 }
 
@@ -180,20 +180,24 @@ impl FromStr for FlightSegmentParameter {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-		let mut segment = s.trim().to_lowercase();
+        let mut segment = s.trim().to_lowercase();
         segment.retain(|c| !c.is_whitespace());
         match segment.as_str() {
-			"cruise" => Ok(Self(FlightSegment::Cruise)),
-			"take-off" => Ok(Self(FlightSegment::TakeOff)),
-			"approach" | "landing" => Ok(Self(FlightSegment::Landing { circling_approach: false, precision_approach: false, steep_approach: false })),
-			"go-around" => Ok(Self(FlightSegment::GoAround)),
-			_ => Err(format!("invalid flight segment: {}", s)),
-		}
+            "cruise" => Ok(Self(FlightSegment::Cruise)),
+            "take-off" => Ok(Self(FlightSegment::TakeOff)),
+            "approach" | "landing" => Ok(Self(FlightSegment::Landing {
+                circling_approach: false,
+                precision_approach: false,
+                steep_approach: false,
+            })),
+            "go-around" => Ok(Self(FlightSegment::GoAround)),
+            _ => Err(format!("invalid flight segment: {}", s)),
+        }
     }
 }
 
 impl Parameter for FlightSegmentParameter {
-	const NAME: &'static str = "flight-segment";
+    const NAME: &'static str = "flight-segment";
 
     const REGEX: &'static str = r"(?:cruise|take-off|landing|go-around|approach)";
 }
