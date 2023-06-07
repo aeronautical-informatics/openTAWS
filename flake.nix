@@ -17,7 +17,7 @@
         let
           pkgs = import nixpkgs { inherit system; };
           rust-toolchain = with fenix.packages.${system}; combine [
-            stable.rust-analyzer
+            rust-analyzer
             stable.cargo
             stable.rustc
             stable.rustfmt
