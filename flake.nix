@@ -21,7 +21,6 @@
             stable.cargo
             stable.rustc
             stable.rustfmt
-            targets.armv7a-none-eabi.stable.rust-std
           ];
           naersk-lib = (naersk.lib."${system}".override {
             cargo = rust-toolchain;
