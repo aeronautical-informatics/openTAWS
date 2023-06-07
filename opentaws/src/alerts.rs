@@ -4,6 +4,7 @@ use heapless::FnvIndexMap;
 use crate::prelude::*;
 
 /// TAWS Alert levels
+#[cfg_attr(feature = "use-serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum AlertLevel {
     /// The level or category of alert for conditions that require immediate flight crew awareness
@@ -20,6 +21,7 @@ pub enum AlertLevel {
 }
 
 /// Represents a TAWS alert
+#[cfg_attr(feature = "use-serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Alert<AlertSource: TawsAlertSource> {
     /// The source resp. the TAWS functionallity which emitted this alert
