@@ -828,6 +828,7 @@ dependencies = [
  "heapless",
  "lazy_static",
  "nalgebra",
+ "serde",
  "uom",
 ]
 
@@ -1304,6 +1305,7 @@ version = "0.34.0"
 source = "git+https://github.com/moritz-meier/uom.git?branch=fix-missing-libm#4ddb11b11b11b333a98185c19336d16c85e22c9c"
 dependencies = [
  "num-traits",
+ "serde",
  "typenum",
 ]
 

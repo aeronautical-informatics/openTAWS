@@ -30,6 +30,7 @@ pub struct Normalized;
 pub type NormalizedAircraftState = AircraftState<Normalized>;
 
 /// Represents the current state of an aircraft
+#[cfg_attr(feature = "use-serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, Default)]
 pub struct AircraftState<T = ()> {
     /// Time when this aircraft state was emitted
@@ -240,7 +241,6 @@ impl<T> AircraftState<T> {
     }
 
     fn wrap_position(lat: Angle, lon: Angle) -> (Angle, Angle) {
-        use ::uom::num_traits::Float;
         let quadrant = ((lat.abs() / *QUARTER_REVOLUTION)
             .get::<ratio::ratio>()
             .floor() as i64)
@@ -337,6 +337,7 @@ AircrafState: {{
 }
 
 /// Represents a flight segment
+#[cfg_attr(feature = "use-serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum FlightSegment {
     /// The aircraft is in cruise flight situation

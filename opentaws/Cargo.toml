@@ -22,8 +22,11 @@ is-it-maintained-open-issues = { repository = "aeronautical-informatics/openTAWS
 maintenance = { status = "actively-developed" }
 
 [features]
+default = ["use-serde"]
+use-serde = ["serde", "uom/use_serde"]
 
 [dependencies]
+serde = { version = "1.0", default-features = false, optional = true, features = ["derive"] }
 lazy_static = { version = "1", default-features = false, features = [
 	"spin_no_std",
 ] }
