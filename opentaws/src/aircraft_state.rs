@@ -241,9 +241,6 @@ impl<T> AircraftState<T> {
     }
 
     fn wrap_position(lat: Angle, lon: Angle) -> (Angle, Angle) {
-        #[allow(unused_imports)]
-        use crate::prelude::uom::num_traits::Float;
-
         let quadrant = ((lat.abs() / *QUARTER_REVOLUTION)
             .get::<ratio::ratio>()
             .floor() as i64)
