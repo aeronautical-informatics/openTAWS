@@ -5,14 +5,13 @@ mod mode3;
 mod pda;
 
 use core::{fmt::Display, slice::Iter};
-use hash32::{Hash, Hasher};
 
 use crate::alerts::Alert;
 
 use crate::prelude::*;
 pub use {ffac::*, /*flta::*,*/ mode1::*, mode3::*, pda::*};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]
 #[allow(non_camel_case_types)]
 pub enum ClassC_Source {
     Ffac,
@@ -52,15 +51,6 @@ impl IntoIterator for ClassC_Source {
 
     fn into_iter(self) -> Self::IntoIter {
         [Self::Ffac, Self::Mode1, Self::Mode3, Self::Pda].iter()
-    }
-}
-
-impl Hash for ClassC_Source {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        state.write(&(*self as usize).to_le_bytes())
     }
 }
 
