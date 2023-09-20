@@ -34,7 +34,6 @@ impl Display for ClassC_Source {
 }
 
 impl TawsAlertSource for ClassC_Source {
-    const NUM_ALERT_SOURCES: usize = 5;
     const ALERT_SOURCES: &'static [Self] = &[
         ClassC_Source::Ffac,
         //ClassC_Source::Flta,
