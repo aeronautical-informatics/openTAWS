@@ -87,13 +87,49 @@ where
     }
 }
 
-impl<Alert: TawsAlert> Alerts<Alert>
+impl<'a, Alert: TawsAlert> IntoIterator for &'a Alerts<Alert>
 where
     Alert::AlertSource: Hash,
 {
-    /// Returns an iterator over all active alerts.
-    pub fn alerts(&self) -> impl Iterator<Item = &Alert> + '_ {
-        self.alerts.values()
+    type Item = &'a Alert;
+    type IntoIter = AlertsIter<'a, Alert>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        AlertsIter::new(self.alerts.iter())
+    }
+}
+
+type AlertsIterInner<'a, Alert> = core::iter::Map<
+    heapless::IndexMapIter<'a, <Alert as TawsAlert>::AlertSource, Alert>,
+    fn((&'a <Alert as TawsAlert>::AlertSource, &'a Alert)) -> &'a Alert,
+>;
+
+pub struct AlertsIter<'a, Alert: TawsAlert>
+where
+    Alert::AlertSource: Hash,
+{
+    iter: AlertsIterInner<'a, Alert>,
+}
+
+impl<'a, Alert: TawsAlert> AlertsIter<'a, Alert>
+where
+    Alert::AlertSource: Hash,
+{
+    fn new(iter: heapless::IndexMapIter<'a, Alert::AlertSource, Alert>) -> Self {
+        Self {
+            iter: iter.map(|(_, alert)| alert),
+        }
+    }
+}
+
+impl<'a, Alert: TawsAlert> Iterator for AlertsIter<'a, Alert>
+where
+    Alert::AlertSource: Hash,
+{
+    type Item = &'a Alert;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next()
     }
 }
 
@@ -116,8 +152,6 @@ where
     }
 
     fn is_alert_active(&self, alert_src: Self::AlertSource, min_level: AlertLevel) -> bool {
-        self.alerts.contains_key(&alert_src);
-
         match self.alerts.get(&alert_src) {
             Some(alert) => alert.level() <= min_level,
             None => false,
@@ -213,7 +247,7 @@ mod tests {
     }
 
     #[test]
-    fn alerts_get() {
+    fn alerts_into_iter() {
         let mut alerts = TestAlerts::default();
         let alert1: TestAlert = (TestClass::A, AlertLevel::Annunciation).into();
         let alert2: TestAlert = (TestClass::B, AlertLevel::Caution).into();
@@ -223,6 +257,18 @@ mod tests {
         alerts.insert(alert2);
         alerts.insert(alert3);
 
-        assert!(alerts.alerts().count() == 3)
+        assert!(alerts.into_iter().count() == 3);
+
+        alerts
+            .into_iter()
+            .any(|alert| *alert == (TestClass::A, AlertLevel::Annunciation).into());
+
+        alerts
+            .into_iter()
+            .any(|alert| *alert == (TestClass::B, AlertLevel::Caution).into());
+
+        alerts
+            .into_iter()
+            .any(|alert| *alert == (TestClass::C, AlertLevel::Warning).into());
     }
 }
