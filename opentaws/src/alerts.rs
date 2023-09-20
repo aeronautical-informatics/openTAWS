@@ -69,11 +69,7 @@ pub struct Alerts<Alert: TawsAlert>
 where
     Alert::AlertSource: Hash,
 {
-    alerts: FnvIndexMap<
-        Alert::AlertSource,
-        Alert,
-        64, /*ToDo: use <Alert::AlertSource>::NUM_ALERT_SOURCES or count the available alert sources with a macro*/
-    >,
+    alerts: FnvIndexMap<Alert::AlertSource, Alert, { MAX_NUM_ALERT_SOURCES }>,
 }
 
 impl<Alert: TawsAlert> Default for Alerts<Alert>
@@ -173,8 +169,7 @@ mod tests {
     }
 
     impl TawsAlertSource for TestClass {
-        const NUM_ALERT_SOURCES: usize = 3;
-        const ALERT_SOURCES: &'static [Self] = &[];
+        const ALERT_SOURCES: &'static [Self] = &[TestClass::A, TestClass::B, TestClass::C];
     }
 
     impl IntoIterator for TestClass {

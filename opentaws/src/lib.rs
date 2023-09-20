@@ -224,10 +224,10 @@ pub trait TawsAlert {
     fn level(&self) -> AlertLevel;
 }
 
+pub const MAX_NUM_ALERT_SOURCES: usize = 64;
+
 /// Abstraction for an alert source
 pub trait TawsAlertSource: Clone + Copy + Eq + 'static {
-    const NUM_ALERT_SOURCES: usize;
-
     const ALERT_SOURCES: &'static [Self];
 }
 

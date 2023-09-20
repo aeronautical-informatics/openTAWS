@@ -2,7 +2,7 @@ pub use self::uom::*;
 pub use crate::aircraft_state::{AircraftState, FlightSegment, NormalizedAircraftState};
 pub use crate::{
     alerts::AlertLevel, Taws, TawsAlert, TawsAlertSource, TawsAlerts, TawsError,
-    TawsFunctionalities, TawsFunctionality,
+    TawsFunctionalities, TawsFunctionality, MAX_NUM_ALERT_SOURCES,
 };
 
 pub mod uom {
