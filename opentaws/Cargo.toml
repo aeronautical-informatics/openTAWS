@@ -30,8 +30,7 @@ serde = { version = "1.0", default-features = false, optional = true, features =
 lazy_static = { version = "1", default-features = false, features = [
 	"spin_no_std",
 ] }
-heapless = "0.7.16"
-hash32 = "0.2.1"
+heapless = { git = "https://github.com/japaric/heapless.git" }
 nalgebra = { version = "0.32.2", default-features = false, features = ["libm"] }
 uom = { git = "https://github.com/moritz-meier/uom.git", branch = "fix-missing-libm", default-features = false, features = [
 	"f64",

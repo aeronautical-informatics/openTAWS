@@ -1,4 +1,4 @@
-use hash32::Hash;
+use core::hash::Hash;
 use heapless::FnvIndexMap;
 
 use crate::prelude::*;
@@ -132,9 +132,8 @@ mod tests {
     use core::slice::Iter;
 
     use super::*;
-    use hash32::{Hash, Hasher};
 
-    #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+    #[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]
     enum TestClass {
         A,
         B,
@@ -153,15 +152,6 @@ mod tests {
 
         fn into_iter(self) -> Self::IntoIter {
             [Self::A, Self::B, Self::C].iter()
-        }
-    }
-
-    impl Hash for TestClass {
-        fn hash<H>(&self, state: &mut H)
-        where
-            H: Hasher,
-        {
-            state.write(&(*self as usize).to_le_bytes());
         }
     }
 
