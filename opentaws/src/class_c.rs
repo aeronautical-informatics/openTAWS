@@ -46,11 +46,10 @@ impl TawsAlertSource for ClassC_Source {
 
 impl IntoIterator for ClassC_Source {
     type Item = &'static ClassC_Source;
-
     type IntoIter = Iter<'static, ClassC_Source>;
 
     fn into_iter(self) -> Self::IntoIter {
-        [Self::Ffac, Self::Mode1, Self::Mode3, Self::Pda].iter()
+        ClassC_Source::ALERT_SOURCES.iter()
     }
 }
 
