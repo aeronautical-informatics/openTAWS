@@ -27,7 +27,10 @@ use core::fmt::Display;
 use crate::prelude::*;
 
 /// Abstraction for a TAWS system
-pub trait Taws {
+pub trait Taws
+where
+    for<'a> &'a Self::Alerts: IntoIterator<Item = &'a Self::Alert>,
+{
     /// Alert source type
     type AlertSource: TawsAlertSource;
 
@@ -187,7 +190,10 @@ pub trait TawsFunctionality {
 }
 
 /// Abstraction for a set of TAWS alerts
-pub trait TawsAlerts {
+pub trait TawsAlerts
+where
+    for<'a> &'a Self: IntoIterator<Item = &'a Self::Alert>,
+{
     type AlertSource: TawsAlertSource;
 
     /// Alert type
