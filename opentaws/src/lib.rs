@@ -199,17 +199,39 @@ where
     /// Alert type
     type Alert: TawsAlert<AlertSource = Self::AlertSource>;
 
+    fn get(&self, alert_src: Self::AlertSource) -> Option<&Self::Alert>;
+
+    fn get_min(&self, alert_src: Self::AlertSource, min_level: AlertLevel) -> Option<&Self::Alert> {
+        self.get(alert_src)
+            .and_then(|alert| (alert.level() <= min_level).then_some(alert))
+    }
+
+    fn is_alert_active(&self, alert_src: Self::AlertSource, min_level: AlertLevel) -> bool {
+        self.get_min(alert_src, min_level).is_some()
+    }
+
     /// Inserts the specified alert into the set.
     /// Already existing alerts are replaced if the [new_alert] has a higher alert level.
     /// # Arguments
     /// * `new_alert` - the new alert which is added to the set of alerts
     fn insert(&mut self, new_alert: Self::Alert);
+}
 
-    /// Returns whether an alert from the given source with at least the specified alert level is active.
-    /// # Arguments
-    /// * `alert_src` - The alert source to check for.
-    /// * `min_level` - The inclusive min level to check for.
-    fn is_alert_active(&self, alert_src: Self::AlertSource, min_level: AlertLevel) -> bool;
+pub trait TawsAlertsPrioritizationExt: TawsAlerts
+where
+    for<'a> &'a Self: IntoIterator<Item = &'a Self::Alert>,
+{
+    type PrioritizedAlerts<'a>: TawsPrioritizedAlerts<'a, Alert = Self::Alert>
+    where
+        Self: 'a;
+
+    fn prioritize(&self) -> Self::PrioritizedAlerts<'_>;
+}
+
+pub trait TawsPrioritizedAlerts<'a> {
+    type Alert: TawsAlert;
+
+    fn index(&self, idx: usize) -> Option<&'a Self::Alert>;
 }
 
 /// Abstraction for a TAWS alert
@@ -229,6 +251,10 @@ pub const MAX_NUM_ALERT_SOURCES: usize = 64;
 /// Abstraction for an alert source
 pub trait TawsAlertSource: Clone + Copy + Eq + 'static {
     const ALERT_SOURCES: &'static [Self];
+}
+
+pub trait TawsAlertSourcePrioritization: TawsAlertSource {
+    const PRIORITIZATION: &'static [(Self, AlertLevel)];
 }
 
 pub trait TawsError: core::fmt::Debug + Display {}
