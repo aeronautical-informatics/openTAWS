@@ -43,6 +43,8 @@ impl TawsAlertSource for ClassC_Source {
     ];
 }
 
+// Class C alert prioritization.
+// DO-367 Section 2.2.3.2.4 Alert Prioritization.
 impl TawsAlertSourcePrioritization for ClassC_Source {
     const PRIORITIZATION: &'static [(Self, AlertLevel)] = &[
         (ClassC_Source::Mode1, AlertLevel::Warning),
