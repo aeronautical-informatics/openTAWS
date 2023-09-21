@@ -154,6 +154,8 @@ where
     }
 }
 
+// Implements the alert prioritization for all `TawsAlerts` implementing types,
+// if the associated `TawsAlerts::AlertSource` type implements `TawsAlertSourcePrioritization`.
 impl<T: TawsAlerts> TawsAlertsPrioritizationExt for T
 where
     T::AlertSource: TawsAlertSourcePrioritization,
@@ -175,6 +177,7 @@ where
     }
 }
 
+/// Sorted set of prioritized alerts.
 pub struct PrioritizedAlerts<'a, Alert: TawsAlert> {
     prioritized: [Option<&'a Alert>; MAX_NUM_ALERT_SOURCES],
 }

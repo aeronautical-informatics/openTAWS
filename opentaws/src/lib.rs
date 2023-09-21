@@ -189,7 +189,7 @@ pub trait TawsFunctionality {
     ) -> Result<Option<Self::Alert>, &'static dyn TawsError>; // Result ?
 }
 
-/// Abstraction for a set of TAWS alerts
+/// Abstraction for a set of `TawsAlert`s.
 pub trait TawsAlerts
 where
     for<'a> &'a Self: IntoIterator<Item = &'a Self::Alert>,
@@ -199,13 +199,25 @@ where
     /// Alert type
     type Alert: TawsAlert<AlertSource = Self::AlertSource>;
 
+    /// Returns the alert with the specified `alert_src`, if one exists; otherwise `None`.
+    /// # Arguments
+    /// * `alert_src` - The `Self::AlertSource` to look for.
     fn get(&self, alert_src: Self::AlertSource) -> Option<&Self::Alert>;
 
+    /// Returns the alert with the specified `alert_src` if one exists and if the alert has an `AlertLevel`
+    /// greater than or equal to `min_level`; otherwise `None`.
+    /// # Arguments
+    /// * `alert_src` - The `Self::AlertSource` to look for.
+    /// * `min_level`- Minimum `AlertLevel` to look for.
     fn get_min(&self, alert_src: Self::AlertSource, min_level: AlertLevel) -> Option<&Self::Alert> {
         self.get(alert_src)
             .and_then(|alert| (alert.level() <= min_level).then_some(alert))
     }
 
+    /// Checks whether an alert with the specified `alert_src` exists that has a minimum `AlertLevel` of `min_level`.
+    /// # Arguments
+    /// * `alert_src` - The `Self::AlertSource` to check.
+    /// * `min_level` - The minimum `AlertLevel`.
     fn is_alert_active(&self, alert_src: Self::AlertSource, min_level: AlertLevel) -> bool {
         self.get_min(alert_src, min_level).is_some()
     }
@@ -217,6 +229,8 @@ where
     fn insert(&mut self, new_alert: Self::Alert);
 }
 
+/// Extension trait for `TawsAlerts` that implements alert prioritization
+/// if the associated `TawsAlertSource` implements `TawsAlertSourcePrioritization`.
 pub trait TawsAlertsPrioritizationExt: TawsAlerts
 where
     for<'a> &'a Self: IntoIterator<Item = &'a Self::Alert>,
@@ -225,12 +239,22 @@ where
     where
         Self: 'a;
 
+    /// Prioritize alerts by the associated `TawsAlertSourcePrioritization` implementation.
     fn prioritize(&self) -> Self::PrioritizedAlerts<'_>;
 }
 
+/// Abstraction for a sorted set of `TawsAlert`s.
 pub trait TawsPrioritizedAlerts<'a> {
     type Alert: TawsAlert;
 
+    /// Gets the alert at index `idx` from the prioritized (sorted) set of alerts,
+    /// if one exists at the given `idx`; otherwise `None`.<br/>
+    /// Low indices describe high priority. Index 0 contains the alert with the highest priority
+    /// or `None` if no alert matches any of the rules in `TawsAlertSourcePrioritization`.<br/>
+    /// It is important to note that an empty set here does not imply absent of alerts in general.
+    /// It only mean that no alert matched any of the prioritization rules.
+    /// # Arguments
+    /// * `idx` - The index at which the prioritized (sorted) set of alerts is accessed.
     fn index(&self, idx: usize) -> Option<&'a Self::Alert>;
 }
 
@@ -246,6 +270,7 @@ pub trait TawsAlert {
     fn level(&self) -> AlertLevel;
 }
 
+/// Maximum number of supported alert sources.
 pub const MAX_NUM_ALERT_SOURCES: usize = 64;
 
 /// Abstraction for an alert source
@@ -253,7 +278,41 @@ pub trait TawsAlertSource: Clone + Copy + Eq + 'static {
     const ALERT_SOURCES: &'static [Self];
 }
 
+/// Alert prioritization trait. Describes how `TawsAlert`s should be prioritized.
 pub trait TawsAlertSourcePrioritization: TawsAlertSource {
+    /// Prioritization rules that assign priorities to `TawsAlert`s.
+    /// # Example
+    /// ```
+    /// # use opentaws::prelude::*;
+    /// # enum AlertSource { Mode1, Mode3, Flta, Pda, Ffac }
+    /// &[
+    ///     (AlertSource::Mode1, AlertLevel::Warning),
+    ///     (AlertSource::Flta, AlertLevel::Warning),
+    ///     (AlertSource::Flta, AlertLevel::Caution),
+    ///     (AlertSource::Pda, AlertLevel::Caution),
+    ///     (AlertSource::Ffac, AlertLevel::Annunciation),
+    ///     (AlertSource::Mode1, AlertLevel::Caution),
+    ///     (AlertSource::Mode3, AlertLevel::Caution),
+    /// ];
+    /// ```
+    ///
+    /// * All Mode1 alerts with level Warning or higher will be assigned priority 0 (highest priority).
+    /// * All Flta alerts with level Warning or higher will be assigned priority 1.
+    /// * All Mode1 alerts with level Caution or higher will be assigned priority 5.
+    ///
+    /// For example these alerts: <br/>
+    /// `{(Mode3, Annunciation), (Mode1, Caution), (Flta, Warning)}`<br/>
+    /// will be sorted into this order: <br/>
+    /// `[(Flta, Warning), (Mode1, Caution)]`
+    ///
+    /// * `(Flta, Warning)` has a higher priority than the other alerts because of rule 2.
+    /// * `(Mode1, Caution)` has a lower priority than the Flta alert because of rule 6 but a higher priority than `(Mode3, Annunciation)`.
+    /// * `(Mode3, Annunciation)` has no priotity because it does not match any rule and is therefore ignored.
+    ///
+    /// Alerts that do not fit into any rule cannot be prioritized, because the prioritization would be arbitrary and thus not reliable.<br/>
+    /// If all alerts should be present in the sorted collection,
+    /// consider adding a catch-all rules for all alert sources at the end with the lowest possible alert level (Annunciation).<br/>
+    /// By doing this all alert sources get a priority assigned and the arbitrariness is prevented.
     const PRIORITIZATION: &'static [(Self, AlertLevel)];
 }
 
