@@ -1,7 +1,9 @@
 use core::hash::Hash;
 use heapless::FnvIndexMap;
 
-use crate::prelude::*;
+use crate::{
+    prelude::*, TawsAlertSourcePrioritization, TawsAlertsPrioritizationExt, TawsPrioritizedAlerts,
+};
 
 /// TAWS Alert levels
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -136,6 +138,10 @@ where
     type Alert = Alert;
     type AlertSource = Alert::AlertSource;
 
+    fn get(&self, alert_src: Self::AlertSource) -> Option<&Self::Alert> {
+        self.alerts.get(&alert_src)
+    }
+
     fn insert(&mut self, new_alert: Alert) {
         let current_alert = self.alerts.get(&new_alert.source());
 
@@ -146,12 +152,42 @@ where
                 .unwrap(); //ToDo
         }
     }
+}
 
-    fn is_alert_active(&self, alert_src: Self::AlertSource, min_level: AlertLevel) -> bool {
-        match self.alerts.get(&alert_src) {
-            Some(alert) => alert.level() <= min_level,
-            None => false,
+impl<T: TawsAlerts> TawsAlertsPrioritizationExt for T
+where
+    T::AlertSource: TawsAlertSourcePrioritization,
+    for<'a> &'a Self: IntoIterator<Item = &'a Self::Alert>,
+{
+    type PrioritizedAlerts<'a> = PrioritizedAlerts<'a, Self::Alert> where Self: 'a;
+
+    fn prioritize(&self) -> Self::PrioritizedAlerts<'_> {
+        let mut prioritized: [Option<&T::Alert>; MAX_NUM_ALERT_SOURCES] =
+            [None; MAX_NUM_ALERT_SOURCES];
+
+        <T::AlertSource as TawsAlertSourcePrioritization>::PRIORITIZATION
+            .iter()
+            .filter_map(|(src, level)| self.get_min(*src, *level))
+            .enumerate()
+            .for_each(|(i, alert)| prioritized[i] = Some(alert));
+
+        Self::PrioritizedAlerts { prioritized }
+    }
+}
+
+pub struct PrioritizedAlerts<'a, Alert: TawsAlert> {
+    prioritized: [Option<&'a Alert>; MAX_NUM_ALERT_SOURCES],
+}
+
+impl<'a, Alert: TawsAlert> TawsPrioritizedAlerts<'a> for PrioritizedAlerts<'a, Alert> {
+    type Alert = Alert;
+
+    fn index(&self, idx: usize) -> Option<&'a Self::Alert> {
+        if !(0..MAX_NUM_ALERT_SOURCES).contains(&idx) {
+            return None;
         }
+
+        self.prioritized[idx]
     }
 }
 
@@ -170,6 +206,14 @@ mod tests {
 
     impl TawsAlertSource for TestClass {
         const ALERT_SOURCES: &'static [Self] = &[TestClass::A, TestClass::B, TestClass::C];
+    }
+
+    impl TawsAlertSourcePrioritization for TestClass {
+        const PRIORITIZATION: &'static [(Self, AlertLevel)] = &[
+            (TestClass::A, AlertLevel::Caution),
+            (TestClass::B, AlertLevel::Warning),
+            (TestClass::C, AlertLevel::Annunciation),
+        ];
     }
 
     impl IntoIterator for TestClass {
@@ -265,5 +309,53 @@ mod tests {
         alerts
             .into_iter()
             .any(|alert| *alert == (TestClass::C, AlertLevel::Warning).into());
+    }
+
+    #[test]
+    fn alert_prioritization() {
+        let mut alerts = TestAlerts::default();
+        let alert1: TestAlert = (TestClass::B, AlertLevel::Warning).into();
+
+        alerts.insert(alert1);
+
+        {
+            let prioritzed = alerts.prioritize();
+            assert!(*prioritzed.index(0).unwrap() == (TestClass::B, AlertLevel::Warning).into());
+            assert!(prioritzed.index(1).is_none());
+        }
+
+        let alert2: TestAlert = (TestClass::C, AlertLevel::Caution).into();
+        alerts.insert(alert2);
+
+        {
+            let prioritzed = alerts.prioritize();
+            assert!(*prioritzed.index(0).unwrap() == (TestClass::B, AlertLevel::Warning).into());
+            assert!(*prioritzed.index(1).unwrap() == (TestClass::C, AlertLevel::Caution).into());
+            assert!(prioritzed.index(2).is_none());
+        }
+
+        let alert3: TestAlert = (TestClass::A, AlertLevel::Caution).into();
+        alerts.insert(alert3);
+
+        {
+            let prioritzed = alerts.prioritize();
+
+            assert!(*prioritzed.index(0).unwrap() == (TestClass::A, AlertLevel::Caution).into());
+            assert!(*prioritzed.index(1).unwrap() == (TestClass::B, AlertLevel::Warning).into());
+            assert!(*prioritzed.index(2).unwrap() == (TestClass::C, AlertLevel::Caution).into());
+            assert!(prioritzed.index(3).is_none());
+        }
+
+        let alert4: TestAlert = (TestClass::A, AlertLevel::Annunciation).into();
+        alerts.insert(alert4);
+
+        {
+            let prioritzed = alerts.prioritize();
+
+            assert!(*prioritzed.index(0).unwrap() == (TestClass::A, AlertLevel::Caution).into());
+            assert!(*prioritzed.index(1).unwrap() == (TestClass::B, AlertLevel::Warning).into());
+            assert!(*prioritzed.index(2).unwrap() == (TestClass::C, AlertLevel::Caution).into());
+            assert!(prioritzed.index(3).is_none());
+        }
     }
 }

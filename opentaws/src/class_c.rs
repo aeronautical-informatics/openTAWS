@@ -6,7 +6,7 @@ mod pda;
 
 use core::{fmt::Display, slice::Iter};
 
-use crate::alerts::Alert;
+use crate::{alerts::Alert, TawsAlertSourcePrioritization};
 
 use crate::prelude::*;
 pub use {ffac::*, /*flta::*,*/ mode1::*, mode3::*, pda::*};
@@ -43,6 +43,18 @@ impl TawsAlertSource for ClassC_Source {
     ];
 }
 
+impl TawsAlertSourcePrioritization for ClassC_Source {
+    const PRIORITIZATION: &'static [(Self, AlertLevel)] = &[
+        (ClassC_Source::Mode1, AlertLevel::Warning),
+        //(ClassC_Source::Flta, AlertLevel::Warning),
+        //(ClassC_Source::Flta, AlertLevel::Caution),
+        (ClassC_Source::Pda, AlertLevel::Caution),
+        (ClassC_Source::Ffac, AlertLevel::Annunciation),
+        (ClassC_Source::Mode1, AlertLevel::Caution),
+        (ClassC_Source::Mode3, AlertLevel::Caution),
+    ];
+}
+
 impl IntoIterator for ClassC_Source {
     type Item = &'static ClassC_Source;
     type IntoIter = Iter<'static, ClassC_Source>;
@@ -61,6 +73,8 @@ pub struct ClassC {
 }
 
 impl ClassC {
+    // ::default() does not work here, we may need params in the future
+    #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
         ClassC {
             ffac: Ffac::default(),
