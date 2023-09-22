@@ -1,12 +1,16 @@
 use core::hash::Hash;
 use heapless::FnvIndexMap;
 
+#[cfg(feature = "use-serde")]
+use serde::{Deserialize, Serialize};
+
 use crate::{
     prelude::*, TawsAlertSourcePrioritization, TawsAlertsPrioritizationExt, TawsPrioritizedAlerts,
 };
 
 /// TAWS Alert levels
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[cfg_attr(feature = "use-serde", derive(Serialize, Deserialize))]
 pub enum AlertLevel {
     /// The level or category of alert for conditions that require immediate flight crew awareness
     /// and immediate flight crew response.
@@ -23,6 +27,7 @@ pub enum AlertLevel {
 
 /// Represents a TAWS alert
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "use-serde", derive(Serialize, Deserialize))]
 pub struct Alert<AlertSource: TawsAlertSource> {
     /// The source resp. the TAWS functionallity which emitted this alert
     pub source: AlertSource,
@@ -67,6 +72,7 @@ impl<AlertSource: TawsAlertSource> From<Alert<AlertSource>> for (AlertSource, Al
 
 /// Represents a set of [Alerts](Alert) by their [AlertSource](Alert::AlertSource)
 #[derive(Debug)]
+//#[cfg_attr(feature = "use-serde", derive(Serialize, Deserialize))]
 pub struct Alerts<Alert: TawsAlert>
 where
     Alert::AlertSource: Hash,
@@ -201,6 +207,7 @@ mod tests {
     use super::*;
 
     #[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]
+    #[cfg_attr(feature = "use-serde", derive(Serialize, Deserialize))]
     enum TestClass {
         A,
         B,

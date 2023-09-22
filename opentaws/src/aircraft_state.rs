@@ -31,6 +31,7 @@ pub type NormalizedAircraftState = AircraftState<Normalized>;
 
 /// Represents the current state of an aircraft
 #[derive(Clone, Debug, Default)]
+#[cfg_attr(feature = "use-serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AircraftState<T = ()> {
     /// Time when this aircraft state was emitted
     timestamp: Time,
@@ -340,6 +341,7 @@ AircrafState: {{
 
 /// Represents a flight segment
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "use-serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum FlightSegment {
     /// The aircraft is in cruise flight situation
     Cruise,
