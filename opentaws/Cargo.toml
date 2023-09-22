@@ -22,7 +22,7 @@ is-it-maintained-open-issues = { repository = "aeronautical-informatics/openTAWS
 maintenance = { status = "actively-developed" }
 
 [features]
-default = ["use-serde"]
+default = []
 use-serde = [
 	"dep:serde",
 	"heapless/serde",
