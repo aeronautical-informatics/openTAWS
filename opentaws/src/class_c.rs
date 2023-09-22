@@ -6,12 +6,12 @@ mod pda;
 
 use core::{fmt::Display, slice::Iter};
 
-use crate::{alerts::Alert, TawsAlertSourcePrioritization};
+use crate::{alerts::Alert, prelude::*, TawsAlertSourcePrioritization};
 
-use crate::prelude::*;
 pub use {ffac::*, /*flta::*,*/ mode1::*, mode3::*, pda::*};
 
 #[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]
+#[cfg_attr(feature = "use-serde", derive(serde::Serialize, serde::Deserialize))]
 #[allow(non_camel_case_types)]
 pub enum ClassC_Source {
     Ffac,

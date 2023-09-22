@@ -22,6 +22,13 @@ is-it-maintained-open-issues = { repository = "aeronautical-informatics/openTAWS
 maintenance = { status = "actively-developed" }
 
 [features]
+default = ["use-serde"]
+use-serde = [
+	"dep:serde",
+	"heapless/serde",
+	"nalgebra/serde-serialize-no-std",
+	"uom/use_serde",
+]
 
 [dependencies]
 lazy_static = { version = "1", default-features = false, features = [
@@ -29,6 +36,9 @@ lazy_static = { version = "1", default-features = false, features = [
 ] }
 heapless = { git = "https://github.com/japaric/heapless.git" }
 nalgebra = { version = "0.32.2", default-features = false, features = ["libm"] }
+serde = { version = "*", optional = true, default-features = false, features = [
+	"derive",
+] }
 uom = { git = "https://github.com/moritz-meier/uom.git", branch = "fix-missing-libm", default-features = false, features = [
 	"f64",
 	"si",

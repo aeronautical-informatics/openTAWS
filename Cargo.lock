@@ -519,6 +519,7 @@ dependencies = [
  "atomic-polyfill",
  "hash32",
  "rustc_version",
+ "serde",
  "spin 0.9.8",
  "stable_deref_trait",
 ]
@@ -668,6 +669,7 @@ dependencies = [
  "num-complex",
  "num-rational",
  "num-traits",
+ "serde",
  "simba",
  "typenum",
 ]
@@ -700,6 +702,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1ba157ca0885411de85d6ca030ba7e2a83a28636056c7c699b07c8b6f7383214"
 dependencies = [
  "num-traits",
+ "serde",
 ]
 
 [[package]]
@@ -746,6 +749,7 @@ dependencies = [
  "heapless",
  "lazy_static",
  "nalgebra",
+ "serde",
  "uom",
 ]
 
@@ -1229,6 +1233,7 @@ version = "0.35.0"
 source = "git+https://github.com/moritz-meier/uom.git?branch=fix-missing-libm#4afd75d1a46b7256db04e9551897a1e0219df2ef"
 dependencies = [
  "num-traits",
+ "serde",
  "typenum",
 ]
 
