@@ -72,7 +72,7 @@ lazy_static! {
         Vector2::new(11_000.0, 330_000.0)
     );
 
-	// Envelopes enlarged by d=0.1, to prevent floating pointing problems.
+    // Envelopes enlarged by d=0.1, to prevent floating pointing problems.
     static ref CAUTION_ENVELOPE: Envelope::<6> = Envelope::new(
         *LIMITS,
         &[

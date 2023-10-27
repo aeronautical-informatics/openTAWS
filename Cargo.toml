@@ -2,9 +2,12 @@
 members = [
 	"opentaws",
 	"taws_minimal",
-	"aviation_database",
-	"kd_tree",
-	"kd_tree_sort",
+	#"aviation_database",
+	#"kd_tree",
+	#"kd_tree_sort",
+	"uom_nalgebra",
+	"geospatial",
+	"airport_db",
 ]
 
 

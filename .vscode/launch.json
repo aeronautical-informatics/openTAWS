@@ -1,0 +1,60 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug unit tests in library 'taws_minimal'",
+			"cargo": {
+				"args": [
+					"test",
+					"--no-run",
+					"--lib",
+					"--package=taws_minimal",
+					"--all-features"
+				],
+				"filter": {
+					"name": "taws_minimal",
+					"kind": "lib"
+				}
+			},
+			"args": [],
+			"cwd": "${workspaceFolder}/taws_minimal",
+			"sourceLanguages": [
+				"rust"
+			],
+			"sourceMap": {
+				"/rustc/4b91a6ea7258a947e59c6522cd5898e7c0a6a88f": "${env:RUSTUP_HOME}/toolchains/stable-x86_64-pc-windows-msvc/lib/rustlib/src/rust"
+			}
+		},
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug integration test 'cucumber'",
+			"cargo": {
+				"args": [
+					"test",
+					"--no-run",
+					"--test=cucumber",
+					"--package=taws_minimal",
+					"--all-features"
+				],
+				"filter": {
+					"name": "cucumber",
+					"kind": "test"
+				}
+			},
+			"args": [],
+			"cwd": "${workspaceFolder}/taws_minimal",
+			"sourceLanguages": [
+				"rust"
+			],
+			"sourceMap": {
+				"/rustc/4b91a6ea7258a947e59c6522cd5898e7c0a6a88f": "${env:RUSTUP_HOME}/toolchains/stable-x86_64-pc-windows-msvc/lib/rustlib/src/rust"
+			}
+		}
+	]
+}

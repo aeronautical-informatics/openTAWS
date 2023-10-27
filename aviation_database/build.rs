@@ -97,7 +97,8 @@ fn main() {
         Box::new(std::io::BufReader::new(r))
     };
 
-    let mut airports: Vec<Airport> = serde_json::from_reader(reader).unwrap();
+    let airports: Vec<Airport> = serde_json::from_reader(reader).unwrap();
+    let mut airports: Vec<Airport> = airports.into_iter().take(100).collect();
 
     let num_airports = airports.len();
     let out_dir = env::var_os("OUT_DIR").unwrap();
