@@ -1,0 +1,44 @@
+[package]
+name = "taws_minimal"
+version = "0.1.0"
+authors = [
+	"Wanja Zaeske <wanja.zaeske@tu-clausthal.de>",
+	"Janick Beck <janick.beck@tu-clausthal.de>",
+	"Umut Durak <umut.durak@tu-clausthal.de>",
+]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "A minimal implementation of openTAWS"
+documentation = "https://aeronautical-informatics.github.io/openTAWS/"
+readme = "../README.md"
+repository = "https://github.com/aeronautical-informatics/openTAWS"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[badges]
+codecov = { repository = "aeronautical-informatics/openTAWS", branch = "main" }
+github = { repository = "aeronautical-informatics/openTAWS" }
+is-it-maintained-open-issues = { repository = "aeronautical-informatics/openTAWS" }
+maintenance = { status = "actively-developed" }
+
+[dependencies]
+opentaws = { path = "../opentaws" }
+
+[dev-dependencies]
+arbitrary = { version = "1", default-features = false, features = ["derive"] }
+cucumber = "0.19.1"
+futures = "0.3.28"
+lazy_static = "1.4"
+rand = "0.8.5"
+rand_pcg = "0.3.1"
+regex = "1.8.1"
+uom = { git = "https://github.com/moritz-meier/uom.git", branch = "fix-missing-libm", default-features = false, features = [
+	"f64",
+	"si",
+] }
+
+
+[[test]]
+name = "cucumber"
+harness = false            # Allows Cucumber to print output instead of libtest
+path = "tests/cucumber.rs"

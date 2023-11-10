@@ -1,45 +1,54 @@
 {
   "nodes": {
-    "naersk": {
+    "fenix": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-analyzer-src": "rust-analyzer-src"
       },
       "locked": {
-        "lastModified": 1618068541,
-        "narHash": "sha256-enxg0QB53Zis0VJWfJsrX7zCjurpi7lW78EKXbJdzpQ=",
-        "owner": "nmattia",
-        "repo": "naersk",
-        "rev": "b3b099d669fc8b18d361c249091c9fe95d57ebbb",
-        "type": "github"
+        "lastModified": 1669616799,
+        "narHash": "sha256-cTe0E41+4h3LS7NtYd+LdE2ngvIBZ5VIQflT4qu+z9I=",
+        "ref": "main",
+        "rev": "864fe18d688b0c8c0730bb179b6686eac951f613",
+        "revCount": 1269,
+        "type": "git",
+        "url": "https://github.com/nix-community/fenix.git"
       },
       "original": {
-        "owner": "nmattia",
-        "repo": "naersk",
-        "type": "github"
+        "ref": "main",
+        "type": "git",
+        "url": "https://github.com/nix-community/fenix.git"
+      }
+    },
+    "naersk": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1662220400,
+        "narHash": "sha256-9o2OGQqu4xyLZP9K6kNe1pTHnyPz0Wr3raGYnr9AIgY=",
+        "ref": "refs/heads/master",
+        "rev": "6944160c19cb591eb85bbf9b2f2768a935623ed3",
+        "revCount": 305,
+        "type": "git",
+        "url": "https://github.com/nix-community/naersk.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://github.com/nix-community/naersk.git"
       }
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1618561750,
-        "narHash": "sha256-AQIkvh+CQMCZWyKMDP1MalYbk38HWmfeUtjmmH1IFoU=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "98d6b081d12ebe7e443e62c40ebaeeddbe5bb9fc",
-        "type": "github"
-      },
-      "original": {
-        "id": "nixpkgs",
-        "type": "indirect"
-      }
-    },
-    "nixpkgs_2": {
-      "locked": {
-        "lastModified": 1618561750,
-        "narHash": "sha256-AQIkvh+CQMCZWyKMDP1MalYbk38HWmfeUtjmmH1IFoU=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "98d6b081d12ebe7e443e62c40ebaeeddbe5bb9fc",
-        "type": "github"
+        "lastModified": 1669289248,
+        "narHash": "sha256-+ErmUe0ph4nJL2C+xwuIt2TR95fvGDy64jEtism5wps=",
+        "path": "/nix/store/fiapm3lr62f4fyyxhy45qzcz8flxcvf0-source",
+        "rev": "73463c394af9fed20f3ce8cd491bf7c8271d20d8",
+        "type": "path"
       },
       "original": {
         "id": "nixpkgs",
@@ -48,24 +57,42 @@
     },
     "root": {
       "inputs": {
+        "fenix": "fenix",
         "naersk": "naersk",
-        "nixpkgs": "nixpkgs_2",
+        "nixpkgs": "nixpkgs",
         "utils": "utils"
+      }
+    },
+    "rust-analyzer-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1669551522,
+        "narHash": "sha256-ScH3I2/5+tCN23U8mUUj/HoZXDF11fo1z93X9imAfOo=",
+        "owner": "rust-lang",
+        "repo": "rust-analyzer",
+        "rev": "6d61be8e65ac0fd45eaf178e1f7a1ec6b582de1f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rust-lang",
+        "ref": "nightly",
+        "repo": "rust-analyzer",
+        "type": "github"
       }
     },
     "utils": {
       "locked": {
-        "lastModified": 1618217525,
-        "narHash": "sha256-WGrhVczjXTiswQaoxQ+0PTfbLNeOQM6M36zvLn78AYg=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "c6169a2772643c4a93a0b5ac1c61e296cba68544",
-        "type": "github"
+        "lastModified": 1667395993,
+        "narHash": "sha256-nuEHfE/LcWyuSWnS8t12N1wc105Qtau+/OdUAjtQ0rA=",
+        "ref": "refs/heads/master",
+        "rev": "5aed5285a952e0b949eb3ba02c12fa4fcfef535f",
+        "revCount": 66,
+        "type": "git",
+        "url": "https://github.com/numtide/flake-utils.git"
       },
       "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
+        "type": "git",
+        "url": "https://github.com/numtide/flake-utils.git"
       }
     }
   },

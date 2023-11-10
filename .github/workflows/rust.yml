@@ -2,59 +2,63 @@ name: main
 
 on:
   push:
-    branches: [ main ]
+    branches: [main, staging]
   pull_request:
-    branches: [ main ]
+    branches: [main, staging]
 
 jobs:
   format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
-            toolchain: stable
-            components: rustfmt
-            override: true
-      - uses: mbrobbel/rustfmt-check@0.2.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          toolchain: stable
+          components: rustfmt
+          override: true
+      - name: Run tests
+        run: cargo fmt -- --check
 
   test:
     runs-on: ubuntu-latest
+    continue-on-error: ${{ github.ref_type == 'branch' && github.ref_name == 'staging' }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
         with:
           path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.lock') }}
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable 
+          toolchain: stable
           target: x86_64-unknown-linux-gnu
           override: true
       - name: Run tests
-        run: cargo test --verbose
+        run: cargo test --all-features --verbose
 
   clippy_check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - uses: actions/checkout@v1
+      - uses: actions/cache@v3
         with:
           path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-clippy-${{ hashFiles('**/Cargo.lock') }}
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - uses: actions-rs/toolchain@v1
         with:
-            toolchain: nightly
-            components: clippy
-            override: true
+          toolchain: nightly
+          components: clippy
+          override: true
       - uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -63,27 +67,30 @@ jobs:
   coverage:
     name: coverage
     runs-on: ubuntu-latest
+    continue-on-error: ${{ github.ref_type == 'branch' && github.ref_name == 'staging' }}
     container:
       image: xd009642/tarpaulin:latest
       options: --security-opt seccomp=unconfined
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
         with:
           path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-tarpaulin-${{ hashFiles('**/Cargo.lock') }}
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - uses: actions-rs/toolchain@v1
         with:
-            toolchain: nightly
-            components: clippy
-            override: true
+          toolchain: nightly
+          components: clippy
+          override: true
       - name: Generate code coverage
         run: |
-          cargo +nightly tarpaulin --verbose --all-features --workspace --timeout 120 --out Xml
+          cargo +nightly tarpaulin --verbose --all-features --workspace --implicit-test-threads --timeout 120 --out xml
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v1
         with:
-          fail_ci_if_error:     true
+          fail_ci_if_error: true
